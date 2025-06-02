@@ -1,0 +1,10 @@
+User-agent: *
+     Disallow: /submit
+     Disallow: /set_language
+     Allow: /
+     Allow: /financial_health
+     Allow: /net_worth
+     Allow: /emergency_fund
+     Allow: /quiz
+     Allow: /budget
+     Sitemap: https://ficore-ai.onrender.com/sitemap.xml
