@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans('learning_hub_quiz') }}
+{% endblock %}
+{% block extra_head %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = 'learning_hub_quiz' %}
+    {% set tool_icon = 'fa-question-circle' %}
+    {% set subtitle = trans(course.title_key) %}
+    {% set step = loop.index %}
+    {% set total_steps = quiz.questions | length %}
+    {% set step_labels = quiz.questions | map(attribute='question_key') | map('trans') | list %}
+    {% include 'tool_header.html' %}
+    <form method="POST">
+        {% for i, q in enumerate(quiz.questions) %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <p><strong>{{ trans(q.question_key) }}</strong></p>
+                {% for opt_key in q.options_keys %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="q{{ i }}" id="q{{ i }}-{{ loop.index }}" value="{{ trans(opt_key) }}" required>
+                        <label class="form-check-label" for="q{{ i }}-{{ loop.index }}">{{ trans(opt_key) }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary mt-4">
+            <i class="fas fa-check"></i> {{ trans('learning_hub_submit') }}
+        </button>
+    </form>
+    <a href="{{ url_for('learning_hub.course_overview', course_id=course.id) }}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> {{ trans('learning_hub_back_to_course') }}
+    </a>
+</div>
+{% endblock %}

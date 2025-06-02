@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}
+    {{ trans('quiz_your_financial_personality_results', default='Your Financial Personality Results', lang=lang) }}
+{% endblock %}
+{% block extra_head %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = 'quiz_your_financial_personality_results' %}
+    {% set tool_icon = 'fa-user-circle' %}
+    {% set subtitle = 'quiz_your_financial_personality_results_subtitle' %}
+    {% include 'tool_header.html' %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>{{ trans('core_first_name', default='First Name', lang=lang) }}</strong>: {{ latest_record.first_name }}</p>
+            <p><strong>{{ trans('quiz_your_personality', default='Your Personality', lang=lang) }}</strong>: {{ trans('quiz_' + latest_record.personality.lower() + '_description', default=latest_record.personality, lang=lang) }}</p>
+            <p><strong>{{ trans('quiz_score', default='Score', lang=lang) }}</strong>: {{ latest_record.score }} / {{ max_score }}</p>
+            <p><strong>{{ trans('core_created_at', default='Created At', lang=lang) }}</strong>: {{ latest_record.created_at }}</p>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3><i class="fas fa-trophy"></i> {{ trans('quiz_badges', default='Badges', lang=lang) }}</h3>
+            {% if latest_record.badges %}
+                <div>
+                    {% for badge in latest_record.badges %}
+                        <span class="badge {{ badge.color_class }}" title="{{ trans('badge_' + badge.name.lower().replace(' ', '_') + '_desc', default=badge.description, lang=lang) }}">
+                            {{ trans('badge_' + badge.name.lower().replace(' ', '_'), default=badge.name, lang=lang) }}
+                        </span>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>{{ trans('quiz_no_badges', default='No badges earned yet', lang=lang) }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3><i class="fas fa-lightbulb"></i> {{ trans('quiz_insights', default='Insights', lang=lang) }}</h3>
+            <div class="insights-box">
+                <ul>
+                    {% for insight in insights %}
+                        <li>{{ insight }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3><i class="fas fa-rocket"></i> {{ trans('quiz_tips_for_improving_financial_habits', default='Tips for Improving Financial Habits', lang=lang) }}</h3>
+            <ul>
+                {% for tip in tips %}
+                    <li>{{ tip }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <a href="{{ url_for('quiz.step1', course_id=course_id) }}" class="btn btn-primary">
+                <i class="fas fa-redo"></i> {{ trans('quiz_retake_quiz', default='Retake Quiz', lang=lang) }}
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

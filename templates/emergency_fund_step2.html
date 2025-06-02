@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{{ trans('emergency_fund_calculator') | default('Emergency Fund Calculator') }}{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = 'emergency_fund_calculator' | default('Emergency Fund Calculator') %}
+    {% set tool_icon = 'fa-piggy-bank' %}
+    {% set subtitle = trans('emergency_fund_step2_subtitle') | default('Enter your income and expenses') %}
+    {% set step = 2 %}
+    {% set total_steps = 4 %}
+    {% set step_labels = [
+        trans('emergency_fund_step1_label') | default('Personal Info'),
+        trans('emergency_fund_step2_label') | default('Income & Expenses'),
+        trans('emergency_fund_step3_label') | default('Savings & Risk'),
+        trans('emergency_fund_step4_label') | default('Savings Plan')
+    ] %}
+    {% include 'tool_header.html' %}
+    <div class="progress mb-4">
+        <div class="progress-bar bg-success" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">Step 2 of 4</div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ trans(message) | default(message) }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close') | default('Close') }}"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card">
+        <div class="card-body">
+            <h3>{{ trans('emergency_fund_step2_title') | default('Your Income & Expenses') }}</h3>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.monthly_expenses.id }}">{{ form.monthly_expenses.label }}</label>
+                    {{ form.monthly_expenses(class="form-control number-input" + (" is-invalid" if form.monthly_expenses.errors else ""), id="monthly_expenses", placeholder=trans('emergency_fund_monthly_expenses_placeholder') | default('e.g., 30,000'), **{'data-bs-toggle': 'tooltip', 'title': trans('emergency_fund_monthly_expenses_tooltip') | default('Money you spend monthly on food, okada, rent, etc.'), 'aria-describedby': 'expensesHelp'}) }}
+                    <small id="expensesHelp" class="form-text text-muted">{{ trans('emergency_fund_monthly_expenses_example') | default('Example: ₦30,000 for food, transport, and data') }}</small>
+                    {% for error in form.monthly_expenses.errors %}
+                        <div class="invalid-feedback">{{ trans(error) | default(error) }}</div>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.monthly_income.id }}">{{ form.monthly_income.label }}</label>
+                    {{ form.monthly_income(class="form-control number-input" + (" is-invalid" if form.monthly_income.errors else ""), id="monthly_income", placeholder=trans('emergency_fund_monthly_income_placeholder') | default('e.g., 50,000'), **{'data-bs-toggle': 'tooltip', 'title': trans('emergency_fund_monthly_income_tooltip') | default('Money you earn monthly (optional)'), 'aria-describedby': 'incomeHelp'}) }}
+                    <small id="incomeHelp" class="form-text text-muted">{{ trans('emergency_fund_monthly_income_example') | default('Example: ₦50,000 from salary or business') }}</small>
+                    {% for error in form.monthly_income.errors %}
+                        <div class="invalid-feedback">{{ trans(error) | default(error) }}</div>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('emergency_fund.step1') }}" class="btn btn-secondary">{{ trans('core_back') | default('Back') }}</a>
+                <button type="submit" class="btn btn-primary">{{ trans('core_next') | default('Next') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        document.querySelectorAll('.number-input').forEach(input => {
+            input.addEventListener('input', () => {
+                let value = input.value.replace(/,/g, '');
+                if (!value) return;
+                if (parseFloat(value) > 10000000000) {
+                    value = '10000000000';
+                    alert('{{ trans('core_input_cannot_exceed_10_billion') | default('Input cannot exceed ₦10 billion') }}');
+                }
+                input.value = parseFloat(value).toLocaleString('en-NG', { maximumFractionDigits: 0 });
+            });
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                let pasted = (e.clipboardData || window.clipboardData).getData('text');
+                let clean = pasted.replace(/[^0-9.]/g, '');
+                input.value = parseFloat(clean).toLocaleString('en-NG', { maximumFractionDigits: 0 });
+            });
+            input.addEventListener('blur', () => {
+                if (input.value) {
+                    input.value = parseFloat(input.value.replace(/,/g, '')).toLocaleString('en-NG', { maximumFractionDigits: 0 });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

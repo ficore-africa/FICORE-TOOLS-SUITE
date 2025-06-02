@@ -1,0 +1,82 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends "base.html" %}
+{% block title %}
+{{ trans('learning_hub_profile') }}
+{% endblock %}
+{% block extra_head %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <!-- Include the tool header with specific variables for the profile page -->
+    {% set tool_name = 'learning_hub_profile' %}
+    {% set tool_icon = 'fa-user' %}
+    {% set subtitle = trans('learning_hub_profile_subtitle', default='Set your profile for personalized learning') %}
+    {% include 'tool_header.html' %}
+
+    <!-- Profile form -->
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.first_name.label }}
+            {{ form.first_name(class="form-control") }}
+            {% for error in form.first_name.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.email.label }}
+            {{ form.email(class="form-control") }}
+            {% for error in form.email.errors %}
+                <span class="text-danger">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="form-group form-check">
+            {{ form.send_email(class="form-check-input") }}
+            {{ form.send_email.label(class="form-check-label") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+    <a href="{{ url_for('learning_hub.courses') }}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> {{ trans('learning_hub_back_to_courses') }}
+    </a>
+</div>
+{% endblock %}

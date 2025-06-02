@@ -1,0 +1,155 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trans('net_worth_summary') | default('Net Worth Summary') }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333333; margin: 0; padding: 0; background-color: #f8f9fa;">
+    <div style="max-width: 600px; margin: 20px auto; background: #ffffff; border: 1px solid #dddddd; border-radius: 8px;">
+        <div style="background: #2E7D32; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">{{ trans('net_worth_summary') | default('Net Worth Summary') }}</h1>
+        </div>
+        <div style="padding: 20px;">
+            <p style="margin: 0 0 10px;">{{ trans('core_dear') | default('Dear') }} {{ data.first_name | default(trans('core_user') | default('User')) }},</p>
+            <p style="margin: 0 0 20px;">{{ trans('net_worth_summary_intro') | default('Here is your net worth summary from FiCore Africa.') }}</p>
+
+            <div style="margin: 20px 0;">
+                <h2 style="color: #2E7D32; font-size: 20px; margin: 0 0 10px;">{{ trans('net_worth_summary') | default('Net Worth Summary') }}</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('core_created_at') | default('Created At') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">{{ data.created_at }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_net_worth') | default('Net Worth') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.net_worth | format_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_total_assets') | default('Total Assets') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.total_assets | format_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_total_liabilities') | default('Total Liabilities') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.total_liabilities | format_number }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h2 style="color: #2E7D32; font-size: 20px; margin: 0 0 10px;">{{ trans('net_worth_what_you_own') | default('What You Own') }}</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_cash_savings') | default('Cash & Savings') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.cash_savings | format_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_investments') | default('Investments') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.investments | format_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_physical_property') | default('Physical Property') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.property | format_number }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h2 style="color: #2E7D32; font-size: 20px; margin: 0 0 10px;">{{ trans('net_worth_what_you_owe') | default('What You Owe') }}</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;"><strong>{{ trans('net_worth_loans') | default('Loans') }}:</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #eeeeee;">₦{{ data.loans | format_number }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h2 style="color: #2E7D32; font-size: 20px; margin: 0 0 10px;">{{ trans('net_worth_badges') | default('Badges') }}</h2>
+                {% if data.badges %}
+                    <table style="width: 100%; border-collapse: collapse;">
+                        {% for badge in data.badges %}
+                            <tr>
+                                <td style="padding: 5px;"><span style="background-color: #e8f5e9; color: #2E7D32; padding: 5px 10px; border-radius: 12px; display: inline-block;">{{ trans('net_worth_' + badge.lower()) | default(badge | replace('_', ' ') | title) }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    <p style="margin: 0;">{{ trans('net_worth_no_badges') | default('No badges earned yet') }}</p>
+                {% endif %}
+            </div>
+
+            <div style="margin: 20px 0;">
+                <h2 style="color: #2E7D32; font-size: 20px; margin: 0 0 10px;">{{ trans('net_worth_recommendations') | default('Recommendations') }}</h2>
+                {% if data.net_worth < 0 %}
+                    <div style="background-color: #e3f2fd; padding: 10px; border-left: 4px solid #0288D1; margin: 10px 0;">
+                        {{ trans('net_worth_reduce_loans') | default('Reduce loans to improve your net worth') }}
+                    </div>
+                {% else %}
+                    <div style="background-color: #e3f2fd; padding: 10px; border-left: 4px solid #0288D1; margin: 10px 0;">
+                        {{ trans('net_worth_invest_assets') | default('Invest assets in Ajo/Esusu/Adashe or cooperative schemes to grow wealth') }}
+                    </div>
+                {% endif %}
+                {% if data.loans > data.total_assets * 0.5 %}
+                    <div style="background-color: #e3f2fd; padding: 10px; border-left: 4px solid #0288D1; margin: 10px 0;">
+                        {{ trans('net_worth_pay_high_loans') | default('Pay off high loans from OPay or GT Bank to reduce liabilities') }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <p style="margin: 0 0 20px; text-align: center;">
+                <a href="{{ data.cta_url }}" style="display: inline-block; padding: 12px 24px; background: #2E7D32; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">{{ trans('net_worth_view_dashboard') | default('View Dashboard') }}</a>
+            </p>
+
+            <p style="margin: 0 0 20px;">{{ trans('core_thank_you') | default('Thank you for using FiCore Africa!') }}</p>
+
+            <p style="font-size: 12px; color: #777777; margin: 20px 0 0;">
+                {{ trans('net_worth_unsubscribe_prompt') | default('To stop receiving these emails, ') }}
+                <a href="{{ data.unsubscribe_url }}" style="color: #0288D1; text-decoration: none;">{{ trans('net_worth_unsubscribe') | default('unsubscribe here') }}</a>.
+            </p>
+        </div>
+        <div style="text-align: center; font-size: 12px; color: #777777; padding: 10px; border-top: 1px solid #dddddd;">
+            <p style="margin: 0;">{{ trans('core_powered_by') | default('Powered by FiCore Africa') }}</p>
+        </div>
+    </div>
+</body>
+</html>

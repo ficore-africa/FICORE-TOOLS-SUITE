@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ trans('bill_view_edit_bills', lang=lang) | default('View and Edit Bills') }}{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = trans('bill_view_edit_bills', lang=lang) | default('View and Edit Bills') %}
+    {% set tool_icon = 'fa-edit' %}
+    {% set subtitle = trans('bill_view_edit_subtitle', lang=lang) | default('View and manage your existing bills') %}
+    {% include 'tool_header.html' %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ trans(message, lang=lang) | default(message) | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close', lang=lang) | default('Close') }}"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if bills %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{{ trans('bill_bill_name', lang=lang) | default('Bill Name') }}</th>
+                        <th>{{ trans('bill_amount', lang=lang) | default('Amount') }}</th>
+                        <th>{{ trans('bill_due_date', lang=lang) | default('Due Date') }}</th>
+                        <th>{{ trans('bill_category', lang=lang) | default('Category') }}</th>
+                        <th>{{ trans('bill_frequency', lang=lang) | default('Frequency') }}</th>
+                        <th>{{ trans('bill_status', lang=lang) | default('Status') }}</th>
+                        <th>{{ trans('bill_actions', lang=lang) | default('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill_id, bill in bills %}
+                        <tr>
+                            <td>{{ bill.bill_name }}</td>
+                            <td>₦{{ bill.amount | format_currency }}</td>
+                            <td>{{ bill.due_date }}</td>
+                            <td>{{ trans('bill_category_' + bill.category, lang=lang) | default(bill.category) }}</td>
+                            <td>{{ trans('bill_frequency_' + bill.frequency, lang=lang) | default(bill.frequency) }}</td>
+                            <td>{{ trans('bill_status_' + bill.status, lang=lang) | default(bill.status) }}</td>
+                            <td>
+                                <form action="{{ url_for('bill.view_edit') }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="bill_id" value="{{ bill_id }}">
+                                    <input type="hidden" name="action" value="edit">
+                                    <button type="submit" class="btn btn-sm btn-primary">{{ trans('bill_edit', lang=lang) | default('Edit') }}</button>
+                                </form>
+                                <form action="{{ url_for('bill.view_edit') }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ trans('bill_confirm_delete', lang=lang) | default('Are you sure you want to delete this bill?') }}');">
+                                    <input type="hidden" name="bill_id" value="{{ bill_id }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <button type="submit" class="btn btn-sm btn-danger">{{ trans('bill_delete', lang=lang) | default('Delete') }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{{ url_for('bill.form_step1') }}" class="btn btn-primary">{{ trans('bill_add_bill', lang=lang) | default('Add Bill') }}</a>
+    {% else %}
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-file-invoice fa-3x mb-3 text-muted"></i>
+                <p>{{ trans('bill_no_bills_empty_state', lang=lang) | default('No bills added yet. Start by adding one!') }}</p>
+                <a href="{{ url_for('bill.form_step1') }}" class="btn btn-primary">{{ trans('bill_add_bill', lang=lang) | default('Add Bill') }}</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

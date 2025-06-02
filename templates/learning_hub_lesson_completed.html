@@ -1,0 +1,180 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trans('learning_hub_lesson_completed_title') | default('Lesson Completed') }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2E7D32, #0288D1);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        a {
+            color: #0288D1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2E7D32, #0288D1);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #1B5E20, #01579B);
+        }
+        .section {
+            margin: 20px 0;
+        }
+        .section h2 {
+            color: #2E7D32;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .unsubscribe {
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 10px;
+            }
+            .btn {
+                display: block;
+                text-align: center;
+            }
+            .summary-table td {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ trans('learning_hub_lesson_completed_title') | default('Lesson Completed') }}</h1>
+        </div>
+        <div class="content">
+            <p>{{ trans('core_dear') | default('Dear') }} {{ data.first_name | default(trans('core_user') | default('User')) }},</p>
+            <p>{{ trans('learning_hub_lesson_completed_message', lesson_title=data.lesson_title, course_title=data.course_title) | default('Congratulations on completing the lesson "' + data.lesson_title + '" in the course "' + data.course_title + '"!') }}</p>
+
+            <div class="section">
+                <h2>{{ trans('learning_hub_details') | default('Details') }}</h2>
+                <table class="summary-table">
+                    <tr>
+                        <td><strong>{{ trans('learning_hub_course') | default('Course') }}:</strong></td>
+                        <td>{{ data.course_title }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ trans('learning_hub_lesson') | default('Lesson') }}:</strong></td>
+                        <td>{{ data.lesson_title }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>{{ trans('core_created_at') | default('Completed At') }}:</strong></td>
+                        <td>{{ data.completed_at }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <p>{{ trans('learning_hub_continue_learning') | default('Keep up the great work and continue your learning journey!') }}</p>
+
+            <p style="text-align: center;">
+                <a href="{{ data.cta_url }}" class="btn">{{ trans('learning_hub_back_to_course') | default('Back to Course') }}</a>
+            </p>
+
+            <p>{{ trans('core_thank_you') | default('Thank you for using FiCore Africa!') }}</p>
+
+            <p class="unsubscribe">
+                {{ trans('learning_hub_unsubscribe_prompt') | default('To stop receiving these emails, ') }}
+                <a href="{{ data.unsubscribe_url }}">{{ trans('learning_hub_unsubscribe') | default('unsubscribe here') }}</a>.
+            </p>
+        </div>
+        <div class="footer">
+            <p>{{ trans('core_powered_by') | default('Powered by FiCore Africa') }}</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}{{ trans('net_worth_dashboard') | default('Net Worth Dashboard') }}{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = 'net_worth_dashboard' | default('Net Worth Dashboard') %}
+    {% set tool_icon = 'fa-balance-scale' %}
+    {% set subtitle = trans('net_worth_personalized_net_worth_summary') | default('Your personalized net worth summary') %}
+    {% include 'tool_header.html' %}
+    {% if latest_record %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2>{{ trans('core_hello') | default('Hello') }} {{ latest_record.first_name | default(trans('core_user') | default('User')) }}, {{ trans('net_worth_net_worth') | default('Net Worth') }}: ₦{{ latest_record.net_worth | format_number }}</h2>
+                <h3><i class="fas fa-plus-circle"></i> {{ trans('net_worth_what_you_own') | default('What You Own') }}</h3>
+                <p><strong>{{ trans('net_worth_cash_and_savings') | default('Cash & Savings') }}:</strong> ₦{{ latest_record.cash_savings | format_number }}</p>
+                <p><strong>{{ trans('net_worth_investments') | default('Investments') }}:</strong> ₦{{ latest_record.investments | format_number }}</p>
+                <p><strong>{{ trans('net_worth_physical_property') | default('Physical Property') }}:</strong> ₦{{ latest_record.property | format_number }}</p>
+                <p><strong>{{ trans('net_worth_total_assets') | default('Total Assets') }}:</strong> ₦{{ latest_record.total_assets | format_number }}</p>
+                <h3><i class="fas fa-minus-circle"></i> {{ trans('net_worth_what_you_owe') | default('What You Owe') }}</h3>
+                <p><strong>{{ trans('net_worth_loans') | default('Loans') }}:</strong> ₦{{ latest_record.loans | format_number }}</p>
+                <p><strong>{{ trans('net_worth_total_liabilities') | default('Total Liabilities') }}:</strong> ₦{{ latest_record.total_liabilities | format_number }}</p>
+                <p><strong>{{ trans('core_created_at') | default('Created At') }}:</strong> {{ latest_record.created_at }}</p>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3><i class="fas fa-chart-bar"></i> {{ trans('net_worth_net_worth_metrics') | default('Net Worth Metrics') }}</h3>
+                <canvas id="netWorthChart" class="chart-container"></canvas>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const ctx = document.getElementById('netWorthChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: [
+                                    '{{ trans('net_worth_total_assets') | default('Total Assets') }}',
+                                    '{{ trans('net_worth_total_liabilities') | default('Total Liabilities') }}',
+                                    '{{ trans('net_worth_net_worth') | default('Net Worth') }}'
+                                ],
+                                datasets: [{
+                                    label: '{{ trans('net_worth_metrics') | default('Metrics') }}',
+                                    data: [
+                                        {{ latest_record.total_assets | default(0) }},
+                                        {{ latest_record.total_liabilities | default(0) }},
+                                        {{ latest_record.net_worth | default(0) }}
+                                    ],
+                                    backgroundColor: ['#2E7D32', '#dc3545', '#0288D1'],
+                                    borderColor: ['#1B5E20', '#bd2130', '#01579B'],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: { color: '#E0E0E0' },
+                                        title: { display: true, text: '{{ trans('core_value') | default('Value (₦)') }}' }
+                                    },
+                                    x: { grid: { display: false } }
+                                },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                return `${context.dataset.label}: ₦${context.parsed.y.toLocaleString('en-NG')}`;
+                                            }
+                                        }
+                                    },
+                                    datalabels: {
+                                        anchor: 'end',
+                                        align: 'top',
+                                        formatter: (value) => `₦${(value / 1000000).toFixed(1)}M`,
+                                        color: '#333',
+                                        font: { size: 12, weight: 'bold' }
+                                    }
+                                },
+                                animation: false,
+                                responsive: true,
+                                maintainAspectRatio: false
+                            },
+                            plugins: [ChartDataLabels]
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3><i class="fas fa-trophy"></i> {{ trans('net_worth_badges') | default('Badges') }}</h3>
+                {% if latest_record.badges %}
+                    {% for badge in latest_record.badges %}
+                        <span class="badge bg-{{ 'success' if badge == 'Wealth Builder' else 'primary' if badge == 'Savings Champion' else 'info' if badge == 'Debt Free' else 'warning' }}">
+                            <i class="fas fa-{{ 'trophy' if badge == 'Wealth Builder' else 'star' if badge == 'Savings Champion' else 'check-circle' if badge == 'Debt Free' else 'building' }}"></i>
+                            {{ trans('net_worth_' + badge.lower().replace(' ', '_')) | default(badge) }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    <p>{{ trans('net_worth_no_badges_earned_yet') | default('No badges earned yet') }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3><i class="fas fa-lightbulb"></i> {{ trans('net_worth_insights') | default('Insights') }}</h3>
+                <div class="insights-box">
+                    {% for insight in insights %}
+                        <p>{{ trans('net_worth_' + insight.lower().replace(' ', '_')) | default(insight) }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3><i class="fas fa-rocket"></i> {{ trans('net_worth_tips_for_improving_net_worth') | default('Tips for Improving Net Worth') }}</h3>
+                {% for tip in tips %}
+                    <p>{{ trans('net_worth_' + tip.lower().replace(' ', '_')) | default(tip) }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3><i class="fas fa-bolt"></i> {{ trans('net_worth_call_to_actions') | default('Call to Actions') }}</h3>
+                <a href="{{ url_for('net_worth.step1') }}" class="btn btn-primary">
+                    <i class="fas fa-calculator"></i> {{ trans('net_worth_recalculate_net_worth') | default('Recalculate Net Worth') }}
+                </a>
+                <a href="{{ url_for('budget.step1') }}" class="btn btn-secondary">
+                    <i class="fas fa-chart-pie"></i> {{ trans('budget_create_budget') | default('Create Budget') }}
+                </a>
+                <a href="{{ url_for('financial_health.step1') }}" class="btn btn-secondary">
+                    <i class="fas fa-heartbeat"></i> {{ trans('financial_health_check_financial_health') | default('Check Financial Health') }}
+                </a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3><i class="fas fa-history"></i> {{ trans('net_worth_previous_assessments') | default('Previous Assessments') }}</h3>
+                {% if records %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{ trans('core_date') | default('Date') }}</th>
+                                <th>{{ trans('net_worth_net_worth') | default('Net Worth') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record_id, record in records %}
+                                <tr>
+                                    <td>{{ record.created_at }}</td>
+                                    <td>₦{{ record.net_worth | format_number }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>{{ trans('net_worth_no_previous_assessments') | default('No previous assessments') }}</p>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <p>{{ trans('net_worth_no_net_worth_data_available') | default('No net worth data available') }}</p>
+                <a href="{{ url_for('net_worth.step1') }}" class="btn btn-primary">
+                    <i class="fas fa-play"></i> {{ trans('net_worth_start_assessment') | default('Start Assessment') }}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

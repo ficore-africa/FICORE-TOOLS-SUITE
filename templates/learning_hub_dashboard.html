@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans('learning_hub_dashboard') }}
+{% endblock %}
+{% block extra_head %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = 'learning_hub_dashboard' %}
+    {% set tool_icon = 'fa-tachometer-alt' %}
+    {% set subtitle = trans('learning_hub_dashboard_subtitle', default='Track your learning progress') %}
+    {% include 'tool_header.html' %}
+    <div class="row mt-4">
+        {% for item in progress_summary %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ trans(item.course.title_key) }}</h5>
+                    <p class="card-text">{{ trans(item.course.desc_key) }}</p>
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" style="width: {{ item.percent }}%;" aria-valuenow="{{ item.percent }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ item.percent }}%
+                        </div>
+                    </div>
+                    <p>
+                        {{ item.completed }}/{{ item.total }}
+                        {{ trans('learning_hub_lessons_completed_label') }}
+                    </p>
+                    <a href="{{ url_for('learning_hub.course_overview', course_id=item.course.id) }}" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i> {{ trans('learning_hub_continue') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('learning_hub.courses') }}" class="btn btn-secondary mt-3">
+        <i class="fas fa-book"></i> {{ trans('learning_hub_browse_courses') }}
+    </a>
+</div>
+{% endblock %}

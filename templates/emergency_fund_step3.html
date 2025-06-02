@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ trans('emergency_fund_calculator') | default('Emergency Fund Calculator') }}{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = 'emergency_fund_calculator' | default('Emergency Fund Calculator') %}
+    {% set tool_icon = 'fa-piggy-bank' %}
+    {% set subtitle = trans('emergency_fund_step3_subtitle') | default('Enter your savings and risk details') %}
+    {% set step = 3 %}
+    {% set total_steps = 4 %}
+    {% set step_labels = [
+        trans('emergency_fund_step1_label') | default('Personal Info'),
+        trans('emergency_fund_step2_label') | default('Income & Expenses'),
+        trans('emergency_fund_step3_label') | default('Savings & Risk'),
+        trans('emergency_fund_step4_label') | default('Savings Plan')
+    ] %}
+    {% include 'tool_header.html' %}
+    <div class="progress mb-4">
+        <div class="progress-bar bg-success" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">Step 3 of 4</div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ trans(message) | default(message) }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close') | default('Close') }}"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card">
+        <div class="card-body">
+            <h3>{{ trans('emergency_fund_step3_title') | default('Your Savings & Risk') }}</h3>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.current_savings.id }}">{{ form.current_savings.label }}</label>
+                    {{ form.current_savings(class="form-control number-input" + (" is-invalid" if form.current_savings.errors else ""), id="current_savings", placeholder=trans('emergency_fund_current_savings_placeholder') | default('e.g., 20,000'), **{'data-bs-toggle': 'tooltip', 'title': trans('emergency_fund_current_savings_tooltip') | default('Money saved in bank, Ajo, or apps like PiggyVest'), 'aria-describedby': 'savingsHelp'}) }}
+                    <small id="savingsHelp" class="form-text text-muted">{{ trans('emergency_fund_current_savings_example') | default('Example: ₦20,000 in your Ajo savings') }}</small>
+                    {% for error in form.current_savings.errors %}
+                        <div class="invalid-feedback">{{ trans(error) | default(error) }}</div>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.risk_tolerance_level.id }}">{{ form.risk_tolerance_level.label }}</label>
+                    {{ form.risk_tolerance_level(class="form-select" + (" is-invalid" if form.risk_tolerance_level.errors else ""), id="risk_tolerance_level", **{'data-bs-toggle': 'tooltip', 'title': trans('emergency_fund_risk_tolerance_level_tooltip') | default('How stable is your job or business?'), 'aria-describedby': 'riskHelp'}) }}
+                    <small id="riskHelp" class="form-text text-muted">{{ trans('emergency_fund_risk_tolerance_level_example') | default('Example: Choose "Low" if your job is not steady') }}</small>
+                    {% for error in form.risk_tolerance_level.errors %}
+                        <div class="invalid-feedback">{{ trans(error) | default(error) }}</div>
+                    {% endfor %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.dependents.id }}">{{ form.dependents.label }}</label>
+                    {{ form.dependents(class="form-control number-input" + (" is-invalid" if form.dependents.errors else ""), id="dependents", placeholder=trans('emergency_fund_dependents_placeholder') | default('e.g., 3'), **{'data-bs-toggle': 'tooltip', 'title': trans('emergency_fund_dependents_tooltip') | default('People you care for, like children or parents'), 'aria-describedby': 'dependentsHelp'}) }}
+                    <small id="dependentsHelp" class="form-text text-muted">{{ trans('emergency_fund_dependents_example') | default('Example: 3 for your two kids and one parent') }}</small>
+                    {% for error in form.dependents.errors %}
+                        <div class="invalid-feedback">{{ trans(error) | default(error) }}</div>
+                    {% endfor %}
+                </div>
+                <a href="{{ url_for('emergency_fund.step2') }}" class="btn btn-secondary">{{ trans('core_back') | default('Back') }}</a>
+                <button type="submit" class="btn btn-primary">{{ trans('core_next') | default('Next') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function(tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        document.querySelectorAll('.number-input').forEach(input => {
+            input.addEventListener('input', () => {
+                let value = input.value.replace(/,/g, '');
+                if (!value) return;
+                if (input.id === 'dependents' && parseInt(value) > 100) {
+                    value = '100';
+                    alert('{{ trans('emergency_fund_dependents_max') | default('Number of dependents cannot exceed 100') }}');
+                } else if (parseFloat(value) > 10000000000) {
+                    value = '10000000000';
+                    alert('{{ trans('core_input_cannot_exceed_10_billion') | default('Input cannot exceed ₦10 billion') }}');
+                }
+                input.value = parseFloat(value).toLocaleString('en-NG', { maximumFractionDigits: 0 });
+            });
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                let pasted = (e.clipboardData || window.clipboardData).getData('text');
+                let clean = pasted.replace(/[^0-9.]/g, '');
+                input.value = parseFloat(clean).toLocaleString('en-NG', { maximumFractionDigits: 0 });
+            });
+            input.addEventListener('blur', () => {
+                if (input.value) {
+                    input.value = parseFloat(input.value.replace(/,/g, '')).toLocaleString('en-NG', { maximumFractionDigits: 0 });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

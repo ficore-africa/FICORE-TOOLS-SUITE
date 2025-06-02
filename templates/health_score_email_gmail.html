@@ -1,0 +1,139 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trans('financial_health_report') | default('Your Financial Health Report') }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333333; margin: 0; padding: 0; background-color: #f8f9fa;">
+    <div style="max-width: 600px; margin: 20px auto; background: #ffffff; border: 1px solid #dddddd; border-radius: 8px;">
+        <div style="background: #2E7D32; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">{{ trans('financial_health_report') | default('Your Financial Health Report') }}</h1>
+        </div>
+        <div style="padding: 20px;">
+            <p style="margin: 0 0 10px;">{{ trans('core_dear') | default('Dear') }} {{ data.first_name | default('User') }},</p>
+            <p style="margin: 0 0 20px;">{{ trans('financial_health_summary_intro') | default('Thank you for completing your Financial Health Score assessment. Below is your personalized summary.') }}</p>
+            
+            <h2 style="color: #2E7D32; font-size: 20px; margin: 20px 0 10px;">{{ trans('financial_health_summary') | default('Financial Health Summary') }}</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold; width: 50%;">{{ trans('core_created_at') | default('Created At') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.created_at }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_your_score') | default('Your Score') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.score | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_status') | default('Status') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ trans('financial_health_' + data.status.lower().replace(' ', '_')) | default(data.status) }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_monthly_income') | default('Monthly Income') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.income | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_monthly_expenses') | default('Monthly Expenses') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.expenses | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_total_debt') | default('Total Debt') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.debt | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_average_interest_rate') | default('Average Interest Rate') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.interest_rate | format_number }}%</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_debt_to_income_ratio') | default('Debt-to-Income Ratio') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.debt_to_income | format_number }}%</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_savings_rate') | default('Savings Rate') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.savings_rate | format_number }}%</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('financial_health_interest_burden') | default('Interest Burden') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.interest_burden | format_number }}%</td>
+                </tr>
+            </table>
+
+            <h2 style="color: #2E7D32; font-size: 20px; margin: 20px 0 10px;">{{ trans('financial_health_badges') | default('Badges') }}</h2>
+            {% if data.badges %}
+                <ul style="padding-left: 20px; margin: 0 0 20px;">
+                    {% for badge in data.badges %}
+                        <li style="margin-bottom: 10px;">{{ trans('financial_health_' + badge.lower().replace(' ', '_')) | default(badge) }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="margin: 0 0 20px;">{{ trans('financial_health_no_badges') | default('No badges earned yet. Keep improving your finances!') }}</p>
+            {% endif %}
+
+            <h2 style="color: #2E7D32; font-size: 20px; margin: 20px 0 10px;">{{ trans('financial_health_recommendations') | default('Recommendations') }}</h2>
+            <ul style="padding-left: 20px; margin: 0 0 20px;">
+                {% if data.debt_to_income > 40 %}
+                    <li style="margin-bottom: 10px;">{{ trans('financial_health_insight_high_debt') | default('Your debt-to-income ratio is high. Consider reducing debt to improve your score.') }}</li>
+                {% endif %}
+                {% if data.savings_rate < 0 %}
+                    <li style="margin-bottom: 10px;">{{ trans('financial_health_insight_negative_savings') | default('Your expenses exceed your income. Cut non-essential expenses like subscriptions or outings.') }}</li>
+                {% elif data.savings_rate < 20 %}
+                    <li style="margin-bottom: 10px;">{{ trans('financial_health_save_more') | default('Aim to save at least 20% of your income through Ajo or fixed deposits.') }}</li>
+                {% else %}
+                    <li style="margin-bottom: 10px;">{{ trans('financial_health_insight_good_savings') | default('Great job saving! Consider investing surplus funds for growth.') }}</li>
+                {% endif %}
+                {% if data.interest_burden > 10 %}
+                    <li style="margin-bottom: 10px;">{{ trans('financial_health_insight_high_interest') | default('High interest burden detected. Prioritize paying off high-interest debts.') }}</li>
+                {% endif %}
+                <li style="margin-bottom: 10px;">{{ trans('financial_health_tip_track_expenses') | default('Track your expenses regularly to stay on top of your finances.') }}</li>
+            </ul>
+
+            <p style="margin: 0 0 20px; text-align: center;">
+                <a href="{{ data.cta_url }}" style="display: inline-block; padding: 12px 24px; background: #2E7D32; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">{{ trans('financial_health_view_dashboard') | default('View Your Dashboard') }}</a>
+            </p>
+            <p style="margin: 0 0 20px;">{{ trans('core_thank_you') | default('Thank you for using FiCore Africa!') }}</p>
+        </div>
+        <div style="text-align: center; font-size: 12px; color: #777777; padding: 10px; border-top: 1px solid #dddddd;">
+            <p style="margin: 0;">{{ trans('core_powered_by') | default('Powered by FiCore Africa') }}</p>
+        </div>
+    </div>
+</body>
+</html>

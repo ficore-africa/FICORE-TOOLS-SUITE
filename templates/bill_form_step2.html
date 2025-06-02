@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}{{ trans('bill_bill_planner', lang=lang) | default('Bill Planner') }} - {{ trans('bill_step2', lang=lang) | default('Step 2: Preferences') }}{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = trans('bill_bill_planner', lang=lang) | default('Bill Planner') %}
+    {% set tool_icon = 'fa-file-invoice' %}
+    {% set subtitle = trans('bill_step2_subtitle', lang=lang) | default('Set your bill preferences') %}
+    {% include 'tool_header.html' %}
+    <div class="progress mb-3" role="progressbar" aria-label="{{ trans('bill_step2_progress', lang=lang) | default('Step 2 of 2') }}" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" style="width: 100%;">{{ trans('bill_step2_progress', lang=lang) | default('Step 2 of 2') }}</div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ trans(message, lang=lang) | default(message) | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close', lang=lang) | default('Close') }}"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('bill.form_step2') }}" id="billFormStep2">
+                {{ form.csrf_token }}
+                <div class="mb-3">
+                    <label for="frequency" class="form-label">{{ trans('bill_frequency', lang=lang) | default('Frequency') }}</label>
+                    {{ form.frequency(class="form-control", **{'data-bs-toggle': 'tooltip', 'title': trans('bill_frequency_tooltip', lang=lang) | default('Select how often this bill or expense occurs'), 'aria-describedby': 'frequencyTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('bill_frequency_required', lang=lang) | default('Frequency is required') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="category" class="form-label">{{ trans('bill_category', lang=lang) | default('Category') }}</label>
+                    {{ form.category(class="form-control", **{'data-bs-toggle': 'tooltip', 'title': trans('bill_category_tooltip', lang=lang) | default('Select a category, e.g., Data/Internet, Ajo/Esusu/Adashe'), 'aria-describedby': 'categoryTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('bill_category_required', lang=lang) | default('Category is required') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="status" class="form-label">{{ trans('bill_status', lang=lang) | default('Status') }}</label>
+                    {{ form.status(class="form-control", value="unpaid", **{'data-bs-toggle': 'tooltip', 'title': trans('bill_status_tooltip', lang=lang) | default('Select the current status of the bill'), 'aria-describedby': 'statusTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('bill_status_required', lang=lang) | default('Status is required') }}</div>
+                </div>
+                <fieldset class="mb-3">
+                    <legend>{{ trans('bill_reminder_settings', lang=lang) | default('Reminder Settings') }}</legend>
+                    <div class="mb-3 form-check">
+                        {{ form.send_email(class="form-check-input", id="send_email", **{'data-bs-toggle': 'tooltip', 'title': trans('bill_send_email_tooltip', lang=lang) | default('Check this to receive email reminders for this bill'), 'aria-describedby': 'sendEmailTooltip'}) }}
+                        <label class="form-check-label" for="send_email">{{ trans('bill_send_email', lang=lang) | default('Send Email Reminders') }}</label>
+                    </div>
+                    <div class="mb-3" id="reminder_days_container" style="display: none;">
+                        <label for="reminder_days" class="form-label">{{ trans('bill_reminder_days', lang=lang) | default('Reminder Days') }}</label>
+                        {{ form.reminder_days(class="form-control", placeholder=trans('bill_reminder_days_placeholder', lang=lang) | default('e.g., 7'), **{'data-bs-toggle': 'tooltip', 'title': trans('bill_reminder_days_tooltip', lang=lang) | default('Number of days before due date to receive reminders (1-30)'), 'aria-describedby': 'reminderDaysTooltip'}) }}
+                        <div class="invalid-feedback">{{ trans('bill_reminder_days_required', lang=lang) | default('Valid number of days (1-30) is required') }}</div>
+                    </div>
+                </fieldset>
+                <button type="submit" name="action" value="save" class="btn btn-success" id="saveButton">{{ trans('bill_save_bill', lang=lang) | default('Save Bill') }}</button>
+                <button type="submit" name="action" value="save_and_continue" class="btn btn-primary" id="saveAndContinueButton">{{ trans('bill_add_another_bill', lang=lang) | default('Add Another Bill') }}</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='{{ url_for('bill.form_step1') }}'">{{ trans('bill_back', lang=lang) | default('Back') }}</button>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">{{ trans('bill_back_to_index', lang=lang) | default('Back to Index') }}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.getElementById('send_email').addEventListener('change', function() {
+        document.getElementById('reminder_days_container').style.display = this.checked ? 'block' : 'none';
+    });
+    document.getElementById('billFormStep2').addEventListener('submit', function(e) {
+        const saveButton = document.getElementById('saveButton');
+        const saveAndContinueButton = document.getElementById('saveAndContinueButton');
+        if (saveButton) {
+            saveButton.disabled = true;
+            saveButton.textContent = '{{ trans('bill_saving', lang=lang) | default('Saving...') }}';
+        }
+        if (saveAndContinueButton) {
+            saveAndContinueButton.disabled = true;
+            saveAndContinueButton.textContent = '{{ trans('bill_saving', lang=lang) | default('Saving...') }}';
+        }
+    });
+</script>
+{% endblock %}

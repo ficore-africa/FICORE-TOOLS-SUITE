@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans(course.title_key) }}
+{% endblock %}
+{% block extra_head %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = course.title_key %}
+    {% set tool_icon = 'fa-book' %}
+    {% set subtitle = trans(course.desc_key) %}
+    {% include 'tool_header.html' %}
+    <div class="card mt-3">
+        <div class="card-body">
+            <h4><i class="fas fa-list"></i> {{ trans('learning_hub_modules') }}</h4>
+            <ul class="list-group">
+                {% for module in course.modules %}
+                <li class="list-group-item">
+                    <strong>{{ trans(module.title_key) }}</strong>
+                    <ul>
+                        {% for lesson in module.lessons %}
+                        <li>
+                            <a href="{{ url_for('learning_hub.lesson', course_id=course.id, lesson_id=lesson.id) }}">
+                                {{ trans(lesson.title_key) }}
+                            </a>
+                            {% if progress.lessons_completed and lesson.id in progress.lessons_completed %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check"></i> {{ trans('learning_hub_completed') }}
+                                </span>
+                            {% endif %}
+                            {% if lesson.quiz_id %}
+                                <a href="{{ url_for('learning_hub.quiz', course_id=course.id, quiz_id=lesson.quiz_id) }}"
+                                   class="badge badge-info">
+                                    <i class="fas fa-question-circle"></i> {{ trans('learning_hub_quiz') }}
+                                </a>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <a href="{{ url_for('learning_hub.courses') }}" class="btn btn-secondary mt-3">
+        <i class="fas fa-arrow-left"></i> {{ trans('learning_hub_back_to_courses') }}
+    </a>
+</div>
+{% endblock %}
