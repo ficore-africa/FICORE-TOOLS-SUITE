@@ -1,0 +1,23 @@
+[
+    {
+        "id": "budgeting_101",
+        "title_en": "Budgeting 101",
+        "title_ha": "Tsarin Kudi 101",
+        "description_en": "Learn the basics of budgeting.",
+        "description_ha": "Koyon asalin tsarin kudi."
+    },
+    {
+        "id": "financial_quiz",
+        "title_en": "Financial Quiz",
+        "title_ha": "Jarabawar Kudi",
+        "description_en": "Test your financial knowledge.",
+        "description_ha": "Gwada ilimin ku na kudi."
+    },
+    {
+        "id": "savings_basics",
+        "title_en": "Savings Basics",
+        "title_ha": "Asalin Tattara Kudi",
+        "description_en": "Understand how to save effectively.",
+        "description_ha": "Fahimci yadda ake tattara kudi yadda ya kamata."
+    }
+]

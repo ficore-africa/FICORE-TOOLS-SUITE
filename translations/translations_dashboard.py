@@ -1,0 +1,36 @@
+DASHBOARD_TRANSLATIONS = {
+    'en': {
+        'dashboard_general_dashboard': 'General Dashboard',
+        'dashboard_financial_overview': 'Financial Overview',
+        'dashboard_no_data_available': 'No data available',
+        'dashboard_view_details': 'View Details',
+        'dashboard_score': 'Score',
+        'dashboard_recommendation': 'Recommendation',
+        'dashboard_surplus_deficit': 'Surplus/Deficit',
+        'dashboard_personality': 'Personality',
+        'dashboard_unpaid_overdue_bills': 'Unpaid/Overdue Bills',
+        'dashboard_net_worth': 'Net Worth',
+        'dashboard_savings_gap': 'Savings Gap',
+        'dashboard_monthly_savings_goal': 'Monthly Savings Goal',
+        'dashboard_key_insight': 'Key Insight',
+        'Yes': 'Yes',
+        'No': 'No'
+    },
+    'ha': {
+        'dashboard_general_dashboard': 'Allon Sarrafa Gabaɗaya',
+        'dashboard_financial_overview': 'Bayanin Kuɗi',
+        'dashboard_no_data_available': 'Babu bayanai da ake da su',
+        'dashboard_view_details': 'Duba Bayanai',
+        'dashboard_score': 'Maki',
+        'dashboard_recommendation': 'Shawara',
+        'dashboard_surplus_deficit': 'Ragi/Ranci',
+        'dashboard_personality': 'Hali',
+        'dashboard_unpaid_overdue_bills': 'Lissafin da Ba a Biya Ba/Yan da Ya Wuce Lokaci',
+        'dashboard_net_worth': 'Dukiyar Kuɗi',
+        'dashboard_savings_gap': 'Gibin Ajiya',
+        'dashboard_monthly_savings_goal': 'Manufar Ajiya ta Wata',
+        'dashboard_key_insight': 'Haske Mai Mahimmanci',
+        'Yes': 'Eh',
+        'No': 'A,a',
+    }
+}

@@ -1,0 +1,940 @@
+/* General */
+body {
+    font-family: 'Poppins', 'Arial', sans-serif;
+    background: linear-gradient(135deg, #E3F2FD, #F5F7FA);
+    color: #333;
+    padding: 20px;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.step-container {
+    max-width: 600px;
+    margin: 2rem auto;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(90deg, #0288D1, #2E7D32);
+    animation: gradientShift 5s ease infinite;
+}
+.navbar-brand, .nav-link {
+    color: #FFFFFF !important;
+    font-weight: bold;
+}
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Header Message */
+.header-message {
+    background: linear-gradient(90deg, #0288D1, #2E7D32);
+    color: white;
+    text-align: center;
+    padding: 8px;
+    font-size: 1rem;
+    animation: fadeInOut 6s ease-in-out infinite;
+}
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Consent Banner */
+.consent-banner {
+    background-color: #E3F2FD;
+    color: #333;
+    text-align: center;
+    padding: 10px;
+    font-size: 1rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    word-break: break-word;
+}
+.consent-banner i {
+    color: #0288D1;
+}
+.consent-banner .close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #0288D1;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+/* Buttons */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #2E7D32, #0288D1);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    transition: transform 0.2s ease, background 0.3s ease;
+}
+.btn-primary:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #1B5E20, #01579B);
+}
+.btn-primary.navbar-btn {
+    background: linear-gradient(90deg, #0288D1, #2E7D32);
+}
+.btn-primary.navbar-btn:hover {
+    background: linear-gradient(90deg, #0277BD, #27632A);
+}
+
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #6c757d;
+    border: none;
+    color: white;
+}
+.btn-secondary:hover {
+    transform: scale(1.05);
+    background: #5a6268;
+}
+
+.btn-success {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #2E7D32;
+    border: none;
+    color: white;
+}
+.btn-success:hover {
+    transform: scale(1.05);
+    background: #1B5E20;
+}
+
+/* Language Button */
+.language-btn {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    min-width: 100px;
+    text-align: center;
+    border-radius: 5px;
+}
+.language-btn i {
+    font-size: 1.2rem;
+}
+
+/* Card */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    border: 2px solid #0288D1;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideIn 0.5s forwards;
+}
+@keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+.card.custom-card {
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.tool-card .custom-card {
+    background-color: #E3F2FD;
+}
+.card-body {
+    padding: 1.5rem;
+    text-align: center;
+}
+.card-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+.card-title i {
+    color: #0288D1;
+    font-size: 1.6rem;
+}
+.card-text {
+    color: #6c757d;
+}
+
+/* Tool Header */
+.tool-header {
+    margin-bottom: 1.5rem;
+}
+.tool-header-container {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+.tool-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #2E7D32, #0288D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+.tool-icon {
+    color: #0288D1;
+    font-size: 2.2rem;
+}
+.tool-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+.step-indicator {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #333;
+}
+.step-text {
+    font-weight: 500;
+}
+.step-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+.step-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #ccc;
+    border-radius: 50%;
+}
+.step-dot.active {
+    background-color: #0288D1;
+}
+.step-connector {
+    width: 20px;
+    height: 2px;
+    background-color: #ccc;
+}
+
+/* Chart */
+.chart-container {
+    max-height: 300px;
+    width: 100%;
+    position: relative;
+}
+
+/* Progress Bar */
+.progress {
+    height: 1.5rem;
+    border-radius: 0.25rem;
+    background-color: #e9ecef;
+}
+.progress-bar {
+    transition: width 0.5s ease-in-out;
+    background-color: #2E7D32;
+}
+
+/* Score Gauge */
+.score-gauge {
+    max-width: 300px;
+    margin: 0 auto 1.5rem;
+}
+
+/* Badges */
+.status-badge, .badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: inline-block; /* Changed to inline-block for better wrapping */
+    align-items: center;
+    gap: 0.5rem;
+    white-space: normal; /* Allow text to wrap */
+    max-width: 100%; /* Prevent overflow */
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.badge {
+    font-size: 0.95rem;
+    transition: transform 0.3s ease;
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.badge:hover {
+    transform: scale(1.1);
+}
+
+.badge-success {
+    background-color: #2E7D32;
+    color: white;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-bronze {
+    background-color: #cd7f32;
+    color: white;
+    border: 2px solid #8c5523;
+}
+
+.badge-silver {
+    background-color: #c0c0c0;
+    color: #333;
+    border: 2px solid #a9a9a9;
+}
+
+.badge-gold {
+    background-color: #ffd700;
+    color: #333;
+    border: 2px solid #daa520;
+}
+
+.badge-platinum {
+    background-color: #e5e4e2;
+    color: #333;
+    border: 2px solid #b0b0b0;
+}
+
+.badge-blue {
+    background-color: #0288D1;
+    color: white;
+    border: 2px solid #01579B;
+}
+
+.badge-gray {
+    background-color: #e9ecef;
+    color: #333;
+    border: 2px solid #ced4da;
+}
+
+.net-worth-highlight {
+    font-weight: bold;
+    color: #2E7D32;
+}
+
+/* Mobile Optimizations for Badges */
+@media (max-width: 768px) {
+    .status-badge, .badge {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+        margin-right: 0.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .status-badge, .badge {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+        margin-right: 0.2rem;
+    }
+}
+
+/* Insights and Comparison Boxes */
+.insights-box, .comparison-box {
+    background: #E3F2FD;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Course Link */
+.course-link {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #2E7D32, #0288D1);
+    border: none;
+    color: white;
+    text-decoration: none;
+}
+.course-link:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #1B5E20, #01579B);
+    text-decoration: none;
+}
+
+/* Resources */
+.resources {
+    margin-top: 1rem;
+}
+.resources a {
+    color: #0288D1;
+    text-decoration: none;
+    display: block;
+    margin: 0.5rem 0;
+}
+.resources a:hover {
+    text-decoration: underline;
+}
+
+/* List Group */
+.list-group {
+    margin-top: 1rem;
+}
+.list-group-item {
+    border: none;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+.list-group-item ul {
+    list-style-type: none;
+    padding-left: 1rem;
+}
+.list-group-item ul li {
+    margin-bottom: 0.5rem;
+}
+.list-group-item a {
+    color: #0288D1;
+    text-decoration: none;
+}
+.list-group-item a:hover {
+    text-overflow: underline;
+}
+
+/* Form Validation */
+.form-check-input.is-invalid {
+    border-color: #dc3545;
+}
+.form-control.is-invalid ~ .invalid-feedback,
+.form-check-input.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+/* Section Headers */
+h1, h3,
+.hero h2,
+.tools-section h2,
+.why-section h2,
+.testimonials-section h2,
+.recommended-learning h2,
+.faq-section h2 {
+    font-family: 'Poppins', 'Arial', sans-serif;
+    color: #0288D1;
+    font-size: 2.5rem;
+    font-weight: 600;
+    text-align: center;
+}
+.card-title i,
+.tools-section h2 i,
+.hero h2 i,
+.why-section h2 i,
+.testimonials-section h2 i,
+.faq-section h2 i {
+    color: #0288D1;
+    margin-right: 10px;
+}
+
+/* Hero */
+.hero {
+    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(135deg, #0288D1, #2E7D32);
+    color: white;
+    padding: 40px 16px;
+    margin-top: 60px;
+    text-align: center;
+}
+.hero h2 {
+    color: white !important;
+    margin-bottom: 1.5rem;
+}
+.hero p {
+    margin-bottom: 2rem;
+}
+.hero-subtext {
+    font-size: 1rem;
+    color: #fff;
+    margin: 1rem 0 2rem;
+    font-weight: 400;
+}
+.hero-subtext i {
+    color: #E3F2FD;
+    font-size: 1.2rem;
+}
+
+/* Testimonials */
+.testimonials-section {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    border-radius: 5px;
+}
+.testimonial {
+    color: #333;
+    padding: 1.2rem 1rem;
+}
+.testimonial .quote {
+    color: #0288D1;
+    font-size: 1.5rem;
+    margin-right: 5px;
+}
+.testimonial .name {
+    color: #0288D1;
+    font-weight: bold;
+}
+
+/* Recommended Learning */
+.recommended-learning {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* FAQ Section */
+.faq-section {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    padding: 20px;
+    border-radius: 5px;
+}
+.faq-item {
+    margin-bottom: 1.5rem;
+}
+.faq-item h3 {
+    font-size: 1.5rem;
+    color: #333;
+}
+.faq-item h3 i {
+    color: #0288D1;
+    font-size: 1.2rem;
+}
+.faq-item p {
+    font-size: 1rem;
+    color: #333;
+}
+
+/* Why Section */
+.why-section {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    padding: 20px;
+    border-radius: 5px;
+}
+.why-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.why-list li i {
+    color: #0288D1;
+    margin-right: 10px;
+}
+
+/* Footer */
+.social-icons a {
+    color: white !important;
+    margin: 0 10px;
+    font-size: 1rem;
+    text-decoration: none;
+}
+.social-icons a:hover {
+    color: #E3F2FD !important;
+    text-decoration: underline;
+}
+.footer-disclaimer {
+    font-size: 0.9rem;
+    color: #E3F2FD;
+    margin: 0.5rem 0;
+}
+.footer-disclaimer i,
+.footer-disclaimer a {
+    color: #E3F2FD;
+}
+.footer-disclaimer a:hover {
+    color: #fff;
+}
+
+/* Logo Centering */
+.logo-centered {
+    max-width: 150px;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .consent-banner {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+    .logo-centered {
+        max-width: 140px;
+    }
+    .hero h2,
+    .tools-section h2,
+    .why-section h2,
+    .testimonials-section h2,
+    .recommended-learning h2,
+    .faq-section h2 {
+        font-size: 1.5rem;
+        line-height: 1.6;
+        padding: 10px;
+    }
+    .hero,
+    .tools-section,
+    .testimonials-section,
+    .recommended-learning,
+    .why-section,
+    .faq-section {
+        padding: 40px 16px;
+        margin-bottom: 16px;
+    }
+    .btn-primary {
+        padding: 12px 20px;
+        font-size: 1rem;
+        border-radius: 8px;
+        width: 90%;
+        margin: 10px auto;
+        display: block;
+    }
+    .btn-primary:last-child {
+        margin-bottom: 40px;
+    }
+    .btn-success, .btn-secondary, .course-link {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    .testimonial + .testimonial {
+        margin-top: 1.5rem;
+    }
+    .social-icons a {
+        font-size: 0.9rem;
+        margin: 0 5px;
+    }
+    .hero-subtext {
+        font-size: 0.9rem;
+    }
+    .hero-subtext i {
+        font-size: 1rem;
+    }
+    .faq-item h3 {
+        font-size: 1.2rem;
+    }
+    .faq-item p {
+        font-size: 0.9rem;
+    }
+    .footer-disclaimer {
+        font-size: 0.8rem;
+    }
+    .footer-disclaimer i {
+        font-size: 0.9rem;
+    }
+    .card-title i {
+        font-size: 1.4rem;
+    }
+    .tool-title {
+        font-size: 1.4rem;
+    }
+    .tool-icon {
+        font-size: 1.4rem;
+    }
+    .tool-subtitle {
+        font-size: 0.8rem;
+    }
+    .step-indicator {
+        font-size: 0.8rem;
+    }
+    .step-dot {
+        width: 8px;
+        height: 8px;
+    }
+    .step-connector {
+        width: 15px;
+    }
+    .btn-back {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .tool-card .card-title {
+        font-size: 1.8rem;
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+    }
+    .tool-card i {
+        font-size: 1.6rem;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+        vertical-align: middle;
+    }
+    .tool-card {
+        margin-bottom: 1.5rem;
+    }
+    .tool-card .btn {
+        height: 48px;
+        padding: 0.6rem 1.5rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        border-radius: 6px;
+    }
+    .tool-card .btn:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #1B5E20, #01579B);
+    }
+    .language-btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8px;
+        min-width: 80px;
+    }
+    .language-btn i {
+        font-size: 1rem;
+    }
+    body {
+        padding: 10px;
+    }
+    .container, .step-container {
+        max-width: 100%;
+    }
+    .card-body {
+        padding: 1rem;
+    }
+    .btn-primary, .btn-secondary, .btn-success {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+    .chart-container {
+        max-height: 200px;
+    }
+    .score-gauge {
+        max-width: 200px;
+    }
+    .tool-title {
+        font-size: 1.4rem;
+    }
+    .btn-back {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.6rem;
+    }
+}
+
+/* Desktop Button Hover Effect */
+@media (min-width: 769px) {
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1B5E20, #01579B);
+        transition: background 0.3s;
+    }
+}
+
+/* Override centering for form labels and inputs in quiz forms */
+.step-container .card-body,
+.quiz-container .card-body {
+    text-align: left !important;
+}
+.step-container .form-label,
+.quiz-container .form-label,
+.step-container .form-control,
+.quiz-container .form-control {
+    text-align: left !important;
+}
+
+/* Remove redundant .form-label, .form-control rules */
+.form-label,
+.form-control,
+input,
+button,
+select,
+textarea {
+    /* Already covered by .step-container, .quiz-container rules */
+}
+
+/* Remove redundant .form-container rules */
+.form-container label,
+.form-container h1,
+.form-container h2,
+.form-container h3,
+.form-container h4,
+.form-container h5,
+.form-container h6 {
+    /* Already covered by .step-container, .quiz-container rules */
+}
+
+/* Ensure tool titles are centered only on index page */
+.index-page .tool-title,
+.index-container .tool-card .card-title {
+    text-align: center !important;
+}
+/* About Page Specific Styles */
+.about-page {
+    padding-top: 20px; /* Adjust top padding if needed to account for fixed navbar */
+    padding-bottom: 40px; /* Add some bottom padding */
+}
+
+.about-container {
+    background-color: #FFFFFF; /* Optional: Add a background to the content area */
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.about-title {
+    font-size: 2.8rem;
+    color: #2E7D32; /* Or your primary color */
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.about-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.about-content {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 2rem; /* Add some space after the main content */
+}
+
+.about-content p {
+    margin-bottom: 1.5rem;
+}
+
+.about-disclaimer {
+    color: #dc3545; /* Highlight the disclaimer */
+    font-style: italic;
+}
+
+/* Mission Statement Styling */
+.mission-statement {
+    margin-top: 3rem;
+    padding: 20px;
+    background-color: #F8F9FA;
+    border-left: 5px solid #0288D1; /* Accent color */
+    border-radius: 4px;
+    margin-bottom: 2rem; /* Add space after the section */
+}
+
+.mission-statement h3 {
+    font-size: 1.7rem;
+    color: #0288D1;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.mission-statement p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.7;
+}
+
+/* Team/Why Behind Ficore Africa Styling */
+.team-why {
+    margin-top: 2rem;
+    padding: 20px;
+    background-color: #E3F2FD; /* A slightly different background */
+    border-radius: 4px;
+    margin-bottom: 2rem; /* Add space after the section */
+}
+
+.team-why h3 {
+    font-size: 1.7rem;
+    color: #2E7D32; /* Use your secondary accent color */
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.team-why p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.7;
+}
+
+/* Optional: Call to Action Styling */
+.call-to-action {
+    text-align: center;
+}
+
+.call-to-action p {
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .about-title {
+        font-size: 2.2rem;
+    }
+    .about-subtitle {
+        font-size: 1rem;
+    }
+    .about-container {
+        padding: 20px;
+    }
+    .mission-statement h3,
+    .team-why h3 {
+        font-size: 1.5rem;
+    }
+    .mission-statement,
+    .team-why {
+        padding: 15px;
+    }
+}
+.info-box {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    padding: 10px;
+    border-radius: 4px;
+}
+.question-icon {
+    font-size: 1.2em;
+    margin-right: 0.5em;
+}
+.question-status {
+    margin-left: 0.5em;
+}

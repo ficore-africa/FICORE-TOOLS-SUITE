@@ -1,0 +1,54 @@
+/* FiCore Africa Custom Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+}
+
+header {
+    padding: 20px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+h1 {
+    color: #0052cc;
+    font-weight: 700;
+}
+
+.btn-primary {
+    background-color: #0052cc;
+    border-color: #0052cc;
+}
+
+.btn-primary:hover {
+    background-color: #003d99;
+    border-color: #003d99;
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+footer a {
+    color: #0052cc;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.icon {
+    margin-right: 8px;
+    color: #28a745;
+}

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "993i2804-i72f-85h8-e150-880099883444",
+    "timestamp": "2025-05-19T11:03:00.123456",
+    "user_email": "user@example.com",
+    "session_id": "flask_session_123",
+    "data": {
+      "score": 75,
+      "status": "Good",
+      "income": 100000,
+      "expenses": 60000,
+      "savings_rate": 20,
+      "debt_to_income": 30
+    }
+  }
+]

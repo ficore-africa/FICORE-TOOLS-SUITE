@@ -1,0 +1,40 @@
+MAILERSEND_TRANSLATIONS = {
+    'en': {
+        'mailersend_email_sent_successfully': 'Email sent successfully',
+        'mailersend_error_sending_email': 'Error sending email',
+        'mailersend_test_email_sent': 'Test email sent',
+        'mailersend_emergency_fund_summary_subject': 'Your Emergency Fund Summary from Ficore Africa',
+        'mailersend_course_completion_subject': 'Congratulations! You’ve Completed a Course',
+        'mailersend_financial_health_summary_subject': 'Your Financial Health Summary',
+        'mailersend_welcome_subject': 'Welcome to Ficore Africa!',
+        'mailersend_email_body_greeting': 'Hello {name},',
+        'mailersend_email_body_closing': 'Best regards,\nThe Ficore Africa Team',
+        'mailersend_emergency_fund_summary_body': 'Here’s your emergency fund plan:\n\nTarget Fund: ₦{target}\nMonthly Savings: ₦{monthly}\nTimeline: {months} months\n\nKeep saving to build your financial safety net!',
+        'mailersend_course_completion_body': 'You’ve completed the {course_name} course!\n\nDownload your certificate here: {certificate_url}\n\nKeep learning with Ficore Africa!',
+        'mailersend_financial_health_summary_body': 'Your financial health score: {score}\n\nKey insights:\n- {insight1}\n- {insight2}\n\nExplore more tools at Ficore Africa to improve your finances!',
+        'mailersend_welcome_body': 'Welcome to Ficore Africa!\n\nStart your financial journey with our tools and courses. Explore now at {website_url}.',
+        'mailersend_email_footer': 'Ficore Africa - Empowering Financial Freedom\nUnsubscribe: {unsubscribe_url}',
+        'mailersend_invalid_email_address': 'Invalid email address provided',
+        'mailersend_email_sending_limit_reached': 'Email sending limit reached. Please try again later.',
+        'mailersend_email_configuration_error': 'Email service not configured properly'
+    },
+    'ha': {
+        'mailersend_email_sent_successfully': 'An aika imel cikin nasara',
+        'mailersend_error_sending_email': 'Kuskure wajen aika imel',
+        'mailersend_test_email_sent': 'An aika imel na gwaji',
+        'mailersend_emergency_fund_summary_subject': 'Taƙaitaccen Asusun Gaggawa na Ka daga Ficore Africa',
+        'mailersend_course_completion_subject': 'Taya Murna! Ka Kammala Kwas',
+        'mailersend_financial_health_summary_subject': 'Taƙaitaccen Lafiyar Kuɗin Ka',
+        'mailersend_welcome_subject': 'Barka da Zuwa Ficore Africa!',
+        'mailersend_email_body_greeting': 'Sannu {name},',
+        'mailersend_email_body_closing': 'Gaisuwa mafi kyau,\nƘungiyar Ficore Africa',
+        'mailersend_emergency_fund_summary_body': 'Ga shirin asusun gaggawa na ka:\n\nAsusun da Aka Nufa: ₦{target}\nAjiya ta Wata: ₦{monthly}\nJadawali: watanni {months}\n\nCi gaba da ajiya don gina raga na tsaro na kuɗi!',
+        'mailersend_course_completion_body': 'Ka kammala kwas na {course_name}!\n\nZazzage takardar shaidarka a nan: {certificate_url}\n\nCi gaba da koyo tare da Ficore Africa!',
+        'mailersend_financial_health_summary_body': 'Makin lafiyar kuɗin ka: {score}\n\nHaske masu mahimmanci:\n- {insight1}\n- {insight2}\n\nBincika ƙarin kayan aiki a Ficore Africa don inganta kuɗin ka!',
+        'mailersend_welcome_body': 'Barka da zuwa Ficore Africa!\n\nFara tafiyar kuɗin ka tare da kayan aikinmu da kwasuna. Bincika yanzu a {website_url}.',
+        'mailersend_email_footer': 'Ficore Africa - Ƙarfafa ’Yancin Kuɗi\nCire biɗa: {unsubscribe_url}',
+        'mailersend_invalid_email_address': 'An ba da adireshin imel ba daidai ba',
+        'mailersend_email_sending_limit_reached': 'An kai iyakar aika imel. Da fatan za a sake gwadawa daga baya.',
+        'mailersend_email_configuration_error': 'Ba a saita sabis na imel yadda ya kamata ba'
+    }
+}

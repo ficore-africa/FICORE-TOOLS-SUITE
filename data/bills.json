@@ -1,0 +1,15 @@
+[
+  {
+    "id": "660f9501-f39c-52e5-b827-557766550111",
+    "timestamp": "2025-05-19T11:03:00.123456",
+    "user_email": "user@example.com",
+    "session_id": "flask_session_123",
+    "data": {
+      "bill_name": "Electricity",
+      "amount": 5000,
+      "due_date": "2025-06-01",
+      "category": "Utilities",
+      "status": "unpaid"
+    }
+  }
+]
