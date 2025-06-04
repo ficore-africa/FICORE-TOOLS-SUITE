@@ -4,6 +4,7 @@ LEARNING_HUB_TRANSLATIONS = {
         'learning_hub_course_budgeting101_title': 'Budgeting 101',
         'learning_hub_course_budgeting101_desc': 'Learn the basics of budgeting and managing your money.',
         'learning_hub_course_financial_quiz_title': 'Financial Quiz',
+        'learning_hub_success_logout': 'You have been successfully logged out.',
         'learning_hub_course_financial_quiz_desc': 'Discover your financial personality with this interactive quiz.',
         'learning_hub_course_savings_basics_title': 'Savings Basics',
         'learning_hub_course_savings_basics_desc': 'Understand the fundamentals of saving money effectively.',
@@ -12,17 +13,22 @@ LEARNING_HUB_TRANSLATIONS = {
         'learning_hub_lesson_marked': 'Lesson marked as completed!',
         'learning_hub_lesson_done': 'You have finished all lessons in this course.',
         'learning_hub_courses_subtitle': 'Explore our range of financial literacy courses.',
+        'learning_hub_error_loading': 'Error loading content. Please try again.',
         'learning_hub_quiz_not_found': 'Quiz not found.',
         'learning_hub_quiz_completed': 'Quiz completed!',
         'learning_hub_success_language_updated':'Language chnaged successfully!',
         'learning_hub_set_profile': 'Set up your profile.',
+        'learning_hub_profile': 'Your Learning Profile',
+        'learning_hub_profile_subtitle': 'Manage your personal details and learning preferences.',
+        'learning_hub_profile_saved': 'Profile saved successfully!',
+        'learning_hub_submit_quiz': 'Submit Quiz',
         
         # Modules and Lessons
         'learning_hub_module_income_title': 'Understanding Income',
         'learning_hub_lesson_income_sources_title': 'Sources of Income',
         'learning_hub_lesson_income_sources_content': 'Learn about different sources where you can earn money; explore online platforms like freelancing sites, investment opportunities, and side hustles such as gig work or online businesses.',
         'learning_hub_lesson_net_income_title': 'What is Net Income?',
-        'learning_hub_lesson_net_income_content': 'Understand what net income means after expenses; et income involves subtracting all expenses, including taxes and operational costs, from total revenue to determine actual profit.',
+        'learning_hub_lesson_net_income_content': 'Understand what net income means after expenses; Net income involves subtracting all expenses, including taxes and operational costs, from total revenue to determine actual profit.',
         'learning_hub_module_quiz_title': 'Quiz Module',
         'learning_hub_lesson_quiz_intro_title': 'Quiz Introduction',
         'learning_hub_lesson_quiz_intro_content': 'Instructions for taking the financial quiz; For the financial quiz, read instructions, tooltips, placeholders, and examples carefully, manage time effectively, and review basic financial concepts beforehand.',
@@ -187,6 +193,7 @@ LEARNING_HUB_TRANSLATIONS = {
         'learning_hub_continue': 'Ci gaba',
         'learning_hub_browse_courses': 'Bincika Kwasuna',
         'learning_hub_set_profile': 'Shigar da Bayananku',
+        'learning_hub_error_loading': 'Kuskure yayin loda abun ciki. Don Allah a sake gwadawa.',
 
         # Additional Course-Related Keys
         'learning_hub_budgeting': 'Kwas ɗin kasafin kuɗi da ake samu don koyo.',
@@ -195,7 +202,12 @@ LEARNING_HUB_TRANSLATIONS = {
         'learning_hub_continue_course': 'Ci gaba da kwas ɗin ka.',
         'learning_hub_no_course_progress': 'Ba a sami ci gaba a kan kwas ɗin ba tukuna.',
         'learning_hub_my_courses': 'Kwas ɗina',
+        'learning_hub_submit_quiz': 'Gabatar da Gwaji',
         'learning_hub_progress': 'Ci gaban Kwas',
+        'learning_hub_profile': 'Bayanan Martabarki na Koyo',
+        'learning_hub_profile_subtitle': 'Sarrafa bayanan sirrinki da abubuwan da kike so na koyo.',
+        'learning_hub_profile_saved': 'An adana bayanan martaba cikin nasara!',
+        'learning_hub_success_logout': 'An yi nasarar fitar da kai.',
         'learning_hub_success_language_updated':'An Canza Yare Cikin Nasara!'       
     }
 }

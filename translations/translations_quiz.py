@@ -5,7 +5,6 @@ QUIZ_TRANSLATIONS = {
         'Kuskure ya faru': 'An error occurred',
         'quiz_step_progress': 'Step {step_num} of {total_steps}',  # Updated to named placeholders
         'Enter Your Personal Information': 'Enter Your Personal Information',
-        'quiz_your_financial_personality_results_subtitle': 'Here's a summary of your financial personality.',
         'badge_first_quiz_completed': 'First Quiz Completed!',
         'Step 3 of 3': 'Step 3 of 3',
         'See Results': 'See Results',
@@ -20,6 +19,7 @@ QUIZ_TRANSLATIONS = {
         'badge_first_quiz_completed_desc': 'You\'ve completed your first quiz! Keep learning and growing!',
         'quiz_financial_personality_quiz': 'Personality Quiz',
         'quiz_your_financial_personality_results': 'Your Financial Personality Results',
+        'quiz_your_financial_personality_results_subtitle': 'Discover your financial personality and insights',
         'quiz_enter_personal_information': 'Enter Your Personal Information',
         'quiz_questions_part1': 'Questions Part 1',
         'quiz_questions_part2': 'Questions Part 2',
@@ -93,7 +93,7 @@ QUIZ_TRANSLATIONS = {
         # Quiz-specific
         'quiz_financial_personality_quiz': 'Tambayoyin Halin Kuɗi',
         'quiz_your_financial_personality_results': 'Sakamakon Halin Kuɗin Ka',
-        'quiz_your_financial_personality_results_subtitle': 'Ga halin kuɗi',
+        'quiz_your_financial_personality_results_subtitle': 'Gano halin kuɗin ka da fahimta',
         'quiz_enter_personal_information': 'Shigar da Bayanan Ka',
         'quiz_questions_part1': 'Tambayoyin Sashe na 1',
         'quiz_questions_part2': 'Tambayoyin Sashe na 2',
@@ -158,6 +158,10 @@ QUIZ_TRANSLATIONS = {
         'badge_first_quiz_completed': 'An Kammala Gwaji na Farko!',
         'badge_first_quiz_completed_desc': 'Kun kammala gwaji na farko! Ku ci gaba da koyo da girma!',
         # Badges
+        'badge_gwarzon_kuɗi_desc': 'Kun nuna kyakkyawan ilimin kuɗi kuma kun sami lambar yabo ta Gwarzon Kuɗi!',
+        'badge_gwarzon_kuɗi': 'Gwarzon Kuɗi',
+        'badge_wanda_ya_fara_ɗaukar_gwaji_desc': 'Kun kammala gwajin ku na farko! Ku ci gaba da koyo da girma!',
+        'badge_wanda_ya_fara_ɗaukar_gwaji': 'Wanda Ya Fara Ɗaukar Gwaji',
         'badge_financial_guru': 'Guru na Kuɗi',
         'badge_financial_guru_desc': 'An ba da kyauta saboda kyakkyawan tsara kuɗi.',
         'badge_savings_star': 'Tauraron Ajiya',

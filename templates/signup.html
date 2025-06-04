@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}{{ trans('auth_signup', lang=lang) | default('Sign Up') }}{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = trans('auth_signup', lang=lang) | default('Sign Up') %}
+    {% set tool_icon = 'fa-user-plus' %}
+    {% set subtitle = trans('auth_signup_subtitle', lang=lang) | default('Create your account to start managing your finances') %}
+    {% include 'tool_header.html' %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ trans(message, lang=lang) | default(message) | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close', lang=lang) | default('Close') }}"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('auth.signup') }}" id="signupForm">
+                {{ form.csrf_token }}
+                <div class="mb-3">
+                    <label for="username" class="form-label">{{ trans('auth_username', lang=lang) | default('Username') }}</label>
+                    {{ form.username(class="form-control", autofocus=True, placeholder=trans('auth_username_placeholder', lang=lang) | default('e.g., chukwuma123'), **{'data-bs-toggle': 'tooltip', 'title': trans('auth_username_tooltip', lang=lang) | default('Choose a unique username'), 'aria-describedby': 'usernameTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('auth_username_required', lang=lang) | default('Username is required') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">{{ trans('core_email', lang=lang) | default('Email') }}</label>
+                    {{ form.email(class="form-control", placeholder=trans('core_email_placeholder', lang=lang) | default('e.g., user@example.com'), **{'data-bs-toggle': 'tooltip', 'title': trans('core_email_tooltip', lang=lang) | default('Enter your email address'), 'aria-describedby': 'emailTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('core_email_required', lang=lang) | default('Valid email is required') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">{{ trans('auth_password', lang=lang) | default('Password') }}</label>
+                    {{ form.password(class="form-control", placeholder=trans('auth_password_placeholder', lang=lang) | default('Enter a secure password'), **{'data-bs-toggle': 'tooltip', 'title': trans('auth_password_tooltip', lang=lang) | default('At least 8 characters'), 'aria-describedby': 'passwordTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('auth_password_required', lang=lang) | default('Password is required') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="confirm_password" class="form-label">{{ trans('auth_confirm_password', lang=lang) | default('Confirm Password') }}</label>
+                    {{ form.confirm_password(class="form-control", placeholder=trans('auth_confirm_password_placeholder', lang=lang) | default('Confirm your password'), **{'data-bs-toggle': 'tooltip', 'title': trans('auth_confirm_password_tooltip', lang=lang) | default('Re-enter your password'), 'aria-describedby': 'confirmPasswordTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('auth_confirm_password_required', lang=lang) | default('Passwords must match') }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="signupButton">{{ trans('auth_signup', lang=lang) | default('Sign Up') }}</button>
+                <a href="{{ url_for('auth.signin') }}" class="btn btn-outline-secondary">{{ trans('auth_already_have_account', lang=lang) | default('Already have an account? Sign In') }}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('signupForm');
+        form.addEventListener('submit', function() {
+            const signupButton = document.getElementById('signupButton');
+            signupButton.disabled = true;
+            signupButton.textContent = '{{ trans('auth_signing_up', lang=lang) | default('Signing Up...') }}';
+        });
+    });
+</script>
+{% endblock %}

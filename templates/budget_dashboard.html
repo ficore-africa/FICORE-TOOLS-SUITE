@@ -28,20 +28,20 @@
                     <h5>{{ trans('budget_summary') | default('Financial Summary') }}</h5>
                 </div>
                 <div class="card-body">
-                    {% if latest_budget %}
+                    {% if latest_budget and latest_budget['income'] is defined and latest_budget['income'] is not none %}
                         <div class="row text-center">
                             <div class="col-md-4">
                                 <h6>{{ trans('budget_income') | default('Income') }}</h6>
-                                <p class="text-success fs-5">{{ latest_budget.income | format_currency }}</p>
+                                <p class="text-success fs-5">{{ latest_budget['income'] | format_currency }}</p>
                             </div>
                             <div class="col-md-4">
                                 <h6>{{ trans('budget_expenses') | default('Total Expenses') }}</h6>
-                                <p class="text-danger fs-5">{{ latest_budget.fixed_expenses | format_currency }}</p>
+                                <p class="text-danger fs-5">{{ latest_budget['fixed_expenses'] | format_currency }}</p>
                             </div>
                             <div class="col-md-4">
                                 <h6>{{ trans('budget_surplus_deficit') | default('Surplus/Deficit') }}</h6>
-                                <p class="{% if latest_budget.surplus_deficit >= 0 %}text-success{% else %}text-danger{% endif %} fs-5">
-                                    {{ latest_budget.surplus_deficit | format_currency }}
+                                <p class="{% if latest_budget['surplus_deficit'] >= 0 %}text-success{% else %}text-danger{% endif %} fs-5">
+                                    {{ latest_budget['surplus_deficit'] | format_currency }}
                                 </p>
                             </div>
                         </div>
@@ -67,7 +67,7 @@
         {% endif %}
 
         <!-- Savings Goal Progress -->
-        {% if latest_budget %}
+        {% if latest_budget and latest_budget['savings_goal'] is defined and latest_budget['surplus_deficit'] is defined %}
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-header">
@@ -104,11 +104,11 @@
                                     {% for budget_id, budget in budgets.items() %}
                                         <tr>
                                             <td>{{ budget.get('created_at', 'N/A') }}</td>
-                                            <td>{{ budget.income | format_currency }}</td>
-                                            <td>{{ budget.fixed_expenses | format_currency }}</td>
-                                            <td>{{ budget.savings_goal | format_currency }}</td>
-                                            <td class="{% if budget.surplus_deficit >= 0 %}text-success{% else %}text-danger{% endif %}">
-                                                {{ budget.surplus_deficit | format_currency }}
+                                            <td>{{ budget.get('income', 0) | format_currency }}</td>
+                                            <td>{{ budget.get('fixed_expenses', 0) | format_currency }}</td>
+                                            <td>{{ budget.get('savings_goal', 0) | format_currency }}</td>
+                                            <td class="{% if budget.get('surplus_deficit', 0) >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {{ budget.get('surplus_deficit', 0) | format_currency }}
                                             </td>
                                             <td>
                                                 <form method="POST" action="{{ url_for('budget.dashboard') }}" onsubmit="return confirm('{{ trans('budget_confirm_delete') | default('Are you sure you want to delete this budget?') }}');">
@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     {% endif %}
 
-    {% if latest_budget %}
+    {% if latest_budget and latest_budget['savings_goal'] is defined and latest_budget['surplus_deficit'] is defined %}
     // Savings Goal Progress Doughnut Chart
     const savingsCtx = document.getElementById('savingsChart').getContext('2d');
     new Chart(savingsCtx, {
@@ -214,15 +214,15 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: [
                 "{{ trans('budget_savings_goal') | default('Savings Goal') }}",
-                "{{ trans('budget_remaining') | default('Remaining') }}"
+                "{{ trans('remaining') | default('Remaining') }}"
             ],
             datasets: [{
                 data: [
-                    {{ latest_budget.savings_goal | default(0) }},
-                    {{ latest_budget.surplus_deficit | default(0) }}
+                    {{ latest_budget.get('savings_goal', 0) }},
+                    {{ latest_budget.get('surplus_deficit', 0) }}
                 ],
                 backgroundColor: ['#36A2EB', '#E0E0E0'],
-                borderColor: '#fff',
+                borderColor: ['#01579B', '#B0B0B0'],
                 borderWidth: 2
             }]
         },

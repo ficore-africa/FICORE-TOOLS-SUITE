@@ -15,16 +15,15 @@
     {% if latest_record %}
         <div class="card mb-4">
             <div class="card-body">
-                <h2>{{ trans('core_hello') | default('Hello') }} {{ latest_record.first_name | default(trans('core_user') | default('User')) }}, {{ trans('net_worth_net_worth') | default('Net Worth') }}: ₦{{ latest_record.net_worth | format_number }}</h2>
+                <h2 style="color: #4CAF50;">{{ trans('core_hello') | default('Hello') }} {{ latest_record.first_name | default(trans('core_user') | default('User')) }}, {{ trans('net_worth_net_worth') | default('Net Worth') }}: ₦{{ latest_record.net_worth | format_currency }}</h2>
                 <h3><i class="fas fa-plus-circle"></i> {{ trans('net_worth_what_you_own') | default('What You Own') }}</h3>
-                <p><strong>{{ trans('net_worth_cash_and_savings') | default('Cash & Savings') }}:</strong> ₦{{ latest_record.cash_savings | format_number }}</p>
-                <p><strong>{{ trans('net_worth_investments') | default('Investments') }}:</strong> ₦{{ latest_record.investments | format_number }}</p>
-                <p><strong>{{ trans('net_worth_physical_property') | default('Physical Property') }}:</strong> ₦{{ latest_record.property | format_number }}</p>
-                <p><strong>{{ trans('net_worth_total_assets') | default('Total Assets') }}:</strong> ₦{{ latest_record.total_assets | format_number }}</p>
+                <p><strong>{{ trans('net_worth_cash_and_savings') | default('Cash & Savings') }}:</strong> ₦{{ latest_record.cash_savings | format_currency }}</p>
+                <p><strong>{{ trans('net_worth_investments') | default('Investments') }}:</strong> ₦{{ latest_record.investments | format_currency }}</p>
+                <p><strong>{{ trans('net_worth_physical_property') | default('Physical Property') }}:</strong> ₦{{ latest_record.property | format_currency }}</p>
+                <p><strong>{{ trans('net_worth_total_assets') | default('Total Assets') }}:</strong> <strong>₦{{ latest_record.total_assets | format_currency }}</strong></p>
                 <h3><i class="fas fa-minus-circle"></i> {{ trans('net_worth_what_you_owe') | default('What You Owe') }}</h3>
-                <p><strong>{{ trans('net_worth_loans') | default('Loans') }}:</strong> ₦{{ latest_record.loans | format_number }}</p>
-                <p><strong>{{ trans('net_worth_total_liabilities') | default('Total Liabilities') }}:</strong> ₦{{ latest_record.total_liabilities | format_number }}</p>
-                <p><strong>{{ trans('core_created_at') | default('Created At') }}:</strong> {{ latest_record.created_at }}</p>
+                <p><strong>{{ trans('net_worth_loans') | default('Loans') }}:</strong> ₦{{ latest_record.loans | format_currency }}</p>
+                <p><strong>{{ trans('net_worth_total_liabilities') | default('Total Liabilities') }}:</strong> <strong>₦{{ latest_record.total_liabilities | format_currency }}</strong></p>
             </div>
         </div>
         <div class="card mb-4">
@@ -49,8 +48,8 @@
                                         {{ latest_record.total_liabilities | default(0) }},
                                         {{ latest_record.net_worth | default(0) }}
                                     ],
-                                    backgroundColor: ['#2E7D32', '#dc3545', '#0288D1'],
-                                    borderColor: ['#1B5E20', '#bd2130', '#01579B'],
+                                    backgroundColor: ['#4CAF50', '#EF5350', '#42A5F5'],
+                                    borderColor: ['#388E3C', '#D32F2F', '#0288D1'],
                                     borderWidth: 1
                                 }]
                             },
@@ -61,21 +60,27 @@
                                         grid: { color: '#E0E0E0' },
                                         title: { display: true, text: '{{ trans('core_value') | default('Value (₦)') }}' }
                                     },
-                                    x: { grid: { display: false } }
+                                    x: { 
+                                        grid: { display: false },
+                                        barPercentage: 0.3,
+                                        categoryPercentage: 0.4
+                                    }
                                 },
                                 plugins: {
                                     legend: { display: false },
                                     tooltip: {
                                         callbacks: {
                                             label: function(context) {
-                                                return `${context.dataset.label}: ₦${context.parsed.y.toLocaleString('en-NG')}`;
+                                                return `${context.dataset.label}: ₦${context.parsed.y.toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
                                             }
                                         }
                                     },
                                     datalabels: {
                                         anchor: 'end',
                                         align: 'top',
-                                        formatter: (value) => `₦${(value / 1000000).toFixed(1)}M`,
+                                        formatter: function(value) {
+                                            return `₦${value.toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                                        },
                                         color: '#333',
                                         font: { size: 12, weight: 'bold' }
                                     }
@@ -151,13 +156,13 @@
                         <tbody>
                             {% for record_id, record in records %}
                                 <tr>
-                                    <td>{{ record.created_at }}</td>
-                                    <td>₦{{ record.net_worth | format_number }}</td>
+                                    <td>{{ record.created_at | format_datetime }}</td>
+                                    <td>₦{{ record.net_worth | format_currency }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                {% else %}
+    {% else %}
                     <p>{{ trans('net_worth_no_previous_assessments') | default('No previous assessments') }}</p>
                 {% endif %}
             </div>

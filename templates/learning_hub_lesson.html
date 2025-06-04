@@ -3,7 +3,7 @@
 {{ trans(lesson.title_key) }}
 {% endblock %}
 {% block extra_head %}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/poppins.css') }}" rel="stylesheet">
 {% endblock %}
 {% block content %}
 <div class="container">
@@ -11,10 +11,21 @@
     {% set tool_icon = 'fa-chalkboard-teacher' %}
     {% set subtitle = trans(course.title_key) %}
     {% include 'tool_header.html' %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div class="card mt-3">
         <div class="card-body">
             <p>{{ trans(lesson.content_key) }}</p>
-            <form method="POST">
+            <form method="POST" onsubmit="this.querySelector('button').disabled=true;">
+                {{ form.csrf_token }}
+                <input type="hidden" name="lesson_id" value="{{ lesson.id }}">
                 <button type="submit" class="btn btn-success">
                     <i class="fas fa-check"></i> {{ trans('learning_hub_mark_complete') }}
                 </button>

@@ -3,8 +3,13 @@ NET_WORTH_TRANSLATIONS = {
         # From translations_translations_net_worth.py
         'net_worth_calculator': 'Net Worth Tracker',
         'net_worth_net_worth_calculator': 'Net Worth Tracker',
-        'net_worth_net_worth': 'Net Worth',
+        'net_worth_net_worth_badge_wealth_builder': 'Wealth Builder Badge',
+        'net_worth_net_worth_badge_savings_champion': 'Savings Champion Badge',
+        'net_worth_net_worth': 'Your Net Worth is',
         'net_worth_dashboard': 'Net Worth Dashboard',
+        'net_worth_net_worth_badge_wealth_builder': 'Wealth Builder Badge',
+        'net_worth_net_worth_badge_savings_champion': 'Savings Champion Badge',
+        'net_worth_missing_step2': 'Please complete the previous step to view your net worth.',
         'net_worth_dashboard_load_error': 'Unable to load net worth dashboard. Please try again.',
         'net_worth_personalized_net_worth_summary': 'Your personalized net worth summary',
         'net_worth_summary': 'Your Net Worth Summary',
@@ -106,7 +111,6 @@ NET_WORTH_TRANSLATIONS = {
         'net_worth_physical_property_example': 'e.g., 5,000,000',
 
         # From additional NET_WORTH_TRANSLATIONS
-        'net_worth_net_worth': 'Net Worth',
         'net_worth_total_assets': 'Total Assets',
         'net_worth_go_net_worth': 'Go to Net Worth',
         'net_worth_cash_savings_placeholder': 'e.g., 500,000',
@@ -254,7 +258,7 @@ NET_WORTH_TRANSLATIONS = {
         # From translations_translations_net_worth.py
         'net_worth_calculator': 'Ƙididdigar Dukiyar Kuɗi',
         'net_worth_net_worth_calculator': 'Duba Kadarori',
-        'net_worth_net_worth': 'Darajar Kuɗi',
+        'net_worth_net_worth': 'Darajar Arzikinka a halin Yanzu Shine',
         'net_worth_dashboard': 'Allon Dukiyar Kuɗi',
         'net_worth_dashboard_load_error': 'Ba a iya ɗora allon dukiyar kuɗi ba. Da fatan za a sake gwadawa.',
         'net_worth_personalized_net_worth_summary': 'Taƙaitaccen dukiyar kuɗin ka na keɓaɓɓu',
@@ -358,7 +362,6 @@ NET_WORTH_TRANSLATIONS = {
 
         # From additional NET_WORTH_TRANSLATIONS
         'net_worth_calculator': 'Ƙididdigar Dukiyar Kuɗi',
-        'net_worth_net_worth': 'Darajar Kuɗi',
         'net_worth_total_assets': 'Jimillar Kadarori',
         'net_worth_go_net_worth': 'Je zuwa Darajar Kuɗi',
         'net_worth_cash_savings_placeholder': 'misali, 500,000',
@@ -488,8 +491,13 @@ NET_WORTH_TRANSLATIONS = {
         'net_worth_error_assets_input': 'An samu kuskure wajen adana kadarorin ka.',
         'net_worth_error_net_worth_calculation': 'An samu kuskure wajen ƙididdige dukiyar kuɗi. Da fatan za a sake gwadawa.',
         'Enter your assets': 'Shigar da kadarorin ku',
+        'net_worth_net_worth_badge_wealth_builder': 'Alamar Mai Gina Arziki',
+        'net_worth_net_worth_badge_savings_champion': 'Alamar Zakaran Tanadi',
         'Enter your liabilities (optional)': 'Shigar da abubuwan da ake bin ku (ba dole ba)',
         'net_worth_success': 'An ƙididdige ƙimar dukiyar ku cikin nasara!',
+        'net_worth_net_worth_badge_wealth_builder': 'Alamar Mai Gina Arziki',
+        'net_worth_net_worth_badge_savings_champion': 'Alamar Zakaran Tanadi',
+        'net_worth_missing_step2': 'Don Allah a kammala matakin baya don ganin darajar ku ta net.',
         'Your personalized net worth summary': 'Takaitaccen ƙimar dukiyar ku na musamman',
         'net_worth_strong_investment_portfolio!_explore_more_options_like_cooperative_schemes': 'Babban fayil ɗin saka hannun jari! Bincika ƙarin zaɓuɓɓuka kamar tsare-tsaren haɗin gwiwa.',
         'net_worth_negative_or_zero_net_worth._focus_on_reducing_loans_and_building_assets': 'Ƙimar dukiya mara kyau ko sifili. Mayar da hankali kan rage lamuni da gina kadarori.',

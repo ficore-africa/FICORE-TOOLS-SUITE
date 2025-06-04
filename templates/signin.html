@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ trans('auth_signin', lang=lang) | default('Sign In') }}{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = trans('auth_signin', lang=lang) | default('Sign In') %}
+    {% set tool_icon = 'fa-sign-in-alt' %}
+    {% set subtitle = trans('auth_signin_subtitle', lang=lang) | default('Access your account to manage your finances') %}
+    {% include 'tool_header.html' %}
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ trans(message, lang=lang) | default(message) | safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close', lang=lang) | default('Close') }}"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('auth.signin') }}" id="signinForm">
+                {{ form.csrf_token }}
+                <div class="mb-3">
+                    <label for="email" class="form-label">{{ trans('core_email', lang=lang) | default('Email') }}</label>
+                    {{ form.email(class="form-control", autofocus=True, placeholder=trans('core_email_placeholder', lang=lang) | default('e.g., user@example.com'), **{'data-bs-toggle': 'tooltip', 'title': trans('core_email_tooltip', lang=lang) | default('Enter your email address'), 'aria-describedby': 'emailTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('core_email_required', lang=lang) | default('Valid email is required') }}</div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">{{ trans('auth_password', lang=lang) | default('Password') }}</label>
+                    {{ form.password(class="form-control", placeholder=trans('auth_password_placeholder', lang=lang) | default('Enter your password'), **{'data-bs-toggle': 'tooltip', 'title': trans('auth_password_tooltip', lang=lang) | default('Enter your password'), 'aria-describedby': 'passwordTooltip'}) }}
+                    <div class="invalid-feedback">{{ trans('auth_password_required', lang=lang) | default('Password is required') }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="signinButton">{{ trans('auth_signin', lang=lang) | default('Sign In') }}</button>
+                <a href="{{ url_for('auth.signup') }}" class="btn btn-outline-secondary">{{ trans('auth_no_account', lang=lang) | default('No account? Sign Up') }}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('signinForm');
+        form.addEventListener('submit', function() {
+            const signinButton = document.getElementById('signinButton');
+            signinButton.disabled = true;
+            signinButton.textContent = '{{ trans('auth_signing_in', lang=lang) | default('Signing In...') }}';
+        });
+    });
+</script>
+{% endblock %}

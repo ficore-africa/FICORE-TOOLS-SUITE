@@ -3,35 +3,45 @@
 {{ trans('learning_hub_quiz') }}
 {% endblock %}
 {% block extra_head %}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/poppins.css') }}" rel="stylesheet">
 {% endblock %}
 {% block content %}
-<div class="container step-container">
+<div class="container">
     {% set tool_name = 'learning_hub_quiz' %}
     {% set tool_icon = 'fa-question-circle' %}
     {% set subtitle = trans(course.title_key) %}
-    {% set step = loop.index %}
-    {% set total_steps = quiz.questions | length %}
-    {% set step_labels = quiz.questions | map(attribute='question_key') | map('trans') | list %}
     {% include 'tool_header.html' %}
-    <form method="POST">
-        {% for i, q in enumerate(quiz.questions) %}
-        <div class="card mt-3">
-            <div class="card-body">
-                <p><strong>{{ trans(q.question_key) }}</strong></p>
-                {% for opt_key in q.options_keys %}
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="q{{ i }}" id="q{{ i }}-{{ loop.index }}" value="{{ trans(opt_key) }}" required>
-                        <label class="form-check-label" for="q{{ i }}-{{ loop.index }}">{{ trans(opt_key) }}</label>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card mt-3">
+        <div class="card-body">
+            <h4>{{ trans('learning_hub_quiz') }}</h4>
+            <form method="POST" onsubmit="this.querySelector('button').disabled=true;">
+                {{ form.csrf_token }}
+                {% for question in quiz.questions %}
+                    <div class="mb-3">
+                        <h5>{{ trans(question.question_key) }}</h5>
+                        {% for option_key in question.options_keys %}
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="q{{ loop.index0 }}" value="{{ trans(option_key) }}" required>
+                                <label class="form-check-label">{{ trans(option_key) }}</label>
+                            </div>
+                        {% endfor %}
                     </div>
                 {% endfor %}
-            </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-check"></i> {{ trans('learning_hub_submit_quiz') }}
+                </button>
+            </form>
         </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-primary mt-4">
-            <i class="fas fa-check"></i> {{ trans('learning_hub_submit') }}
-        </button>
-    </form>
+    </div>
     <a href="{{ url_for('learning_hub.course_overview', course_id=course.id) }}" class="btn btn-secondary mt-3">
         <i class="fas fa-arrow-left"></i> {{ trans('learning_hub_back_to_course') }}
     </a>
