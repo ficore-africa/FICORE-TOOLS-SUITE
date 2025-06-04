@@ -74,7 +74,7 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('quiz_personality_quiz') | default('Personality Quiz') }}</h3>
-            {% if data.quiz is defined and data.quiz.personality is defined %}
+            {% if data.quiz is defined and data.quiz.personality is defined and data.quiz.personality %}
               <p>{{ trans('quiz_personality') | default('Personality') }}: {{ trans('quiz_' + data.quiz.personality) | default(data.quiz.personality) }}</p>
               <p>{{ trans('core_score') | default('Score') }}: {{ data.quiz.score | default(0) | format_number }} / 10</p>
             {% else %}
@@ -230,8 +230,8 @@
               <p>{{ trans('learninghub_no_progress') | default('You haven’t started any lessons yet.') }}</p>
             {% endif %}
             <a href="{{ url_for('learning_hub.courses') }}" 
-               class="btn btn-primary" 
-               aria-label="{{ trans('learninghub_browse_courses') | default('Browse Courses') }}">
+                 class="btn btn-primary" 
+                 aria-label="{{ trans('learninghub_browse_courses') | default('Browse Courses') }}">
               <i class="fas fa-book"></i> {{ trans('learninghub_browse_courses') | default('Browse Courses') }}
             </a>
           </div>
