@@ -188,9 +188,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const ctx = document.getElementById('overviewChart').getContext('2d');
-      const financialHealthScore = {{ data.financial_health.score if data.financial_health is defined and data.financial_health.score is defined else 0 }};
-      const netWorth = {{ (data.net_worth.net_worth / 1000000) if data.net_worth is defined and data.net_worth.net_worth is defined else 0 }};
-      const savingsGap = {{ (data.emergency_fund.savings_gap / 1000000) if data.emergency_fund is defined and data.emergency_fund.savings_gap is defined else 0 }};
+      const financialHealthScore = {{ data.financial_health.score | default(0) }};
+      const netWorth = {{ (data.net_worth.net_worth | default(0)) / 1000000 }};
+      const savingsGap = {{ (data.emergency_fund.savings_gap | default(0)) / 1000000 }};
       new Chart(ctx, {
         type: 'bar',
         data: {
