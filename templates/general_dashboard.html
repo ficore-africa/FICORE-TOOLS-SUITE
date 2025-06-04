@@ -11,17 +11,17 @@
   <div class="container">
     {% set tool_name = trans('core_financial_dashboard') | default('Financial Dashboard') %}
     {% set tool_icon = 'fa-tachometer-alt' %}
-    {% set subtitle = trans('core_financial_overview') | default('Your comprehensive financial overview with Ficore Africa.') %}
+    {% set subtitle = trans('core_financial_overview') | default('Your financial overview with Ficore Africa.') %}
     {% include 'tool_header.html' %}
-    
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       <div class="alert-container mt-3">
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show" 
+            <div class="alert alert-{{ category }} alert-dismissible fade show"
                  role="alert">
               {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert" 
+              <button type="button" class="btn-close" data-bs-dismiss="alert"
                       aria-label="{{ trans('core_close') | default('Close') }}"></button>
             </div>
           {% endfor %}
@@ -33,17 +33,17 @@
       <div class="col-md-6 mb-4">
         <div class="card h-100">
           <div class="card-body">
-            <h3>{{ trans('financial_health_financial_health_score') | default('Financial Health Score') }}</h3>
+            <h3>{{ trans('financial_health_financial_health_score') | default('Financial Health') }}</h3>
             {% if data.financial_health is defined and data.financial_health.score is defined %}
               <p>{{ trans('core_score') | default('Score') }}: {{ data.financial_health.score | format_number }} / 100</p>
-              {% if data.financial_health.status is defined and data.financial_health.status %}
+              {% if data.financial_health.status %}
                 <p>{{ trans('core_status') | default('Status') }}: {{ trans('financial_health_' + data.financial_health.status) | default(data.financial_health.status) }}</p>
               {% endif %}
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('financial_health.step1') }}" 
-               class="btn btn-primary" 
+            <a href="{{ url_for('financial_health.step1') }}"
+               class="btn btn-primary"
                aria-label="{{ trans('financial_health_go_financial_health') | default('Go to Financial Health') }}">
               <i class="fas fa-heartbeat"></i> {{ trans('financial_health_go_financial_health') | default('Go to Financial Health') }}
             </a>
@@ -55,35 +55,16 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('budget_budget_planner') | default('Budget Planner') }}</h3>
-            {% if data.budget is defined and data.budget.surplus_deficit is defined %}
+            {% if data.budget is defined and data.budget.surplus_deficit is not none %}
               <p>{{ trans('budget_surplus_deficit') | default('Surplus/Deficit') }}: {{ data.budget.surplus_deficit | format_currency }}</p>
-              <p>{{ trans('budget_savings_goal') | default('Saving Goal') }}: {{ data.budget.savings_goal | default(0) | format_currency }}</p>
+              <p>{{ trans('budget_savings_goal') | default('Savings Goal') }}: {{ data.budget.savings_goal | default(0) | format_currency }}</p>
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('budget.step1') }}" 
-               class="btn btn-primary" 
+            <a href="{{ url_for('budget.step1') }}"
+               class="btn btn-primary"
                aria-label="{{ trans('budget_go_budget') | default('Go to Budget Planner') }}">
               <i class="fas fa-chart-pie"></i> {{ trans('budget_go_budget') | default('Go to Budget Planner') }}
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 mb-4">
-        <div class="card h-100">
-          <div class="card-body">
-            <h3>{{ trans('quiz_personality_quiz') | default('Personality Quiz') }}</h3>
-            {% if data.quiz is defined and data.quiz.personality is defined and data.quiz.personality %}
-              <p>{{ trans('quiz_personality') | default('Personality') }}: {{ trans('quiz_' + data.quiz.personality) | default(data.quiz.personality) }}</p>
-              <p>{{ trans('core_score') | default('Score') }}: {{ data.quiz.score | default(0) | format_number }} / 10</p>
-            {% else %}
-              <p>{{ trans('quiz_not_completed') | default('Quiz not completed.') }}</p>
-            {% endif %}
-            <a href="{{ url_for('quiz.step1') }}" 
-               class="btn btn-primary" 
-               aria-label="{{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}">
-              <i class="fas fa-question-circle"></i> {{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}
             </a>
           </div>
         </div>
@@ -99,8 +80,8 @@
             {% else %}
               <p>{{ trans('bill_no_bills') | default('No bills added.') }}</p>
             {% endif %}
-            <a href="{{ url_for('bill.form_step1') }}" 
-               class="btn btn-primary" 
+            <a href="{{ url_for('bill.form_step1') }}"
+               class="btn btn-primary"
                aria-label="{{ trans('bill_go_bill') | default('Go to Bill Planner') }}">
               <i class="fas fa-file-invoice"></i> {{ trans('bill_go_bill') | default('Go to Bill Planner') }}
             </a>
@@ -111,15 +92,15 @@
       <div class="col-md-6 mb-4">
         <div class="card h-100">
           <div class="card-body">
-            <h3>{{ trans('net_worth_net_worth_calculator') | default('Net Worth Calculator') }}</h3>
+            <h3>{{ trans('net_worth_net_worth_calculator') | default('Net Worth') }}</h3>
             {% if data.net_worth is defined and data.net_worth.net_worth is defined %}
               <p>{{ trans('net_worth_net_worth') | default('Net Worth') }}: {{ data.net_worth.net_worth | format_currency }}</p>
               <p>{{ trans('net_worth_total_assets') | default('Total Assets') }}: {{ data.net_worth.total_assets | default(0) | format_currency }}</p>
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('net_worth.step1') }}" 
-               class="btn btn-primary" 
+            <a href="{{ url_for('net_worth.step1') }}"
+               class="btn btn-primary"
                aria-label="{{ trans('net_worth_go_net_worth') | default('Go to Net Worth') }}">
               <i class="fas fa-balance-scale"></i> {{ trans('net_worth_go_net_worth') | default('Go to Net Worth') }}
             </a>
@@ -130,15 +111,15 @@
       <div class="col-md-6 mb-4">
         <div class="card h-100">
           <div class="card-body">
-            <h3>{{ trans('emergency_fund_emergency_fund_calculator') | default('Emergency Fund Calculator') }}</h3>
-            {% if data.emergency_fund is defined and data.emergency_fund.savings_gap is defined %}
-              <p>{{ trans('emergency_fund_target_savings_6_months') | default('Target Savings (6 Months)') }}: {{ data.emergency_fund.target_savings_6m | default(0) | format_currency }}</p>
-              <p>{{ trans('emergency_fund_savings_gap_6_months') | default('Savings Gap (6 Months)') }}: {{ data.emergency_fund.savings_gap_6m | default(0) | format_currency }}</p>
+            <h3>{{ trans('emergency_fund_emergency_fund_calculator') | default('Emergency Fund') }}</h3>
+            {% if data.emergency_fund is defined and data.emergency_fund.target_amount is defined %}
+              <p>{{ trans('emergency_fund_target_amount') | default('Target Amount') }}: {{ data.emergency_fund.target_amount | default(0) | format_currency }}</p>
+              <p>{{ trans('emergency_fund_savings_gap') | default('Savings Gap') }}: {{ data.emergency_fund.savings_gap | default(0) | format_currency }}</p>
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('emergency_fund.step1') }}" 
-               class="btn btn-primary" 
+            <a href="{{ url_for('emergency_fund.step1') }}"
+               class="btn btn-primary"
                aria-label="{{ trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}">
               <i class="fas fa-piggy-bank"></i> {{ trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}
             </a>
@@ -149,36 +130,18 @@
       <div class="col-md-6 mb-4">
         <div class="card h-100">
           <div class="card-body">
-            <h3>{{ trans('courses_my_courses') | default('My Courses') }}</h3>
-            {% set user_progress = data.learning_progress.get('budgeting_learning_101') %}
-            {% if user_progress %}
-              <p>
-                <strong>{{ trans('courses_course_budgeting') | default('Budgeting Basics') }}:</strong>
-                {{ trans('core_progress') | default('Progress') }}: {{ user_progress.progress_percentage | default(0) | format_number }}%
-              </p>
-              <div class="progress mb-2">
-                <div class="progress-bar bg-success" 
-                     role="progressbar" 
-                     style="width: {{ user_progress.progress_percentage | default(0) }}%" 
-                     aria-valuenow="{{ user_progress.progress_percentage | default(0) }}" 
-                     aria-valuemin="0" 
-                     aria-valuemax="100">
-                  {{ user_progress.progress_percentage | default(0) }}%
-                </div>
-              </div>
-              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}" 
-                 class="btn btn-primary" 
-                 aria-label="{{ trans('courses_continue_budgeting') | default('Continue Budgeting Basics Course') }}">
-                <i class="fas fa-play"></i> {{ trans('courses_continue_course') | default('Continue Course') }}
-              </a>
+            <h3>{{ trans('quiz_personality_quiz') | default('Personality Quiz') }}</h3>
+            {% if data.quiz is defined and data.quiz.personality is defined and data.quiz.personality %}
+              <p>{{ trans('quiz_personality') | default('Personality') }}: {{ trans('quiz_' + data.quiz.personality) | default(data.quiz.personality) }}</p>
+              <p>{{ trans('core_score') | default('Score') }}: {{ data.quiz.score | default(0) | format_number }} / 10</p>
             {% else %}
-              <p>{{ trans('courses_no_course_progress') | default('You haven’t started any courses yet.') }}</p>
-              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}" 
-                 class="btn btn-primary" 
-                 aria-label="{{ trans('courses_start_budgeting') | default('Start Budgeting Basics Course') }}">
-                <i class="fas fa-book"></i> {{ trans('courses_start_budgeting_course') | default('Start Budgeting Basics') }}
-              </a>
+              <p>{{ trans('quiz_not_completed') | default('Quiz not completed.') }}</p>
             {% endif %}
+            <a href="{{ url_for('quiz.step1') }}"
+               class="btn btn-primary"
+               aria-label="{{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}">
+              <i class="fas fa-question-circle"></i> {{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}
+            </a>
           </div>
         </div>
       </div>
@@ -186,54 +149,26 @@
       <div class="col-md-6 mb-4">
         <div class="card h-100">
           <div class="card-body">
-            <h3>{{ trans('learninghub_dashboard') | default('Learning Hub Progress') }}</h3>
-            {% if data.learning_progress %}
-              {% set total_lessons = 0 %}
-              {% set completed_lessons = 0 %}
-              {% for course_id, progress in data.learning_progress.items() %}
-                {% set course = none %}
-                {% for c in current_app.config['COURSES'] %}
-                  {% if c.id == course_id %}
-                    {% set course = c %}
-                  {% endif %}
-                {% endfor %}
-                {% if course %}
-                  {% set lessons = 0 %}
-                  {% for module in course.modules | default([]) %}
-                    {% set lessons = lessons + (module.lessons | default([]) | length) %}
-                  {% endfor %}
-                  {% set completed = progress.completed_lessons | default([]) | length %}
-                  {% set total_lessons = total_lessons + lessons %}
-                  {% set completed_lessons = completed_lessons + completed %}
-                  <p>
-                    <strong>{{ trans('course_' + course_id) | default(course.title_en | default('Course')) }}:</strong>
-                    {{ completed }}/{{ lessons }} {{ trans('learninghub_lessons_completed') | default('Lessons Completed') }}
-                  </p>
-                {% endif %}
-              {% endfor %}
-              {% if total_lessons > 0 %}
-                {% set progress_percent = (completed_lessons / total_lessons * 100) | round(1) %}
-                <div class="progress mb-2">
-                  <div class="progress-bar bg-success" 
-                       role="progressbar" 
-                       style="width: {{ progress_percent }}%" 
-                       aria-valuenow="{{ progress_percent }}" 
-                       aria-valuemin="0" 
-                       aria-valuemax="100">
-                    {{ progress_percent }}%
-                  </div>
-                </div>
-              {% else %}
-                <p>{{ trans('learninghub_no_progress') | default('You haven’t started any lessons yet.') }}</p>
-              {% endif %}
+            <h3>{{ trans('courses_my_courses') | default('My Courses') }}</h3>
+            {% set user_progress = data.learning_progress.get('budgeting_learning_101') %}
+            {% if user_progress and user_progress.lessons_completed %}
+              <p>
+                <strong>{{ trans('courses_course_budgeting') | default('Budgeting Basics') }}:</strong>
+                {{ trans('core_lessons_completed') | default('Lessons Completed') }}: {{ user_progress.lessons_completed | length }}
+              </p>
+              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}"
+                 class="btn btn-primary"
+                 aria-label="{{ trans('courses_continue_budgeting') | default('Continue Budgeting Basics Course') }}">
+                <i class="fas fa-play"></i> {{ trans('courses_continue_course') | default('Continue Course') }}
+              </a>
             {% else %}
-              <p>{{ trans('learninghub_no_progress') | default('You haven’t started any lessons yet.') }}</p>
+              <p>{{ trans('courses_no_course_progress') | default('No course progress.') }}</p>
+              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}"
+                 class="btn btn-primary"
+                 aria-label="{{ trans('courses_start_budgeting') | default('Start Budgeting Basics Course') }}">
+                <i class="fas fa-book"></i> {{ trans('courses_start_budgeting_course') | default('Start Budgeting Basics') }}
+              </a>
             {% endif %}
-            <a href="{{ url_for('learning_hub.courses') }}" 
-                 class="btn btn-primary" 
-                 aria-label="{{ trans('learninghub_browse_courses') | default('Browse Courses') }}">
-              <i class="fas fa-book"></i> {{ trans('learninghub_browse_courses') | default('Browse Courses') }}
-            </a>
           </div>
         </div>
       </div>
@@ -241,33 +176,11 @@
 
     <div class="card mb-4">
       <div class="card-body">
-        <h3>{{ trans('core_metrics') | default('Financial Metrics Overview') }}</h3>
+        <h3>{{ trans('core_metrics') | default('Financial Metrics') }}</h3>
         <div class="chart-container">
-          <canvas id="overviewChart" 
+          <canvas id="overviewChart"
                   aria-label="{{ trans('core_metrics_chart') | default('Financial Metrics Chart') }}"></canvas>
         </div>
-      </div>
-    </div>
-
-    <div class="card mb-4">
-      <div class="card-body">
-        <h3>{{ trans('core_recommendations') | default('Financial Recommendations') }}</h3>
-        <ul>
-          {% if data.financial_health is defined and data.financial_health.score is defined and data.financial_health.score < 70 %}
-            <li>{{ trans('financial_health_improve_improve_health') | default('Improve your financial health by reviewing your budget.') }}</li>
-          {% endif %}
-          {% if data.bills is defined and data.bills.bills and data.bills.unpaid_amount > 0 %}
-            <li>{{ trans('bill_pay_bills') | default('Pay outstanding bills to avoid penalties.') }}</li>
-          {% endif %}
-          {% if data.emergency_fund is defined and data.emergency_fund.savings_gap is defined and data.emergency_fund.savings_gap_6m > 0 %}
-            <li>{{ trans('emergency_fund_increase_savings') | default('Increase savings to meet your emergency fund needs.') }}</li>
-          {% endif %}
-          {% if data.learning_progress is defined and not data.learning_progress %}
-            <li>{{ trans('courses_start_budgeting_course') | default('Start Budgeting Basics course to improve financial skills.') }}</li>
-            <li>{{ trans('learninghub_start_course') | default('Start a course in the Learning Hub to boost your financial knowledge.') }}</li>
-          {% endif %}
-          <li>{{ trans('core_update_data') | default('Regularly update your financial data for accurate insights.') }}</li>
-        </ul>
       </div>
     </div>
   </div>
@@ -277,18 +190,18 @@
       const ctx = document.getElementById('overviewChart').getContext('2d');
       const financialHealthScore = {{ data.financial_health.score if data.financial_health is defined and data.financial_health.score is defined else 0 }};
       const netWorth = {{ (data.net_worth.net_worth / 1000000) if data.net_worth is defined and data.net_worth.net_worth is defined else 0 }};
-      const emergencyFundGap = {{ (data.emergency_fund.savings_gap_6m / 1000000) if data.emergency_fund is defined and data.emergency_fund.savings_gap is defined else 0 }};
+      const savingsGap = {{ (data.emergency_fund.savings_gap / 1000000) if data.emergency_fund is defined and data.emergency_fund.savings_gap is defined else 0 }};
       new Chart(ctx, {
         type: 'bar',
         data: {
           labels: [
             "{{ trans('financial_health_financial_health_score') | default('Financial Health') }}",
             "{{ trans('net_worth_net_worth') | default('Net Worth') }} (₦M)",
-            "{{ trans('emergency_fund_savings_gap_6_months') | default('Emergency Fund Gap (6 Months)') }} (₦M)"
+            "{{ trans('emergency_fund_savings_gap') | default('Savings Gap') }} (₦M)"
           ],
           datasets: [{
             label: "{{ trans('core_financial_metrics') | default('Financial Metrics') }}",
-            data: [financialHealthScore, netWorth, emergencyFundGap],
+            data: [financialHealthScore, netWorth, savingsGap],
             backgroundColor: ['#2E7D32', '#0288D1', '#dc3545'],
             borderColor: ['#1B5E20', '#01579B', '#bd2130'],
             borderWidth: 1
@@ -298,7 +211,7 @@
           scales: {
             y: {
               beginAtZero: true,
-              max: Math.max(financialHealthScore, netWorth, emergencyFundGap, 100) * 1.1,
+              max: Math.max(financialHealthScore, netWorth, savingsGap, 100) * 1.1,
               title: {
                 display: true,
                 text: "{{ trans('core_value') | default('Value') }}"
@@ -314,10 +227,10 @@
                 label: function(context) {
                   let label = context.dataset.label || '';
                   let value = context.parsed.y;
-                  if (context.dataIndex > 0) {
-                    return `${label}: ₦${(value * 1000000).toLocaleString('en-NG')}`;
+                  if (context.dataIndex === 0) {
+                    return `${label}: ${value}`;
                   }
-                  return `${label}: ${value}`;
+                  return `${label}: ₦${(value * 1000000).toLocaleString('en-NG')}`;
                 }
               }
             },
