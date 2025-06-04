@@ -34,7 +34,7 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('financial_health_financial_health_score') | default('Financial Health') }}</h3>
-            {% if data.financial_health is defined and data.financial_health.score is defined %}
+            {% if data.financial_health is defined and data.financial_health.score is not none %}
               <p>{{ trans('core_score') | default('Score') }}: {{ data.financial_health.score | format_number }} / 100</p>
               {% if data.financial_health.status %}
                 <p>{{ trans('core_status') | default('Status') }}: {{ trans('financial_health_' + data.financial_health.status) | default(data.financial_health.status) }}</p>
@@ -93,7 +93,7 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('net_worth_net_worth_calculator') | default('Net Worth') }}</h3>
-            {% if data.net_worth is defined and data.net_worth.net_worth is defined %}
+            {% if data.net_worth is defined and data.net_worth.net_worth is not none %}
               <p>{{ trans('net_worth_net_worth') | default('Net Worth') }}: {{ data.net_worth.net_worth | format_currency }}</p>
               <p>{{ trans('net_worth_total_assets') | default('Total Assets') }}: {{ data.net_worth.total_assets | default(0) | format_currency }}</p>
             {% else %}
@@ -112,16 +112,16 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('emergency_fund_emergency_fund_calculator') | default('Emergency Fund') }}</h3>
-            {% if data.emergency_fund is defined and data.emergency_fund.target_amount is defined %}
+            {% if data.emergency_fund is defined and data.emergency_fund.target_amount is not none %}
               <p>{{ trans('emergency_fund_target_amount') | default('Target Amount') }}: {{ data.emergency_fund.target_amount | default(0) | format_currency }}</p>
               <p>{{ trans('emergency_fund_savings_gap') | default('Savings Gap') }}: {{ data.emergency_fund.savings_gap | default(0) | format_currency }}</p>
             {% else %}
-              <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
+              <p>{{ trans('core_not_calculated') }}</p>
             {% endif %}
             <a href="{{ url_for('emergency_fund.step1') }}"
-               class="btn btn-primary"
-               aria-label="{{ trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}">
-              <i class="fas fa-piggy-bank"></i> {{ trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}
+                class="btn btn-primary"
+                aria-label='{{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}'>
+                <i class="fas fa-piggy-bank"></i> {{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}
             </a>
           </div>
         </div>
@@ -131,7 +131,7 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('quiz_personality_quiz') | default('Personality Quiz') }}</h3>
-            {% if data.quiz is defined and data.quiz.personality is defined and data.quiz.personality %}
+            {% if data.quiz.is defined and data.quiz.personality is not none and data.quiz.is defined %}
               <p>{{ trans('quiz_personality') | default('Personality') }}: {{ trans('quiz_' + data.quiz.personality) | default(data.quiz.personality) }}</p>
               <p>{{ trans('core_score') | default('Score') }}: {{ data.quiz.score | default(0) | format_number }} / 10</p>
             {% else %}
@@ -189,8 +189,10 @@
     document.addEventListener('DOMContentLoaded', function() {
       const ctx = document.getElementById('overviewChart').getContext('2d');
       const financialHealthScore = {{ data.financial_health.score | default(0) }};
-      const netWorth = {{ (data.net_worth.net_worth | default(0)) / 1000000 }};
-      const savingsGap = {{ (data.emergency_fund.savings_gap | default(0)) / 1000000 }};
+      const rawNetWorth = {{ data.net_worth.net_worth | default(0) }};
+      const rawSavingsGap = {{ data.emergency_fund.savings_gap | default(0) }};
+      const netWorth = rawNetWorth / 1000000;
+      const savingsGap = rawSavingsGap / 1000000;
       new Chart(ctx, {
         type: 'bar',
         data: {
