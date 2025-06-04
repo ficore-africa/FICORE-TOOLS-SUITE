@@ -159,14 +159,14 @@
                                 {{ user_progress.progress.progress_percentage | default(0) }}%
                             </div>
                         </div>
-                        <a href="{{ url_for('learning_hub.course_detail', course_id='budgeting_101') }}" 
+                        <a href="{{ url_for('learning_hub.courses', course_id='budgeting_101') }}" 
                            class="btn btn-primary"
                            aria-label="{{ trans('courses_continue_budgeting') | default('Continue Budgeting Basics Course') }}">
                             <i class="fas fa-play"></i> {{ trans('courses_continue_course') | default('Continue Course') }}
                         </a>
                     {% else %}
                         <p>{{ trans('courses_no_course_progress') | default('You haven’t started any courses yet.') }}</p>
-                        <a href="{{ url_for('learning_hub.course_detail', course_id='budgeting_101') }}" 
+                        <a href="{{ url_for('learning_hub.courses', course_id='budgeting_101') }}" 
                            class="btn btn-primary"
                            aria-label="{{ trans('courses_start_budgeting') | default('Start Budgeting Basics Course') }}">
                             <i class="fas fa-book"></i> {{ trans('courses_start_budgeting_course') | default('Start Budgeting Basics') }}
