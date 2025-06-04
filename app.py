@@ -1,23 +1,85 @@
-import logging
 import os
 import sys
-from flask import Flask, jsonify, render_template, request, session, redirect, url_for, flash, send_from_directory, has_request_context, g, current_app, make_response
-from flask_session import Session
-from flask_wtf.csrf import CSRFProtect, CSRFError
-from translations import trans
-from blueprints.financial_health import financial_health_bp
-from blueprints.budget import budget_bp
-from blueprints.quiz import quiz_bp
-from blueprints.bill import bill_bp
-from blueprints.net_worth import net_worth_bp
-from blueprints.emergency_fund import emergency_fund_bp
-from blueprints.learning_hub import learning_hub_bp
-from json_store import JsonStorage
-from scheduler_setup import init_scheduler
-from jinja2 import environment
-import json
+import logging
 import uuid
 from datetime import datetime, timedelta
+from flask import Flask, jsonify, render_template, request, session, redirect, url_for, flash, send_from_directory, has_request_context, g, current_app, make_response
+from flask_wtf.csrf import CSRFError, generate_csrf
+from flask_login import current_user
+from dotenv import load_dotenv
+from extensions import db, login_manager, session as flask_session, csrf
+from blueprints.auth import auth_bp 
+from translations import trans
+from scheduler_setup import init_scheduler
+from models import Course, FinancialHealth, Budget, Bill, NetWorth, EmergencyFund, LearningProgress, QuizResult, User
+import json
+
+# Load environment variables
+load_dotenv()
+
+# Set up logging
+root_logger = logging.getLogger('ficore_app')
+root_logger.setLevel(logging.DEBUG)
+
+class SessionFormatter(logging.Formatter):
+    def format(self, record):
+        record.session_id = getattr(record, 'session_id', 'no-session-id')
+        return super().format(record)
+
+formatter = SessionFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s [session: %(session_id)s]')
+
+class SessionAdapter(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        kwargs['extra'] = kwargs.get('extra', {})
+        session_id = kwargs['extra'].get('session_id', 'no-session-id')
+        if has_request_context():
+            session_id = session.get('sid', 'no-session-id')
+        kwargs['extra']['session_id'] = session_id
+        return msg, kwargs
+
+logger = SessionAdapter(root_logger, {})
+
+def setup_logging(app):
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+    root_logger.addHandler(handler)
+    log_dir = os.path.join(os.path.dirname(__file__), 'data')
+    os.makedirs(log_dir, exist_ok=True)
+    try:
+        file_handler = logging.FileHandler(os.path.join(log_dir, 'storage.log'))
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
+        logger.info("Logging setup complete with file handler")
+    except (PermissionError, OSError) as e:
+        logger.warning(f"Failed to set up file logging: {str(e)}")
+
+def setup_session(app):
+    session_dir = os.path.join(os.path.dirname(__file__), 'data', 'sessions')
+    try:
+        os.makedirs(session_dir, exist_ok=True)
+        logger.info(f"Session directory ensured at {session_dir}")
+    except (PermissionError, OSError) as e:
+        logger.error(f"Failed to create session directory {session_dir}: {str(e)}. Using in-memory sessions.")
+        app.config['SESSION_TYPE'] = 'null'
+        return
+    app.config['SESSION_FILE_DIR'] = session_dir
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_PERMANENT'] = True
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
+    app.config['SESSION_USE_SIGNER'] = True
+    logger.info(f"Session configured: type={app.config['SESSION_TYPE']}, dir={session_dir}, lifetime={app.config['PERMANENT_SESSION_LIFETIME']}")
+
+def initialize_courses_data(app):
+    with app.app_context():
+        if Course.query.count() == 0:
+            for course in SAMPLE_COURSES:
+                db_course = Course(**course)
+                db.session.add(db_course)
+            db.session.commit()
+            logger.info("Initialized courses in database")
+        app.config['COURSES'] = [course.to_dict() for course in Course.query.all()]
 
 # Constants
 SAMPLE_COURSES = [
@@ -50,176 +112,81 @@ SAMPLE_COURSES = [
     }
 ]
 
-# Set up logging
-root_logger = logging.getLogger('ficore_app')
-root_logger.setLevel(logging.DEBUG)
-
-class SessionFormatter(logging.Formatter):
-    def format(self, record):
-        record.session_id = getattr(record, 'session_id', 'no_session_id')
-        return super().format(record)
-
-formatter = SessionFormatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s [session: %(session_id)s]')
-
-class SessionAdapter(logging.LoggerAdapter):
-    def process(self, msg, kwargs):
-        kwargs['extra'] = kwargs.get('extra', {})
-        session_id = kwargs['extra'].get('session_id', 'no-session-id')
-        if has_request_context():
-            session_id = session.get('sid', 'no-session-id')
-        kwargs['extra']['session_id'] = session_id
-        return msg, kwargs
-
-logger = SessionAdapter(root_logger, {})
-
-def setup_logging(app):
-    handler = logging.StreamHandler(sys.stderr)
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-    root_logger.addHandler(handler)
-    os.makedirs('data', exist_ok=True)
-    try:
-        file_handler = logging.FileHandler('data/storage.log')
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(formatter)
-        root_logger.addHandler(file_handler)
-        logger.info("Logging setup complete with file handler")
-    except (PermissionError, OSError) as e:
-        logger.warning(f"Failed to set up file logging: {str(e)}")
-
-def setup_session(app):
-    session_dir = os.environ.get('SESSION_DIR', 'data/sessions')
-    if os.environ.get('RENDER'):
-        session_dir = '/tmp/sessions'
-    try:
-        if os.path.exists(session_dir):
-            if not os.path.isdir(session_dir):
-                logger.error(f"Session path {session_dir} is not a directory. Removing and recreating.")
-                os.remove(session_dir)
-                os.makedirs(session_dir)
-                logger.info(f"Created session directory at {session_dir}")
-            else:
-                logger.info(f"Session directory exists at {session_dir}")
-        else:
-            os.makedirs(session_dir)
-            logger.info(f"Created session directory at {session_dir}")
-    except (PermissionError, OSError) as e:
-        logger.error(f"Failed to create session directory {session_dir}: {str(e)}. Using in-memory sessions.")
-        app.config['SESSION_TYPE'] = 'null'
-        return
-    app.config['SESSION_FILE_DIR'] = session_dir
-    app.config['SESSION_TYPE'] = 'filesystem'
-    app.config['SESSION_PERMANENT'] = True
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
-    app.config['SESSION_USE_SIGNER'] = True
-
-def init_storage_managers(app):
-    storage_managers = {}
-    for name, path, init_func in [
-        ('financial_health', '/tmp/financial_health.json' if os.environ.get('RENDER') else 'data/financial_health.json', lambda app: JsonStorage(path, logger_instance=app.logger)),
-        ('user_progress', '/tmp/user_progress.json' if os.environ.get('RENDER') else 'data/user_progress.json', lambda app: JsonStorage(path, logger_instance=app.logger)),
-        ('net_worth', '/tmp/networth.json' if os.environ.get('RENDER') else 'data/networth.json', lambda app: JsonStorage(path, logger_instance=app.logger)),
-        ('emergency_fund', '/tmp/emergency_fund.json' if os.environ.get('RENDER') else 'data/emergency_fund.json', lambda app: JsonStorage(path, logger_instance=app.logger)),
-        ('courses', '/tmp/courses.json' if os.environ.get('RENDER') else 'data/courses.json', lambda app: JsonStorage(path, logger_instance=app.logger)),
-        ('budget', None, lambda app: JsonStorage('/tmp/budget.json' if os.environ.get('RENDER') else 'data/budget.json', logger_instance=app.logger)),
-        ('bills', None, lambda app: JsonStorage('/tmp/bills.json' if os.environ.get('RENDER') else 'data/bills.json', logger_instance=app.logger)),
-        ('quiz', None, lambda app: JsonStorage('/tmp/quiz.json' if os.environ.get('RENDER') else 'data/quiz.json', logger_instance=app.logger)),
-    ]:
-        try:
-            with app.app_context():
-                logger.info(f"Initializing {name} storage")
-                storage_managers[name] = init_func(app)
-        except Exception as e:
-            logger.error(f"Failed to initialize {name} storage: {str(e)}", exc_info=True)
-            raise RuntimeError(f"Cannot initialize {name} storage: {str(e)}")
-    app.config['STORAGE_MANAGERS'] = storage_managers
-    logger.info(f"STORAGE_MANAGERS initialized with keys: {list(storage_managers.keys())}")
-
-def initialize_courses_data(app):
-    with app.app_context():
-        try:
-            courses_storage = app.config['STORAGE_MANAGERS']['courses']
-            courses = courses_storage.read_all()
-            if not courses:
-                logger.info("Courses storage is empty. Initializing with default courses.")
-                courses_storage.write([{
-                    'id': str(uuid.uuid4()),
-                    'session_id': 'initial-load',
-                    'timestamp': datetime.utcnow().isoformat() + "Z",
-                    'data': course
-                } for course in SAMPLE_COURSES])
-                courses = courses_storage.read_all()
-            # Convert flat courses to expected format if needed
-            converted_courses = []
-            for course in courses:
-                if isinstance(course, dict) and 'data' in course and isinstance(course['data'], dict):
-                    converted_courses.append(course)
-                elif isinstance(course, dict) and 'id' in course and 'title_key' in course:
-                    converted_courses.append({
-                        'id': str(uuid.uuid4()),
-                        'session_id': 'converted',
-                        'timestamp': datetime.utcnow().isoformat() + "Z",
-                        'data': course
-                    })
-                else:
-                    logger.warning(f"Skipping invalid course: {course}")
-            if converted_courses != courses:
-                courses_storage.write(converted_courses)
-                logger.info("Converted and rewrote courses to expected format")
-            app.config['COURSES'] = converted_courses
-        except Exception as e:
-            logger.error(f"Error initializing courses: {str(e)}", exc_info=True)
-            app.config['COURSES'] = [{
-                'id': str(uuid.uuid4()),
-                'session_id': 'fallback',
-                'timestamp': datetime.utcnow().isoformat() + "Z",
-                'data': course
-            } for course in SAMPLE_COURSES]
-
 def create_app():
-    app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'a_fallback-secret-key-for-dev-only-change-me')
-    if not os.environ.get('FLASK_SECRET_KEY') and not app.debug:
-        logger.critical("FLASK_SECRET_KEY must be set in production")
-        raise RuntimeError("FLASK_SECRET_KEY must be set in production")
+    app = Flask(__name__, template_folder='templates')
+    app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-please-change-me')
+    if not os.environ.get('FLASK_SECRET_KEY'):
+        logger.warning("FLASK_SECRET_KEY not set. Using fallback for development. Set it in production.")
 
     logger.info("Starting app creation")
     setup_logging(app)
     setup_session(app)
     app.config['BASE_URL'] = os.environ.get('BASE_URL', 'http://localhost:5000')
-    Session(app)
-    CSRFProtect(app)
+    flask_session.init_app(app)
+    csrf.init_app(app)
 
-    # Add format_currency filter
+    # Configure SQLite database
+    db_dir = os.path.join(os.path.dirname(__file__), 'data')  # Use project directory for data
+    try:
+        os.makedirs(db_dir, exist_ok=True)
+        logger.info(f"Database directory ensured at {db_dir}")
+    except (PermissionError, OSError) as e:
+        logger.critical(f"Failed to create database directory {db_dir}: {str(e)}")
+        raise
+    db_path = os.path.join(db_dir, 'ficore.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db.init_app(app)
+
+    # Initialize Flask-Login
+    login_manager.init_app(app)
+    login_manager.login_view = 'auth.signin'
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # Initialize scheduler
+    try:
+        init_scheduler(app)
+        logger.info("Scheduler initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize scheduler: {str(e)}")
+
     def format_currency(value):
         try:
             return "₦{:,.2f}".format(float(value))
         except (ValueError, TypeError):
-            return str(value)  # Fallback to string if formatting fails
+            return str(value)
     app.jinja_env.filters['format_currency'] = format_currency
 
-    # Initialize storage managers
     with app.app_context():
-        logger.info("Starting storage initialization")
-        init_storage_managers(app)
-        logger.info("Starting scheduler initialization")
-        init_scheduler(app)
-        logger.info("Starting data initialization")
+        db.create_all()
         initialize_courses_data(app)
-        logger.info("Completed data initialization")
+        logger.info("Database tables created and courses initialized")
 
     # Register blueprints
-    app.register_blueprint(financial_health_bp)
-    app.register_blueprint(budget_bp)
-    app.register_blueprint(quiz_bp)
-    app.register_blueprint(bill_bp)
-    app.register_blueprint(net_worth_bp)
-    app.register_blueprint(emergency_fund_bp)
-    app.register_blueprint(learning_hub_bp)
+    from blueprints.financial_health import financial_health_bp
+    from blueprints.budget import budget_bp
+    from blueprints.quiz import quiz_bp
+    from blueprints.bill import bill_bp
+    from blueprints.net_worth import net_worth_bp
+    from blueprints.emergency_fund import emergency_fund_bp
+    from blueprints.learning_hub import learning_hub_bp
+    from blueprints.auth import auth_bp
+
+    app.register_blueprint(financial_health_bp, template_folder='templates/financial_health')
+    app.register_blueprint(budget_bp, template_folder='templates/budget')
+    app.register_blueprint(quiz_bp, template_folder='templates/quiz')
+    app.register_blueprint(bill_bp, template_folder='templates/bill')
+    app.register_blueprint(net_worth_bp, template_folder='templates/net_worth')
+    app.register_blueprint(emergency_fund_bp, template_folder='templates/emergency_fund')
+    app.register_blueprint(learning_hub_bp, template_folder='templates/learning_hub')
+    app.register_blueprint(auth_bp, template_folder='templates/auth')
 
     def translate(key, lang='en', logger=logger, **kwargs):
         translation = trans(key, lang=lang, **kwargs)
-        if translation == key:
+        if translation == key and app.debug:
             logger.warning(f"Missing translation for key='{key}' in lang='{lang}'")
         return translation
 
@@ -240,6 +207,30 @@ def create_app():
             logger.warning(f"Error formatting number {value}: {str(e)}")
             return str(value)
 
+    @app.template_filter('format_datetime')
+    def format_datetime(value):
+        """
+        Format a datetime object to a readable string (e.g., 'June 4, 2025, 10:05 AM').
+        If the value is not a datetime object, return it as is.
+        """
+        if isinstance(value, datetime):
+            return value.strftime('%B %d, %Y, %I:%M %p')
+        return value
+
+    @app.template_filter('format_currency')
+    def format_currency(value):
+        """
+        Format a number as currency (e.g., 887.00 -> ₦887, 88.00 -> ₦88).
+        Removes decimal places if they are .00.
+        """
+        try:
+            value = float(value)
+            if value.is_integer():
+                return f"{int(value):,}"
+            return f"{value:,.2f}"
+        except (TypeError, ValueError):
+            return value
+
     @app.before_request
     def setup_session_and_language():
         try:
@@ -251,7 +242,7 @@ def create_app():
                 logger.info(f"Set default language to {session['lang']}")
             g.logger = logger
             g.logger.info(f"Request started for path: {request.path}")
-            if not os.path.exists('data/storage.log'):
+            if not os.path.exists(os.path.join(os.path.dirname(__file__), 'data', 'storage.log')):
                 g.logger.warning("data/storage.log not found")
         except Exception as e:
             logger.error(f"Before request error: {str(e)}", exc_info=True)
@@ -260,7 +251,6 @@ def create_app():
     def inject_translations():
         lang = session.get('lang', 'en')
         def context_trans(key, **kwargs):
-            # Use template-provided lang if available, else fall back to session lang
             used_lang = kwargs.pop('lang', lang)
             return translate(key, lang=used_lang, logger=g.get('logger', logger), **kwargs)
         return {
@@ -272,7 +262,9 @@ def create_app():
             'FEEDBACK_FORM_URL': os.environ.get('FEEDBACK_FORM_URL', '#'),
             'WAITLIST_FORM_URL': os.environ.get('WAITLIST_FORM_URL', '#'),
             'CONSULTANCY_FORM_URL': os.environ.get('CONSULTANCY_FORM_URL', '#'),
-            'current_lang': lang
+            'current_lang': lang,
+            'current_user': current_user if has_request_context() else None,  # Safely handle current_user
+            'csrf_token': generate_csrf
         }
 
     @app.route('/')
@@ -280,34 +272,17 @@ def create_app():
         lang = session.get('lang', 'en')
         logger.info("Serving index page")
         try:
-            courses = current_app.config['COURSES'] or [{
-                'id': str(uuid.uuid4()),
-                'session_id': 'fallback',
-                'timestamp': datetime.utcnow().isoformat() + "Z",
-                'data': course
-            } for course in SAMPLE_COURSES]
+            courses = current_app.config['COURSES'] or SAMPLE_COURSES
             logger.info(f"Retrieved {len(courses)} courses")
-            title_key_map = {c['id']: c['title_key'] for c in SAMPLE_COURSES}
-            processed_courses = []
-            for course in courses:
-                if isinstance(course, dict) and 'data' in course and isinstance(course['data'], dict):
-                    course_data = course['data']
-                    processed_courses.append({
-                        **course_data,
-                        'title_key': title_key_map.get(course_data['id'], f"learning_hub_course_{course_data['id']}_title")
-                    })
-                else:
-                    logger.warning(f"Invalid course format in index: {course}")
-                    processed_courses.append(course)
-            courses = processed_courses
+            processed_courses = courses
         except Exception as e:
             logger.error(f"Error retrieving courses: {str(e)}", exc_info=True)
-            courses = SAMPLE_COURSES
+            processed_courses = SAMPLE_COURSES
             flash(translate('learning_hub_error_message', default='An error occurred', lang=lang), 'danger')
         return render_template(
             'index.html',
             t=translate,
-            courses=courses,
+            courses=processed_courses,
             lang=lang,
             sample_courses=SAMPLE_COURSES
         )
@@ -323,35 +298,19 @@ def create_app():
 
     @app.route('/acknowledge_consent', methods=['POST'])
     def acknowledge_consent():
-        """
-        Handles consent acknowledgement from users.
-        Sets a server-side session flag and logs the event.
-        
-        Returns:
-            HTTP 204 No Content on success
-            HTTP 400 Bad Request if not a POST request
-            HTTP 403 Forbidden if CSRF token is invalid (handled by CSRFProtect)
-        """
         if request.method != 'POST':
             logger.warning(f"Invalid method {request.method} for consent acknowledgement")
             return '', 400
-        
-        # Set consent flag with timestamp
         session['consent_acknowledged'] = {
             'status': True,
             'timestamp': datetime.utcnow().isoformat(),
             'ip': request.remote_addr,
             'user_agent': request.headers.get('User-Agent')
         }
-        
-        # Log the event with session context
         logger.info(f"Consent acknowledged for session {session['sid']} from IP {request.remote_addr}")
-        
-        # Security headers for the response
         response = make_response('', 204)
         response.headers['Cache-Control'] = 'no-store'
         response.headers['X-Content-Type-Options'] = 'nosniff'
-        
         return response
 
     @app.route('/favicon.ico')
@@ -364,32 +323,31 @@ def create_app():
         lang = session.get('lang', 'en')
         logger.info("Serving general dashboard")
         data = {}
-        expected_keys = {
-            'score': None,
-            'surplus_deficit': None,
-            'personality': None,
-            'bills': [],
-            'net_worth': None,
-            'savings_gap': None
-        }
         try:
-            for tool, storage in current_app.config['STORAGE_MANAGERS'].items():
-                try:
-                    records = storage.read_all()
-                    session_records = [r['data'] for r in records if r.get('data', {}).get('session_id') == session['sid']]
-                    if tool == 'courses':
-                        data[tool] = session_records
-                    else:
-                        data[tool] = expected_keys.copy()
-                        if session_records:
-                            latest_record = session_records[-1]
-                            data[tool].update({k: latest_record.get(k, v) for k, v in expected_keys.items()})
-                    logger.info(f"Retrieved {len(session_records)} records for {tool}")
-                except Exception as e:
-                    logger.error(f"Error fetching data for {tool}: {str(e)}", exc_info=True)
-                    data[tool] = [] if tool == 'courses' else expected_keys.copy()
-            learning_progress = session.get('learning_progress', {})
-            data['learning_progress'] = learning_progress if isinstance(learning_progress, dict) else {}
+            filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+
+            fh_records = FinancialHealth.query.filter_by(**filter_kwargs).order_by(FinancialHealth.created_at.desc()).all()
+            data['financial_health'] = {'score': fh_records[0].score} if fh_records else {'score': None}
+
+            budget_records = Budget.query.filter_by(**filter_kwargs).order_by(Budget.created_at.desc()).all()
+            data['budget'] = {'surplus_deficit': budget_records[0].surplus_deficit} if budget_records else {'surplus_deficit': None}
+
+            bills = Bill.query.filter_by(**filter_kwargs).all()
+            data['bills'] = [bill.to_dict() for bill in bills]
+
+            nw_records = NetWorth.query.filter_by(**filter_kwargs).order_by(NetWorth.created_at.desc()).all()
+            data['net_worth'] = nw_records[0].to_dict() if nw_records else {'net_worth': None}
+
+            ef_records = EmergencyFund.query.filter_by(**filter_kwargs).order_by(EmergencyFund.created_at.desc()).all()
+            data['emergency_fund'] = {'savings_gap': ef_records[0].savings_gap} if ef_records else {'savings_gap': None}
+
+            lp_records = LearningProgress.query.filter_by(**filter_kwargs).all()
+            data['learning_progress'] = {lp.course_id: lp.to_dict() for lp in lp_records}
+
+            quiz_records = QuizResult.query.filter_by(**filter_kwargs).order_by(QuizResult.created_at.desc()).all()
+            data['quiz'] = {'personality': quiz_records[0].personality} if quiz_records else {'personality': None}
+
+            logger.info(f"Retrieved data for session {session['sid']}")
             return render_template('general_dashboard.html', data=data, t=translate, lang=lang)
         except Exception as e:
             logger.error(f"Error in general_dashboard: {str(e)}", exc_info=True)
@@ -422,12 +380,9 @@ def create_app():
         logger.info("Health check requested")
         status = {"status": "healthy"}
         try:
-            for tool, storage in current_app.config['STORAGE_MANAGERS'].items():
-                if not isinstance(storage, JsonStorage):
-                    status["status"] = "unhealthy"
-                    status["details"] = f"Storage for {tool} is not initialized correctly"
-                    return jsonify(status), 500
-            if not os.path.exists('data/storage.log'):
+            with app.app_context():
+                db.session.execute(db.text("SELECT 1"))
+            if not os.path.exists(os.path.join(os.path.dirname(__file__), 'data', 'storage.log')):
                 status["status"] = "warning"
                 status["details"] = "Log file data/storage.log not found"
                 return jsonify(status), 200
@@ -458,6 +413,12 @@ def create_app():
         logger.error(f"404 error: {str(error)}")
         return render_template('404.html', t=translate, lang=lang), 404
 
+    @app.route('/static/<path:filename>')
+    def static_files(filename):
+        response = send_from_directory('static', filename)
+        response.headers['Cache-Control'] = 'public, max-age=31536000' if not app.debug else 'no-cache'
+        return response
+
     logger.info("App creation completed")
     return app
 
@@ -466,6 +427,3 @@ try:
 except Exception as e:
     logger.critical(f"Error creating app: {str(e)}", exc_info=True)
     raise
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)

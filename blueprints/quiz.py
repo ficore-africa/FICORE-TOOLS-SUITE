@@ -2,12 +2,15 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, BooleanField, SubmitField, RadioField
 from wtforms.validators import DataRequired, Email, Optional
+from flask_login import current_user
 import uuid
 from datetime import datetime
-import pandas as pd
+import json
 import logging
 from translations import trans
 from mailersend_email import send_email, EMAIL_CONFIG
+from extensions import db
+from models import QuizResult  # Import SQLAlchemy db and QuizResult model
 
 # Configure logging
 logger = logging.getLogger('ficore_app')
@@ -177,41 +180,54 @@ def assign_badges(score, lang='en'):
 # Routes
 @quiz_bp.route('/step1', methods=['GET', 'POST'])
 def step1():
+    """Handle quiz step 1 form (personal information)."""
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
+        session.permanent = True
         session.modified = True
-        logger.debug(f"New session created with sid: {session['sid']}")
+        logger.debug(f"New session created with sid: {session['sid']}", extra={'session_id': session['sid']})
     lang = session.get('lang', 'en')
     course_id = request.args.get('course_id', 'financial_quiz')
-    form = QuizStep1Form(lang=lang, formdata=request.form if request.method == 'POST' else None)
+    form_data = session.get('quiz_data', {})
+    if current_user.is_authenticated:
+        form_data['email'] = form_data.get('email', current_user.email)
+        form_data['first_name'] = form_data.get('first_name', current_user.username)
+    form = QuizStep1Form(lang=lang, data=form_data)
     
-    if request.method == 'POST' and form.validate_on_submit():
-        session['quiz_data'] = {
-            'first_name': form.first_name.data,
-            'email': form.email.data,
-            'lang': form.lang.data or 'en',
-            'send_email': form.send_email.data
-        }
-        session['lang'] = form.lang.data or 'en'
-        session.modified = True
-        logger.info(f"Quiz step 1 validated successfully, session updated: {session['quiz_data']}")
-        return redirect(url_for('quiz.step2a', course_id=course_id))
-    elif form.errors:
-        logger.error(f"Form validation failed: {form.errors}")
-        flash(trans('quiz_form_errors', default='Please correct the errors in the form.'), 'danger')
-
-    return render_template(
-        'quiz_step1.html',
-        form=form,
-        course_id=course_id,
-        lang=lang,
-        total_steps=3
-    )
+    try:
+        if request.method == 'POST' and form.validate_on_submit():
+            session['quiz_data'] = {
+                'first_name': form.first_name.data,
+                'email': form.email.data,
+                'lang': form.lang.data or 'en',
+                'send_email': form.send_email.data
+            }
+            session['lang'] = form.lang.data or 'en'
+            session.modified = True
+            logger.info(f"Quiz step 1 validated successfully for session {session['sid']}", extra={'session_id': session['sid']})
+            return redirect(url_for('quiz.step2a', course_id=course_id))
+        elif form.errors:
+            logger.error(f"Form validation failed in step1: {form.errors}", extra={'session_id': session['sid']})
+            flash(trans('quiz_form_errors', default='Please correct the errors in the form.', lang=lang), 'danger')
+        
+        return render_template(
+            'quiz_step1.html',
+            form=form,
+            course_id=course_id,
+            lang=lang,
+            total_steps=3
+        )
+    except Exception as e:
+        logger.error(f"Error in quiz.step1: {str(e)}", extra={'session_id': session['sid']})
+        flash(trans('quiz_error_personal_info', default='An error occurred. Please try again.', lang=lang), 'danger')
+        return render_template('quiz_step1.html', form=form, course_id=course_id, lang=lang, total_steps=3), 500
 
 @quiz_bp.route('/step2a', methods=['GET', 'POST'])
 def step2a():
+    """Handle quiz step 2a form (questions 1-5)."""
     if 'sid' not in session or 'quiz_data' not in session:
-        flash(trans('session_expired', default='Session expired. Please start again.'), 'danger')
+        logger.warning(f"Session expired or missing quiz_data for session {session.get('sid', 'unknown')}", extra={'session_id': session.get('sid', 'unknown')})
+        flash(trans('session_expired', default='Session expired. Please start again.', lang=session.get('lang', 'en')), 'danger')
         return redirect(url_for('quiz.step1', course_id=request.args.get('course_id', 'financial_quiz')))
     
     lang = session['quiz_data'].get('lang', 'en')
@@ -227,43 +243,50 @@ def step2a():
         {'id': 'question_5', 'text_key': 'quiz_invest_regularly_label', 'text': 'Do you invest your money regularly?', 'tooltip': 'quiz_invest_regularly_tooltip', 'icon': '📈'},
     ]
     
-    if request.method == 'POST':
-        if form.back.data:
-            return redirect(url_for('quiz.step1', course_id=course_id))
-        if form.validate_on_submit():
-            session['quiz_data'].update({
-                'question_1': form.question_1.data,
-                'question_2': form.question_2.data,
-                'question_3': form.question_3.data,
-                'question_4': form.question_4.data,
-                'question_5': form.question_5.data,
-            })
-            session.modified = True
-            logger.info(f"Quiz step 2a validated successfully, session updated: {session['quiz_data']}")
-            return redirect(url_for('quiz.step2b', course_id=course_id))
-        else:
-            logger.error(f"Form validation failed in step2a: {form.errors}")
-            flash(trans('quiz_form_errors', default='Please correct the errors in the form.'), 'danger')
-    
-    # Pre-fill form with session data if available
-    for q in questions:
-        if q['id'] in session.get('quiz_data', {}):
-            getattr(form, q['id']).data = session['quiz_data'][q['id']]
-    
-    return render_template(
-        'quiz_step.html',
-        form=form,
-        questions=questions,
-        course_id=course_id,
-        lang=lang,
-        step_num=2,
-        total_steps=3
-    )
+    try:
+        if request.method == 'POST':
+            if form.back.data:
+                return redirect(url_for('quiz.step1', course_id=course_id))
+            if form.validate_on_submit():
+                session['quiz_data'].update({
+                    'question_1': form.question_1.data,
+                    'question_2': form.question_2.data,
+                    'question_3': form.question_3.data,
+                    'question_4': form.question_4.data,
+                    'question_5': form.question_5.data,
+                })
+                session.modified = True
+                logger.info(f"Quiz step 2a validated successfully for session {session['sid']}", extra={'session_id': session['sid']})
+                return redirect(url_for('quiz.step2b', course_id=course_id))
+            else:
+                logger.error(f"Form validation failed in step2a: {form.errors}", extra={'session_id': session['sid']})
+                flash(trans('quiz_form_errors', default='Please correct the errors in the form.', lang=lang), 'danger')
+        
+        # Pre-fill form with session data if available
+        for q in questions:
+            if q['id'] in session.get('quiz_data', {}):
+                getattr(form, q['id']).data = session['quiz_data'][q['id']]
+        
+        return render_template(
+            'quiz_step.html',
+            form=form,
+            questions=questions,
+            course_id=course_id,
+            lang=lang,
+            step_num=2,
+            total_steps=3
+        )
+    except Exception as e:
+        logger.error(f"Error in quiz.step2a: {str(e)}", extra={'session_id': session['sid']})
+        flash(trans('quiz_error_questions', default='An error occurred. Please try again.', lang=lang), 'danger')
+        return render_template('quiz_step.html', form=form, questions=questions, course_id=course_id, lang=lang, step_num=2, total_steps=3), 500
 
 @quiz_bp.route('/step2b', methods=['GET', 'POST'])
 def step2b():
+    """Handle quiz step 2b form (questions 6-10) and store results in SQLite."""
     if 'sid' not in session or 'quiz_data' not in session:
-        flash(trans('session_expired', default='Session expired. Please start again.'), 'danger')
+        logger.warning(f"Session expired or missing quiz_data for session {session.get('sid', 'unknown')}", extra={'session_id': session.get('sid', 'unknown')})
+        flash(trans('session_expired', default='Session expired. Please start again.', lang=session.get('lang', 'en')), 'danger')
         return redirect(url_for('quiz.step1', course_id=request.args.get('course_id', 'financial_quiz')))
     
     lang = session['quiz_data'].get('lang', 'en')
@@ -279,112 +302,162 @@ def step2b():
         {'id': 'question_10', 'text_key': 'quiz_retirement_plan_label', 'text': 'Do you have a retirement savings plan?', 'tooltip': 'quiz_retirement_plan_tooltip', 'icon': '🏖️'},
     ]
     
-    if request.method == 'POST':
-        if form.back.data:
-            return redirect(url_for('quiz.step2a', course_id=course_id))
-        if form.validate_on_submit():
-            session['quiz_data'].update({
-                'question_6': form.question_6.data,
-                'question_7': form.question_7.data,
-                'question_8': form.question_8.data,
-                'question_9': form.question_9.data,
-                'question_10': form.question_10.data,
-            })
-            session.modified = True
-            logger.info(f"Quiz step 2b validated successfully, session updated: {session['quiz_data']}")
-            
-            # Calculate results
-            answers = [session['quiz_data'].get(f'question_{i}') for i in range(1, 11)]
-            score = calculate_score(answers)
-            personality = assign_personality(score, lang)
-            badges = assign_badges(score, lang)
-            
-            # Store results in session
-            session['quiz_results'] = {
-                'first_name': session['quiz_data'].get('first_name', ''),
-                'personality': personality['name'],
-                'score': score,
-                'badges': badges,
-                'created_at': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'),
-                'insights': personality['insights'],
-                'tips': personality['tips']
-            }
-            session.modified = True
-            
-            return redirect(url_for('quiz.results', course_id=course_id))
-        else:
-            logger.error(f"Form validation failed in step2b: {form.errors}")
-            flash(trans('quiz_form_errors', default='Please correct the errors in the form.'), 'danger')
-    
-    # Pre-fill form with session data if available
-    for q in questions:
-        if q['id'] in session.get('quiz_data', {}):
-            getattr(form, q['id']).data = session['quiz_data'][q['id']]
-    
-    return render_template(
-        'quiz_step.html',
-        form=form,
-        questions=questions,
-        course_id=course_id,
-        lang=lang,
-        step_num=3,
-        total_steps=3
-    )
+    try:
+        if request.method == 'POST':
+            if form.back.data:
+                return redirect(url_for('quiz.step2a', course_id=course_id))
+            if form.validate_on_submit():
+                session['quiz_data'].update({
+                    'question_6': form.question_6.data,
+                    'question_7': form.question_7.data,
+                    'question_8': form.question_8.data,
+                    'question_9': form.question_9.data,
+                    'question_10': form.question_10.data,
+                })
+                session.modified = True
+                logger.info(f"Quiz step 2b validated successfully for session {session['sid']}", extra={'session_id': session['sid']})
+                
+                # Calculate results
+                answers = [session['quiz_data'].get(f'question_{i}') for i in range(1, 11)]
+                score = calculate_score(answers)
+                personality = assign_personality(score, lang)
+                badges = assign_badges(score, lang)
+                
+                # Create and persist QuizResult record to SQLite
+                quiz_result = QuizResult(
+                    id=str(uuid.uuid4()),
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    created_at=datetime.utcnow(),
+                    first_name=session['quiz_data'].get('first_name', ''),
+                    email=session['quiz_data'].get('email', ''),
+                    send_email=session['quiz_data'].get('send_email', False),
+                    personality=personality['name'],
+                    score=score,
+                    badges=json.dumps(badges),
+                    insights=json.dumps(personality['insights']),
+                    tips=json.dumps(personality['tips'])
+                )
+                db.session.add(quiz_result)
+                db.session.commit()
+                session['quiz_result_id'] = quiz_result.id
+                session.modified = True
+                logger.info(f"Successfully saved quiz result {quiz_result.id} for session {session['sid']}", extra={'session_id': session['sid']})
+                
+                # Prepare results for display
+                results = quiz_result.to_dict()
+                
+                # Send email if user opted in
+                if session['quiz_data'].get('send_email') and session['quiz_data'].get('email'):
+                    try:
+                        config = EMAIL_CONFIG["quiz"]
+                        subject = trans(config["subject_key"], lang=lang)
+                        template = config["template"]
+                        send_email(
+                            app=current_app,
+                            logger=current_app.logger,
+                            to_email=session['quiz_data']['email'],
+                            subject=subject,
+                            template_name=template,
+                            data={
+                                "first_name": results['first_name'],
+                                "score": results['score'],
+                                "max_score": 30,  # Based on current logic: 10 questions, max 3 points each
+                                "personality": results['personality'],
+                                "badges": results['badges'],
+                                "insights": results['insights'],
+                                "tips": results['tips'],
+                                "created_at": results['created_at'],
+                                "cta_url": url_for('quiz.results', course_id=course_id, _external=True)
+                            },
+                            lang=lang
+                        )
+                    except Exception as e:
+                        logger.error(f"Failed to send quiz results email: {str(e)}", extra={'session_id': session['sid']})
+                        flash(trans("email_send_failed", default="Failed to send email.", lang=lang), "warning")
+                
+                # Store results in session for immediate display
+                session['quiz_results'] = results
+                session.modified = True
+                
+                return redirect(url_for('quiz.results', course_id=course_id))
+            else:
+                logger.error(f"Form validation failed in step2b: {form.errors}", extra={'session_id': session['sid']})
+                flash(trans('quiz_form_errors', default='Please correct the errors in the form.', lang=lang), 'danger')
+        
+        # Pre-fill form with session data if available
+        for q in questions:
+            if q['id'] in session.get('quiz_data', {}):
+                getattr(form, q['id']).data = session['quiz_data'][q['id']]
+        
+        return render_template(
+            'quiz_step.html',
+            form=form,
+            questions=questions,
+            course_id=course_id,
+            lang=lang,
+            step_num=3,
+            total_steps=3
+        )
+    except Exception as e:
+        logger.error(f"Error in quiz.step2b: {str(e)}", extra={'session_id': session['sid']})
+        flash(trans('quiz_error_questions', default='An error occurred. Please try again.', lang=lang), 'danger')
+        return render_template('quiz_step.html', form=form, questions=questions, course_id=course_id, lang=lang, step_num=3, total_steps=3), 500
 
 @quiz_bp.route('/results', methods=['GET'])
 def results():
-    if 'sid' not in session or 'quiz_results' not in session or 'quiz_data' not in session:
-        flash(trans('session_expired', default='Session expired. Please start again.'), 'danger')
+    """Display quiz results from SQLite."""
+    if 'sid' not in session:
+        logger.warning("No session ID found", extra={'session_id': 'unknown'})
+        flash(trans('session_expired', default='Session expired. Please start again.', lang=session.get('lang', 'en')), 'danger')
         return redirect(url_for('quiz.step1', course_id=request.args.get('course_id', 'financial_quiz')))
     
     lang = session.get('lang', 'en')
     course_id = request.args.get('course_id', 'financial_quiz')
-    results = session['quiz_results']
-    quiz_data = session['quiz_data']
     
-    # Define maximum possible score
-    MAX_SCORE = 30  # Based on current logic: 10 questions, max 3 points each
-    
-    # Send email if user opted in
-    if quiz_data.get('send_email') and quiz_data.get('email'):
-        try:
-            config = EMAIL_CONFIG["quiz"]
-            subject = trans(config["subject_key"], lang=lang)
-            template = config["template"]
-            send_email(
-                app=current_app,
-                logger=current_app.logger,
-                to_email=quiz_data['email'],
-                subject=subject,
-                template_name=template,
-                data={
-                    "first_name": results['first_name'],
-                    "score": results['score'],
-                    "max_score": MAX_SCORE,
-                    "personality": results['personality'],
-                    "badges": results['badges'],
-                    "insights": results.get('insights', []),
-                    "tips": results.get('tips', []),
-                    "created_at": results['created_at'],
-                    "cta_url": url_for('quiz.results', course_id=course_id, _external=True)
-                },
-                lang=lang
-            )
-        except Exception as e:
-            current_app.logger.error(f"Failed to send quiz results email: {str(e)}")
-            flash(trans("email_send_failed", lang=lang), "warning")
-    
-    # Clear session data
-    session.pop('quiz_data', None)
-    session.pop('quiz_results', None)
-    session.modified = True
-    
-    return render_template(
-        'quiz_results.html',
-        latest_record=results,
-        insights=results.get('insights', []),
-        tips=results.get('tips', []),
-        course_id=course_id,
-        lang=lang,
-        max_score=MAX_SCORE
-    )
+    try:
+        # Try to fetch results from session first
+        results = session.get('quiz_results')
+        
+        if not results:
+            # Fetch from database using quiz_result_id, user_id, or session_id
+            filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+            if 'quiz_result_id' in session:
+                quiz_result = QuizResult.query.get(session['quiz_result_id'])
+                if quiz_result:
+                    results = quiz_result.to_dict()
+            if not results:
+                # Fallback to latest result by user_id or session_id
+                quiz_result = QuizResult.query.filter_by(**filter_kwargs).order_by(QuizResult.created_at.desc()).first()
+                if quiz_result:
+                    results = quiz_result.to_dict()
+            # Fallback to email if authenticated and no results found
+            if not results and current_user.is_authenticated and current_user.email:
+                quiz_result = QuizResult.query.filter_by(email=current_user.email).order_by(QuizResult.created_at.desc()).first()
+                if quiz_result:
+                    results = quiz_result.to_dict()
+        
+        if not results:
+            logger.warning(f"No quiz results found for session {session['sid']}", extra={'session_id': session['sid']})
+            flash(trans('quiz_no_results', default='No quiz results found. Please take the quiz again.', lang=lang), 'danger')
+            return redirect(url_for('quiz.step1', course_id=course_id))
+        
+        # Clear session data
+        session.pop('quiz_data', None)
+        session.pop('quiz_results', None)
+        session.modified = True
+        logger.info(f"Displaying quiz results for session {session['sid']}", extra={'session_id': session['sid']})
+        
+        return render_template(
+            'quiz_results.html',
+            latest_record=results,
+            insights=results.get('insights', []),
+            tips=results.get('tips', []),
+            course_id=course_id,
+            lang=lang,
+            max_score=30  # Based on current logic: 10 questions, max 3 points each
+        )
+    except Exception as e:
+        logger.error(f"Error in quiz.results: {str(e)}", extra={'session_id': session['sid']})
+        flash(trans('quiz_error_results', default='An error occurred while loading results.', lang=lang), 'danger')
+        return redirect(url_for('quiz.step1', course_id=course_id)), 500

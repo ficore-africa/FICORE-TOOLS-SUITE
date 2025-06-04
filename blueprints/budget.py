@@ -2,25 +2,16 @@ from flask import Blueprint, request, session, redirect, url_for, render_templat
 from flask_wtf import FlaskForm
 from wtforms import StringField, FloatField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, NumberRange, Optional, Email, ValidationError
-from json_store import JsonStorage
+from flask_login import current_user
 from mailersend_email import send_email, EMAIL_CONFIG
 from datetime import datetime
 import uuid
 import re
-
-try:
-    from app import trans
-except ImportError:
-    def trans(key, lang=None):
-        return key
+from translations import trans
+from extensions import db
+from models import Budget
 
 budget_bp = Blueprint('budget', __name__, url_prefix='/budget')
-
-def init_budget_storage(app):
-    """Initialize budget_storage within app context."""
-    with app.app_context():
-        app.logger.info("Initializing budget storage")
-        return JsonStorage('/tmp/data/budget.json', logger_instance=app.logger)
 
 def strip_commas(value):
     """Strip commas from string values."""
@@ -149,14 +140,17 @@ def step1():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
         current_app.logger.info(f"New session ID generated: {session['sid']}")
-        # Clear any stale budget data to start fresh
         session.pop('budget_step1', None)
         session.pop('budget_step2', None)
         session.pop('budget_step3', None)
         session.pop('budget_step4', None)
     session.permanent = True
     lang = session.get('lang', 'en')
-    form = Step1Form()
+    form_data = session.get('budget_step1', {})
+    if current_user.is_authenticated:
+        form_data['email'] = form_data.get('email', current_user.email)
+        form_data['first_name'] = form_data.get('first_name', current_user.username)
+    form = Step1Form(data=form_data)
     try:
         if request.method == 'POST':
             current_app.logger.info(f"POST request received for step1, session {session['sid']}: Raw form data: {dict(request.form)}")
@@ -274,32 +268,30 @@ def step4():
                 savings_goal = step4_data.get('savings_goal', 0)
                 surplus_deficit = income - expenses
 
-                record = {
-                    "income": income,
-                    "fixed_expenses": expenses,
-                    "variable_expenses": 0,
-                    "savings_goal": savings_goal,
-                    "surplus_deficit": surplus_deficit,
-                    "housing": step3_data.get('housing', 0),
-                    "food": step3_data.get('food', 0),
-                    "transport": step3_data.get('transport', 0),
-                    "dependents": step3_data.get('dependents', 0),
-                    "miscellaneous": step3_data.get('miscellaneous', 0),
-                    "others": step3_data.get('others', 0),
-                    "created_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                }
-
+                budget = Budget(
+                    id=str(uuid.uuid4()),
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    user_email=step1_data.get('email'),
+                    income=income,
+                    fixed_expenses=expenses,
+                    variable_expenses=0,
+                    savings_goal=savings_goal,
+                    surplus_deficit=surplus_deficit,
+                    housing=step3_data.get('housing', 0),
+                    food=step3_data.get('food', 0),
+                    transport=step3_data.get('transport', 0),
+                    dependents=step3_data.get('dependents', 0),
+                    miscellaneous=step3_data.get('miscellaneous', 0),
+                    others=step3_data.get('others', 0)
+                )
                 try:
-                    budget_storage = current_app.config['STORAGE_MANAGERS']['budget']
-                    if not budget_storage.is_writable():
-                        current_app.logger.error(f"Storage not writable for session {session['sid']}: {budget_storage.filename}")
-                        flash(trans("budget_storage_unavailable") or "Storage is currently unavailable", "danger")
-                        return render_template('budget_step4.html', form=form, trans=trans, lang=lang)
-                    current_app.logger.info(f"Attempting to save budget for session {session['sid']}")
-                    budget_storage.append(record, user_email=step1_data.get('email'), session_id=session['sid'])
-                    current_app.logger.info(f"Budget saved successfully for session {session['sid']}")
+                    db.session.add(budget)
+                    db.session.commit()
+                    current_app.logger.info(f"Budget saved successfully to database for session {session['sid']}")
                 except Exception as e:
-                    current_app.logger.error(f"Budget storage failed for session {session['sid']}: {str(e)}")
+                    db.session.rollback()
+                    current_app.logger.error(f"Failed to save budget to database for session {session['sid']}: {str(e)}")
                     flash(trans("budget_storage_error") or "Failed to save budget data", "danger")
                     return render_template('budget_step4.html', form=form, trans=trans, lang=lang)
 
@@ -317,19 +309,19 @@ def step4():
                             subject=subject,
                             template_name=template,
                             data={
-                                "first_name":               step1_data.get('first_name', ''),
-                                "income":                   income,
-                                "expenses":                 expenses,
-                                "housing":                  step3_data.get('housing', 0),
-                                "food":                     step3_data.get('food', 0),
-                                "transport":                step3_data.get('transport', 0),
-                                "dependents":               step3_data.get('dependents', 0),
-                                "miscellaneous":            step3_data.get('miscellaneous', 0),
-                                "others":                   step3_data.get('others', 0),
-                                "savings_goal":             savings_goal,
-                                "surplus_deficit":          surplus_deficit,
-                                "created_at":               datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                                "cta_url":                   url_for('budget.dashboard', _external=True)
+                                "first_name": step1_data.get('first_name', ''),
+                                "income": income,
+                                "expenses": expenses,
+                                "housing": step3_data.get('housing', 0),
+                                "food": step3_data.get('food', 0),
+                                "transport": step3_data.get('transport', 0),
+                                "dependents": step3_data.get('dependents', 0),
+                                "miscellaneous": step3_data.get('miscellaneous', 0),
+                                "others": step3_data.get('others', 0),
+                                "savings_goal": savings_goal,
+                                "surplus_deficit": surplus_deficit,
+                                "created_at": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                                "cta_url": url_for('budget.dashboard', _external=True)
                             },
                             lang=lang
                         )
@@ -369,53 +361,61 @@ def dashboard():
     lang = session.get('lang', 'en')
     try:
         current_app.logger.info(f"Request started for path: /budget/dashboard [session: {session['sid']}]")
-        
-        budget_storage = current_app.config['STORAGE_MANAGERS']['budget']
-        user_data = budget_storage.filter_by_session(session['sid'])
-        current_app.logger.info(f"Read {len(user_data)} records from budget storage [session: {session['sid']}]")
-        current_app.logger.info(f"Filtered {len(user_data)} records for session {session['sid']} in budget storage [session: {session['sid']}]")
-        
-        budgets = {}
+
+        filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+        budgets = Budget.query.filter_by(**filter_kwargs).order_by(Budget.created_at.desc()).all()
+        current_app.logger.info(f"Read {len(budgets)} records from budget storage [session: {session['sid']}]")
+
+        budgets_dict = {}
         latest_budget = None
-        for record in user_data:
-            budget_id = record["id"]
-            budget_data = record["data"]
-            budget_data['fixed_expenses'] = sum([
-                budget_data.get('housing', 0),
-                budget_data.get('food', 0),
-                budget_data.get('transport', 0),
-                budget_data.get('dependents', 0),
-                budget_data.get('miscellaneous', 0),
-                budget_data.get('others', 0)
-            ])
-            budget_data['surplus_deficit'] = budget_data.get('income', 0) - budget_data['fixed_expenses']
-            budgets[budget_id] = budget_data
-            if not latest_budget or budget_data.get('created_at', '') > latest_budget.get('created_at', ''):
+        for budget in budgets:
+            budget_data = budget.to_dict()
+            budgets_dict[budget.id] = budget_data
+            if not latest_budget or budget.created_at > datetime.strptime(latest_budget['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ'):
                 latest_budget = budget_data
+
+        if not latest_budget:
+            latest_budget = {
+                'income': 0.0,
+                'fixed_expenses': 0.0,
+                'surplus_deficit': 0.0,
+                'savings_goal': 0.0,
+                'housing': 0.0,
+                'food': 0.0,
+                'transport': 0.0,
+                'dependents': 0.0,
+                'miscellaneous': 0.0,
+                'others': 0.0,
+                'created_at': ''
+            }
 
         if request.method == 'POST':
             action = request.form.get('action')
             budget_id = request.form.get('budget_id')
             if action == 'delete':
                 try:
-                    budget_storage.delete_by_id(budget_id)
-                    flash(trans("budget_budget_deleted_success") or "Budget deleted successfully", "success")
-                    current_app.logger.info(f"Deleted budget ID {budget_id} for session {session['sid']}")
+                    budget = Budget.query.filter_by(id=budget_id, **filter_kwargs).first()
+                    if budget:
+                        db.session.delete(budget)
+                        db.session.commit()
+                        flash(trans("budget_budget_deleted_success") or "Budget deleted successfully", "success")
+                        current_app.logger.info(f"Deleted budget ID {budget_id} for session {session['sid']}")
+                    else:
+                        flash(trans("budget_budget_not_found") or "Budget not found", "danger")
                 except Exception as e:
+                    db.session.rollback()
                     current_app.logger.error(f"Failed to delete budget ID {budget_id} for session {session['sid']}: {str(e)}")
                     flash(trans("budget_budget_delete_failed") or "Failed to delete budget", "danger")
                 return redirect(url_for('budget.dashboard'))
 
-        categories = {}
-        if latest_budget:
-            categories = {
-                'Housing/Rent': latest_budget.get('housing', 0),
-                'Food': latest_budget.get('food', 0),
-                'Transport': latest_budget.get('transport', 0),
-                'Dependents': latest_budget.get('dependents', 0),
-                'Miscellaneous': latest_budget.get('miscellaneous', 0),
-                'Others': latest_budget.get('others', 0)
-            }
+        categories = {
+            'Housing/Rent': latest_budget.get('housing', 0),
+            'Food': latest_budget.get('food', 0),
+            'Transport': latest_budget.get('transport', 0),
+            'Dependents': latest_budget.get('dependents', 0),
+            'Miscellaneous': latest_budget.get('miscellaneous', 0),
+            'Others': latest_budget.get('others', 0)
+        }
 
         tips = [
             trans("budget_tip_track_expenses") or "Track your expenses regularly.",
@@ -424,7 +424,7 @@ def dashboard():
             trans("budget_tip_plan_dependents") or "Plan for dependents' expenses."
         ]
         insights = []
-        if latest_budget:
+        if latest_budget.get('income', 0) > 0:
             if latest_budget.get('surplus_deficit', 0) < 0:
                 insights.append(trans("budget_insight_budget_deficit") or "Your budget shows a deficit.")
             elif latest_budget.get('surplus_deficit', 0) > 0:
@@ -432,10 +432,10 @@ def dashboard():
             if latest_budget.get('savings_goal', 0) == 0:
                 insights.append(trans("budget_insight_set_savings_goal") or "Consider setting a savings goal.")
 
-        current_app.logger.info(f"Rendering dashboard for session {session['sid']}: {len(budgets)} budgets found")
+        current_app.logger.info(f"Rendering dashboard for session {session['sid']}: {len(budgets_dict)} budgets found")
         return render_template(
             'budget_dashboard.html',
-            budgets=budgets,
+            budgets=budgets_dict,
             latest_budget=latest_budget,
             categories=categories,
             tips=tips,
@@ -449,7 +449,19 @@ def dashboard():
         return render_template(
             'budget_dashboard.html',
             budgets={},
-            latest_budget={},
+            latest_budget={
+                'income': 0.0,
+                'fixed_expenses': 0.0,
+                'surplus_deficit': 0.0,
+                'savings_goal': 0.0,
+                'housing': 0.0,
+                'food': 0.0,
+                'transport': 0.0,
+                'dependents': 0.0,
+                'miscellaneous': 0.0,
+                'others': 0.0,
+                'created_at': ''
+            },
             categories={},
             tips=[
                 trans("budget_tip_track_expenses") or "Track your expenses regularly.",

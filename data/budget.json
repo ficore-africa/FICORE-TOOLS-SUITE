@@ -1,15 +1,1 @@
-[
-  {
-    "id": "004j3905-j83g-96i9-f261-991100994555",
-    "timestamp": "2025-05-19T11:03:00.123456",
-    "user_email": "user@example.com",
-    "session_id": "flask_session_123",
-    "data": {
-      "income": 100000,
-      "fixed_expenses": 40000,
-      "variable_expenses": 20000,
-      "savings_goal": 10000,
-      "surplus_deficit": 30000
-    }
-  }
-]
+[]
