@@ -4,7 +4,7 @@ CORE_TRANSLATIONS = {
         'auth_username_placeholder': 'Enter your username',
         'Bill status toggled successfully': 'Bill status toggled successfully.',
         'core_financial_assessment_group': 'Financial Assessment Tools',
-        'Financial Dashboard': 'Financial Dashboard',
+        'Financial Dashboard': 'General Financial Dashboard',
         'courses_start_budgeting': 'Start Budgeting Course',
         'core_metrics': 'Metrics',
         'core_financial_assessment_subtext': 'Understand your financial behavior and readiness.',
