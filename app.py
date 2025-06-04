@@ -329,27 +329,29 @@ def create_app():
             fh_records = FinancialHealth.query.filter_by(**filter_kwargs).order_by(FinancialHealth.created_at.desc()).all()
             if not fh_records:
                 logger.warning(f"No FinancialHealth records found for filter: {filter_kwargs}")
-            data['financial_health'] = {'score': fh_records[0].score} if fh_records else {'score': None}
+            data['financial_health'] = {'score': fh_records[0].score, 'status': fh_records[0].status} if fh_records else {'score': None, 'status': None}
 
             budget_records = Budget.query.filter_by(**filter_kwargs).order_by(Budget.created_at.desc()).all()
             if not budget_records:
                 logger.warning(f"No Budget records found for filter: {filter_kwargs}")
-            data['budget'] = {'surplus_deficit': budget_records[0].surplus_deficit} if budget_records else {'surplus_deficit': None}
+            data['budget'] = {'surplus_deficit': budget_records[0].surplus_deficit, 'savings_goal': budget_records[0].savings_goal} if budget_records else {'surplus_deficit': None, 'savings_goal': None}
 
             bills = Bill.query.filter_by(**filter_kwargs).all()
             if not bills:
                 logger.warning(f"No Bill records found for filter: {filter_kwargs}")
-            data['bills'] = [bill.to_dict() for bill in bills]
+            total_amount = sum(bill.amount for bill in bills)
+            unpaid_amount = sum(bill.amount for bill in bills if not bill.is_paid)
+            data['bills'] = {'bills': [bill.to_dict() for bill in bills], 'total_amount': total_amount, 'unpaid_amount': unpaid_amount}
 
             nw_records = NetWorth.query.filter_by(**filter_kwargs).order_by(NetWorth.created_at.desc()).all()
             if not nw_records:
                 logger.warning(f"No NetWorth records found for filter: {filter_kwargs}")
-            data['net_worth'] = nw_records[0].to_dict() if nw_records else {'net_worth': None}
+            data['net_worth'] = nw_records[0].to_dict() if nw_records else {'net_worth': None, 'total_assets': None}
 
             ef_records = EmergencyFund.query.filter_by(**filter_kwargs).order_by(EmergencyFund.created_at.desc()).all()
             if not ef_records:
                 logger.warning(f"No EmergencyFund records found for filter: {filter_kwargs}")
-            data['emergency_fund'] = {'savings_gap': ef_records[0].savings_gap} if ef_records else {'savings_gap': None}
+            data['emergency_fund'] = {'savings_gap': ef_records[0].savings_gap, 'target_savings_6m': ef_records[0].target_savings_6m, 'savings_gap_6m': ef_records[0].savings_gap_6m} if ef_records else {'savings_gap': None, 'target_savings_6m': None, 'savings_gap_6m': None}
 
             lp_records = LearningProgress.query.filter_by(**filter_kwargs).all()
             if not lp_records:
@@ -359,7 +361,7 @@ def create_app():
             quiz_records = QuizResult.query.filter_by(**filter_kwargs).order_by(QuizResult.created_at.desc()).all()
             if not quiz_records:
                 logger.warning(f"No QuizResult records found for filter: {filter_kwargs}")
-            data['quiz'] = {'personality': quiz_records[0].personality} if quiz_records else {'personality': None}
+            data['quiz'] = {'personality': quiz_records[0].personality, 'score': quiz_records[0].score} if quiz_records else {'personality': None, 'score': None}
 
             logger.info(f"Retrieved data for session {session['sid']}")
             return render_template('general_dashboard.html', data=data, t=translate, lang=lang)
@@ -367,13 +369,13 @@ def create_app():
             logger.error(f"Error in general_dashboard: {str(e)}", exc_info=True)
             flash(translate('global_error_message', default='An error occurred', lang=lang), 'danger')
             default_data = {
-                'financial_health': {'score': None},
-                'budget': {'surplus_deficit': None},
-                'bills': [],
-                'net_worth': {'net_worth': None},
-                'emergency_fund': {'savings_gap': None},
+                'financial_health': {'score': None, 'status': None},
+                'budget': {'surplus_deficit': None, 'savings_goal': None},
+                'bills': {'bills': [], 'total_amount': 0, 'unpaid_amount': 0},
+                'net_worth': {'net_worth': None, 'total_assets': None},
+                'emergency_fund': {'savings_gap': None, 'target_savings_6m': None, 'savings_gap_6m': None},
                 'learning_progress': {},
-                'quiz': {'personality': None}
+                'quiz': {'personality': None, 'score': None}
             }
             return render_template('general_dashboard.html', data=default_data, t=translate, lang=lang), 500
 
@@ -400,7 +402,7 @@ def create_app():
 
     @app.route('/health')
     def health():
-        logger.info("Health check requested")
+        logger.info("Health check")
         status = {"status": "healthy"}
         try:
             with app.app_context():
@@ -409,37 +411,35 @@ def create_app():
                 status["status"] = "warning"
                 status["details"] = "Log file data/storage.log not found"
                 return jsonify(status), 200
+            return jsonify(status), 200
         except Exception as e:
             logger.error(f"Health check failed: {str(e)}", exc_info=True)
             status["status"] = "unhealthy"
             status["details"] = str(e)
             return jsonify(status), 500
-        return jsonify(status), 200
 
     @app.errorhandler(500)
     def internal_error(error):
         lang = session.get('lang', 'en')
-        logger.error(f"Server error: {str(error)}", exc_info=True)
-        flash(translate('global_error_message', default='An error occurred', lang=lang), 'danger')
-        return render_template('500.html', error=str(error), t=translate, lang=lang), 500
+        logger.error(f"Server error: {str(error)}")
+        return jsonify({'error': str(error)}), 500
 
     @app.errorhandler(CSRFError)
-    def handle_csrf_error(error):
+    def handle_csrf(e):
         lang = session.get('lang', 'en')
-        logger.warning(f"CSRF error: {str(error)}")
-        flash(translate('csrf_error', default='Invalid CSRF token', lang=lang), 'danger')
-        return render_template('error.html', error="Invalid CSRF token", t=translate, lang=lang), 400
+        logger.error(f"CSRF error: {str(e)}")
+        return jsonify({'error': 'CSRF token invalid'}), 400
 
     @app.errorhandler(404)
-    def page_not_found(error):
+    def page_not_found(e):
         lang = session.get('lang', 'en')
-        logger.error(f"404 error: {str(error)}")
-        return render_template('404.html', t=translate, lang=lang), 404
+        logger.error(f"404 error: {str(e)}")
+        return jsonify({'error': '404 not found'}), 404
 
     @app.route('/static/<path:filename>')
     def static_files(filename):
         response = send_from_directory('static', filename)
-        response.headers['Cache-Control'] = 'public, max-age=31536000' if not app.debug else 'no-cache'
+        response.headers['Content-Type'] = 'text/plain'
         return response
 
     logger.info("App creation completed")
@@ -448,5 +448,5 @@ def create_app():
 try:
     app = create_app()
 except Exception as e:
-    logger.critical(f"Error creating app: {str(e)}", exc_info=True)
+    logger.error(f"Error creating app: {e}")
     raise
