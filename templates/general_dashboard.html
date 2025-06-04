@@ -131,7 +131,7 @@
         <div class="card h-100">
           <div class="card-body">
             <h3>{{ trans('quiz_personality_quiz') | default('Personality Quiz') }}</h3>
-            {% if data.quiz.is defined and data.quiz.personality is not none and data.quiz.is defined %}
+            {% if data.quiz is defined and data.quiz.personality is not none %}
               <p>{{ trans('quiz_personality') | default('Personality') }}: {{ trans('quiz_' + data.quiz.personality) | default(data.quiz.personality) }}</p>
               <p>{{ trans('core_score') | default('Score') }}: {{ data.quiz.score | default(0) | format_number }} / 10</p>
             {% else %}
