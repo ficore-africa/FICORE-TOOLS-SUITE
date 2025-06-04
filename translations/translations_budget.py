@@ -2,6 +2,7 @@ BUDGET_TRANSLATIONS = {
     'en': {
         # General Budget Fields
         'budget_summary': 'Budget Summary',
+        'budget_go_budget': 'Go to Budget',
         'budget_dashboard_subtitle': 'Your current financial overview.',
         'Budget Dashboard': 'Budget Dashboard',
         'budget_no_data': 'No budget data available yet.',
@@ -822,6 +823,7 @@ BUDGET_TRANSLATIONS = {
         'budget_no_data': 'Babu bayanan kasafin kuɗi tukuna.',
         'budget_history': 'Tarihin Kasafin Kuɗi',
         'budget_no_history': 'Babu tsoffin kasafin kuɗi da ake samu.',
+        'budget_go_budget': 'Je zuwa Kasafin Kuɗi',
         'budget_tips_insights': 'Nasihu da Fahimtar Kasafin Kuɗi',
         'budget_create_new': 'Ƙirƙiri Sabon Kasafin Kuɗi',
         'budget_savings_progress': 'Matakin Burin Ajiyar Kuɗi',
