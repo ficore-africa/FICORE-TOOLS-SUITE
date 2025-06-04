@@ -8,7 +8,7 @@ from flask_wtf.csrf import CSRFError, generate_csrf
 from flask_login import current_user
 from dotenv import load_dotenv
 from extensions import db, login_manager, session as flask_session, csrf
-from blueprints.auth import auth_bp 
+from blueprints.auth import auth_bp
 from translations import trans
 from scheduler_setup import init_scheduler
 from models import Course, FinancialHealth, Budget, Bill, NetWorth, EmergencyFund, LearningProgress, QuizResult, User
@@ -126,7 +126,7 @@ def create_app():
     csrf.init_app(app)
 
     # Configure SQLite database
-    db_dir = os.path.join(os.path.dirname(__file__), 'data')  # Use project directory for data
+    db_dir = os.path.join(os.path.dirname(__file__), 'data')
     try:
         os.makedirs(db_dir, exist_ok=True)
         logger.info(f"Database directory ensured at {db_dir}")
@@ -226,8 +226,8 @@ def create_app():
         try:
             value = float(value)
             if value.is_integer():
-                return f"{int(value):,}"
-            return f"{value:,.2f}"
+                return f"₦{int(value):,}"
+            return f"₦{value:,.2f}"
         except (TypeError, ValueError):
             return value
 
@@ -263,7 +263,7 @@ def create_app():
             'WAITLIST_FORM_URL': os.environ.get('WAITLIST_FORM_URL', '#'),
             'CONSULTANCY_FORM_URL': os.environ.get('CONSULTANCY_FORM_URL', '#'),
             'current_lang': lang,
-            'current_user': current_user if has_request_context() else None,  # Safely handle current_user
+            'current_user': current_user if has_request_context() else None,
             'csrf_token': generate_csrf
         }
 
@@ -327,24 +327,38 @@ def create_app():
             filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
 
             fh_records = FinancialHealth.query.filter_by(**filter_kwargs).order_by(FinancialHealth.created_at.desc()).all()
+            if not fh_records:
+                logger.warning(f"No FinancialHealth records found for filter: {filter_kwargs}")
             data['financial_health'] = {'score': fh_records[0].score} if fh_records else {'score': None}
 
             budget_records = Budget.query.filter_by(**filter_kwargs).order_by(Budget.created_at.desc()).all()
+            if not budget_records:
+                logger.warning(f"No Budget records found for filter: {filter_kwargs}")
             data['budget'] = {'surplus_deficit': budget_records[0].surplus_deficit} if budget_records else {'surplus_deficit': None}
 
             bills = Bill.query.filter_by(**filter_kwargs).all()
+            if not bills:
+                logger.warning(f"No Bill records found for filter: {filter_kwargs}")
             data['bills'] = [bill.to_dict() for bill in bills]
 
             nw_records = NetWorth.query.filter_by(**filter_kwargs).order_by(NetWorth.created_at.desc()).all()
+            if not nw_records:
+                logger.warning(f"No NetWorth records found for filter: {filter_kwargs}")
             data['net_worth'] = nw_records[0].to_dict() if nw_records else {'net_worth': None}
 
             ef_records = EmergencyFund.query.filter_by(**filter_kwargs).order_by(EmergencyFund.created_at.desc()).all()
+            if not ef_records:
+                logger.warning(f"No EmergencyFund records found for filter: {filter_kwargs}")
             data['emergency_fund'] = {'savings_gap': ef_records[0].savings_gap} if ef_records else {'savings_gap': None}
 
             lp_records = LearningProgress.query.filter_by(**filter_kwargs).all()
+            if not lp_records:
+                logger.warning(f"No LearningProgress records found for filter: {filter_kwargs}")
             data['learning_progress'] = {lp.course_id: lp.to_dict() for lp in lp_records}
 
             quiz_records = QuizResult.query.filter_by(**filter_kwargs).order_by(QuizResult.created_at.desc()).all()
+            if not quiz_records:
+                logger.warning(f"No QuizResult records found for filter: {filter_kwargs}")
             data['quiz'] = {'personality': quiz_records[0].personality} if quiz_records else {'personality': None}
 
             logger.info(f"Retrieved data for session {session['sid']}")
@@ -352,7 +366,16 @@ def create_app():
         except Exception as e:
             logger.error(f"Error in general_dashboard: {str(e)}", exc_info=True)
             flash(translate('global_error_message', default='An error occurred', lang=lang), 'danger')
-            return render_template('general_dashboard.html', data={}, t=translate, lang=lang), 500
+            default_data = {
+                'financial_health': {'score': None},
+                'budget': {'surplus_deficit': None},
+                'bills': [],
+                'net_worth': {'net_worth': None},
+                'emergency_fund': {'savings_gap': None},
+                'learning_progress': {},
+                'quiz': {'personality': None}
+            }
+            return render_template('general_dashboard.html', data=default_data, t=translate, lang=lang), 500
 
     @app.route('/logout')
     def logout():
