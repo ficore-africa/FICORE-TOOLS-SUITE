@@ -90,7 +90,7 @@
                     {% else %}
                         <p>{{ trans('bill_no_bills') | default('No bills added.') }}</p>
                     {% endif %}
-                    <a href="{{ url_for('bill.form') }}" 
+                    <a href="{{ url_for('bill.form_step1') }}" 
                        class="btn btn-primary"
                        aria-label="{{ trans('bill_go_bill') | default('Go to Bill Planner') }}">
                         <i class="fas fa-file-invoice"></i> {{ trans('bill_go_bill') | default('Go to Bill Planner') }}
