@@ -2,28 +2,40 @@
 {% block title %}{{ trans('core_home') | default('Home') }}{% endblock %}
 {% block content %}
 <div class="container">
+    <!-- Journey Flow Strip -->
+    <section class="journey-strip my-3">
+        <div class="journey-container">
+            <div class="journey-step">
+                <span class="step-icon">🟢</span>
+                <span class="step-text">{{ trans('core_step1_assess') | default('Step 1: Check Your Financial Health') }}</span>
+            </div>
+            <div class="journey-step">
+                <span class="step-icon">🔵</span>
+                <span class="step-text">{{ trans('core_step2_plan') | default('Step 2: Plan Your Goals') }}</span>
+            </div>
+            <div class="journey-step">
+                <span class="step-icon">🟣</span>
+                <span class="step-text">{{ trans('core_step3_track') | default('Step 3: Track and Learn') }}</span>
+            </div>
+        </div>
+    </section>
+
     <!-- Hero Section -->
     <section class="hero text-center my-3">
         <div class="hero-content">
             <h2><i class="fas fa-wallet"></i> {{ trans('core_all_in_one_toolkit') | default('Your All-in-One Toolkit for Financial Health Across Africa') }}</h2>
             <p class="mt-3">{{ trans('core_money_control') | default('Your Money. Your Control. Your Tools.') }}</p>
             <p class="hero-subtext mt-3" aria-describedby="no-fund-handling-desc"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i> {{ trans('core_no_fund_handling') | default('Track and manage your money, we never touch it.') }}</p>
-            <div class="d-flex justify-content-center">
-                <a href="{{ url_for('financial_health.step1') }}" class="btn btn-primary btn-explore" aria-label="{{ trans('financial_health_get_health_score') | default('Start Here – Check Your Financial Health') }}">{{ trans('financial_health_get_health_score') | default('Start Here – Check Your Financial Health') }}</a>
+            <div class="d-flex flex-column align-items-center">
+                <a href="{{ url_for('financial_health.step1') }}" class="btn btn-primary btn-explore mb-3" aria-label="{{ trans('financial_health_get_health_score') | default('Start Here – Check Your Financial Health') }}">
+                    {{ trans('financial_health_get_health_score') | default('Start Here – Check Your Financial Health') }}
+                    <span class="badge badge-success ms-2">Recommended First Step</span>
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Journey Flow Strip -->
-    <section class="journey-strip text-center my-4">
-        <div class="journey-container">
-            <div class="journey-step"><span class="journey-icon">🟢</span> {{ trans('core_step1_assess') | default('Step 1: Assess') }}</div>
-            <div class="journey-step"><span class="journey-icon">🔵</span> {{ trans('core_step2_plan') | default('Step 2: Plan') }}</div>
-            <div class="journey-step"><span class="journey-icon">🟣</span> {{ trans('core_step3_track') | default('Step 3: Track') }}</div>
-        </div>
-    </section>
-
-    <!-- Why Ficore Africa -->
+    <!-- Why Ficore Africa Section -->
     <section class="why-section my-4">
         <h2 class="text-center"><i class="fas fa-check-circle"></i> {{ trans('core_why_ficore') | default('Why Ficore Africa?') }}</h2>
         <ul class="why-list list-unstyled">
@@ -37,7 +49,6 @@
     <section class="tools-section my-4" id="tools-section">
         <h2 class="text-center"><i class="fas fa-tools"></i> {{ trans('core_choose_tool') | default('Choose a Tool') }}</h2>
         <div class="accordion" id="toolsAccordion">
-            <!-- Financial Assessment -->
             <div class="tool-group accordion-item">
                 <h3 class="group-title accordion-header" id="headingFinancialAssessment">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinancialAssessment" aria-expanded="true" aria-controls="collapseFinancialAssessment">
@@ -51,7 +62,7 @@
                             <div class="col-md-6 mb-3">
                                 <div class="card tool-card custom-card">
                                     <div class="card-body">
-                                        <h3 class="card-title"><i class="fas fa-heartbeat"></i> {{ trans('financial_health_financial_health_score') | default('Financial Health Score') }} <span class="badge badge-success">Recommended</span></h3>
+                                        <h3 class="card-title"><i class="fas fa-heartbeat"></i> {{ trans('financial_health_financial_health_score') | default('Financial Health Score') }}</h3>
                                         <p class="card-text">{{ trans('financial_health_evaluate_finances') | default('Evaluates income, expenses, and debt for a health score') }}</p>
                                         <a href="{{ url_for('financial_health.step1') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('financial_health_start_financial_health') | default('Start Financial Health Score') }}">{{ trans('core_start') | default('Start') }}</a>
                                     </div>
@@ -70,8 +81,8 @@
                                 <div class="card tool-card custom-card">
                                     <div class="card-body">
                                         <h3 class="card-title"><i class="fas fa-tachometer-alt"></i> {{ trans('core_general_dashboard') | default('General Dashboard') }}</h3>
-                                        <p class="card-text">{{ trans('core_general_dashboard_desc') | default('View all your financial metrics in one place') }}</p>
-                                        <a href="{{ url_for('general_dashboard') }}" class="btn btn-primary" aria-label="{{ trans('core_general_dashboard') | default('Go to General Dashboard') }}">{{ trans('core_start') | default('Start') }}</a>
+                                        <p class="card-text">{{ trans('core_general_dashboard_subtext') | default('View all your financial metrics in one place') }}</p>
+                                        <a href="{{ url_for('general_dashboard') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('core_start_general_dashboard') | default('Start General Dashboard') }}">{{ trans('core_start') | default('Start') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -79,7 +90,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Planning Tools -->
             <div class="tool-group accordion-item">
                 <h3 class="group-title accordion-header" id="headingPlanningTools">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlanningTools" aria-expanded="false" aria-controls="collapsePlanningTools">
@@ -112,8 +122,8 @@
                                 <div class="card tool-card custom-card">
                                     <div class="card-body">
                                         <h3 class="card-title"><i class="fas fa-piggy-bank"></i> {{ trans('emergency_fund_calculator') | default('Emergency Fund Planner') }}</h3>
-                                        <p class="card-text">{{ trans('emergency_fund_goal') | default('Aims to cover 3-6 months of expenses for financial security') }}</p>
-                                        <a href="{{ url_for('emergency_fund.step1') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('emergency_fund_start_emergency_fund') | default('Start Emergency Fund Planner') }}">{{ trans('core_start') | default('Start') }}</a>
+                                    <p class="card-text">{{ trans('emergency_fund_goal') | default('Aims to cover 3-6 months of expenses for financial security') }}</p>
+                                    <a href="{{ url_for('emergency_fund.step1') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('emergency_fund_start_emergency_fund') | default('Start Emergency Fund Planner') }}">{{ trans('core_start') | default('Start') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -121,7 +131,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Wealth Tracking -->
             <div class="tool-group accordion-item">
                 <h3 class="group-title accordion-header" id="headingWealthTracking">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWealthTracking" aria-expanded="false" aria-controls="collapseWealthTracking">
@@ -145,7 +154,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Learning & Growth -->
             <div class="tool-group accordion-item">
                 <h3 class="group-title accordion-header" id="headingLearningGrowth">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLearningGrowth" aria-expanded="false" aria-controls="collapseLearningGrowth">
@@ -174,8 +182,8 @@
                                         {% if courses %}
                                         {% for course in courses %}
                                         <div class="course-item mb-2">
-                                            <p><strong>{{ trans(course.title_key) | default(course.title_en) }}</strong></p>
-                                            <p>
+                                            <p class="card-text">
+                                                <strong>{{ trans(course.title_key) | default(course.title_en) }}</strong><br>
                                                 {% if course.id == 'budgeting_101' %}
                                                     {{ trans('learning_hub_learn_budgeting') | default('Learn the basics of creating and managing a budget.') }}
                                                 {% elif course.id == 'financial_quiz' %}
@@ -190,12 +198,12 @@
                                                     {{ trans('learning_hub_free_course') | default('Free course') }}
                                                 {% endif %}
                                             </p>
-                                            <a href="{{ url_for('learning_hub.course_overview', course_id=course.id) }}" class="course-link" aria-label="{{ trans('learning_hub_start_course') | default('Start Course') }} {{ trans(course.title_key) }}">{{ trans('core_start') | default('Start') }}</a>
+                                            <a href="{{ url_for('learning_hub.course_overview', course_id=course.id) }}" class="btn btn-primary" aria-label="{{ trans('learning_hub_start_course') | default('Start Course') }} {{ trans(course.title_key) }}">{{ trans('core_start') | default('Start') }}</a>
                                         </div>
                                         {% endfor %}
                                         {% else %}
-                                        <p>{{ trans('learning_hub_course_not_found') | default('No courses available at the moment.') }}</p>
-                                        <a href="{{ url_for('learning_hub.courses') }}" class="course-link">{{ trans('learning_hub_view_all_courses') | default('View All Courses') }}</a>
+                                        <p class="text-center">{{ trans('learning_hub_course_not_found') | default('No courses available at the moment.') }}</p>
+                                        <a href="{{ url_for('learning_hub.courses') }}" class="btn btn-primary">{{ trans('learning_hub_view_all_courses') | default('View All Courses') }}</a>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -210,20 +218,21 @@
     <!-- Testimonials Section -->
     <section class="testimonials-section my-4">
         <h2 class="text-center"><i class="fas fa-quote-left"></i> {{ trans('core_testimonials') | default('What People Are Saying About Us') }}</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="testimonial text-center">
-                    <div class="testimonial-avatar">MU</div>
-                    <p>{{ trans('core_impressed_features') | default('I explored the features earlier today and was impressed... I thought it was only for SMEs, but I see value for individuals too!') }}</p>
-                    <p class="name">Maisarata Uqubatu</p>
-                </div>
+        <div class="testimonial-slider">
+            <div class="testimonial text-center">
+                <i class="fas fa-quote-left quote"></i>
+                {{ trans('core_impressed_features') | default('I explored the features earlier today and was impressed... I thought it was only for SMEs, but I see value for individuals too!') }} — <span class="name">Maisarata Uqubatu</span>
+                <div class="avatar-circle">MU</div>
             </div>
-            <div class="col-md-6">
-                <div class="testimonial text-center">
-                    <div class="testimonial-avatar">AA</div>
-                    <p>{{ trans('core_ficore_praise') | default('🔥 Ficore 🔥') }}</p>
-                    <p class="name">Abubakar Abdulkadir, {{ trans('core_software_engineer') | default('Software Engineer for Sustainable Solutions') }}</p>
-                </div>
+            <div class="testimonial text-center">
+                <i class="fas fa-quote-left quote"></i>
+                {{ trans('core_ficore_praise') | default('🔥 Ficore 🔥') }} — <span class="name">Abubakar Abdulkadir</span>, {{ trans('core_software_engineer') | default('Software Engineer for Sustainable Solutions') }}
+                <div class="avatar-circle">AA</div>
+            </div>
+            <div class="testimonial text-center">
+                <i class="fas fa-quote-left quote"></i>
+                {{ trans('core_potential_support') | default('I’ve been following the Ficore project and I’m impressed. It’s clear there’s potential, and I look forward to supporting.') }} — <span class="name">Aminu Sani Usman</span>
+                <div class="avatar-circle">AS</div>
             </div>
         </div>
     </section>
@@ -239,10 +248,31 @@
         </div>
     </section>
 
-    <!-- Bottom CTA -->
-    <section class="call-to-action text-center my-4">
-        <p><i class="fas fa-star"></i> {{ trans('core_ready_to_take_charge') | default('Ready to take charge of your finances?') }}</p>
-        <a href="{{ url_for('quiz.step1', course_id='financial_quiz') }}" class="btn btn-primary btn-explore" aria-label="{{ trans('quiz_start_personality_quiz') | default('Start Personality Quiz') }}">{{ trans('quiz_start_personality_quiz') | default('Start with a Quick Assessment') }}</a>
+    <!-- Call to Action -->
+    <section class="call-to-action-section my-4 text-center">
+        <p class="call-to-action-text"><i class="fas fa-star"></i> {{ trans('core_take_charge') | default('Ready to take charge of your finances?') }}</p>
+        <a href="{{ url_for('quiz.step1', course_id='financial_quiz') }}" class="btn btn-primary btn-explore" aria-label="{{ trans('quiz_start_personality_quiz') | default('Start Personality Quiz') }}">{{ trans('core_start_assessment') | default('Start with a Quick Assessment') }}</a>
     </section>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testimonials = document.querySelectorAll('.testimonial');
+    let currentTestimonial = 0;
+
+    function showTestimonial(index) {
+        testimonials.forEach((testimonial, i) => {
+            testimonial.style.display = i === index ? 'block' : 'none';
+        });
+    }
+
+    function nextTestimonial() {
+        currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+        showTestimonial(currentTestimonial);
+    }
+
+    showTestimonial(currentTestimonial);
+    setInterval(nextTestimonial, 5000);
+});
+</script>
 {% endblock %}
