@@ -52,7 +52,7 @@
                         <a class="nav-link" href="{{ url_for('general_dashboard') }}">{{ trans('core_general_dashboard') | default('General Dashboard') }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('feedback.form') }}">{{ trans('core_feedback') | default('Feedback') }}</a>
+                        <a class="nav-link" href="{{ FEEDBACK_FORM_URL }}">{{ trans('core_feedback') | default('Feedback') }}</a>
                     </li>
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
@@ -80,13 +80,13 @@
         <p>{{ trans('core_about_ficore_africa') | default('About Ficore Africa') }}: {{ trans('core_empowering_financial_growth') | default('Empowering financial growth across Africa since 2025') }}</p>
         <p class="footer-disclaimer"><i class="fas fa-info-circle"></i> {{ trans('core_disclaimer') | default('Ficore is not a bank and does not hold or move funds.') }} <a href="{{ url_for('about') }}" class="learn-more">{{ trans('core_learn_more') | default('Learn more') }}</a></p>
         <div class="social-icons">
-            <a href="https://linkedin.com" aria-label="LinkedIn">LinkedIn</a>
-            <a href="https://twitter.com" aria-label="Twitter">Twitter</a>
-            <a href="https://facebook.com" aria-label="Facebook">Facebook</a>
+            <a href="{{ LINKEDIN_URL }}" aria-label="LinkedIn">LinkedIn</a>
+            <a href="{{ TWITTER_URL }}" aria-label="Twitter">Twitter</a>
+            <a href="{{ FACEBOOK_URL }}" aria-label="Facebook">Facebook</a>
         </div>
         <div class="footer-links">
-            <a href="{{ url_for('contact') }}">{{ trans('core_contact_us') | default('Contact Us') }}</a>
-            <a href="{{ url_for('feedback.form') }}">{{ trans('core_provide_feedback') | default('Provide Feedback') }}</a>
+            <a href="{{ CONSULTANCY_FORM_URL }}">{{ trans('core_contact_us') | default('Contact Us') }}</a>
+            <a href="{{ FEEDBACK_FORM_URL }}">{{ trans('core_provide_feedback') | default('Provide Feedback') }}</a>
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('auth.logout') }}">{{ trans('core_logout') | default('Logout') }}</a>
             {% else %}
