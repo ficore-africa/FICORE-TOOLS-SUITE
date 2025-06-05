@@ -7,7 +7,7 @@ CORE_TRANSLATIONS = {
         'Financial Dashboard': 'General Financial Dashboard',
         'courses_start_budgeting': 'Start Budgeting Course',
         'core_metrics': 'Metrics',
-        'core_your_financial_journey': 'Your Financial Journey',
+        'core_your_financial_journey': 'Four Steps Financial Journey',
         'core_step1_assess': 'Step 1: Assess',
         'core_step2_plan': 'Step 2: Plan',
         'core_step3_track': 'Step 3: Track',
