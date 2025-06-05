@@ -1,6 +1,6 @@
 FINANCIAL_HEALTH_TRANSLATIONS = {
     'en': {
-        'financial_health_score': 'Financial Health Score',
+        'financial_health_score': 'Fin Health Score',
         'financial_health_complete_form_with_ficore': 'Complete the health score form with Ficore Africa to calculate your personalized financial health score.',
         'financial_health_new_to_finances': 'New to finances? Click here to get guided tips on how to fill this form.',
         'financial_health_your_financial_health_status_needs_improvement':'Status needs improvement',
