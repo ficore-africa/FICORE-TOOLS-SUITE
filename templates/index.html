@@ -17,30 +17,26 @@
         <div class="journey-container text-center">
             <h3>{{ trans('core_your_financial_journey') | default('Your Financial Journey') }}</h3>
             <div class="journey-steps d-flex justify-content-center gap-3">
-                <div class="journey-step">
-                    <a href="#assess-tools" class="journey-link">
-                        <span class="journey-icon">🟢</span>
-                        <p>{{ trans('core_step1_assess') | default('Step 1: Assess') }}</p>
-                    </a>
-                </div>
-                <div class="journey-step">
-                    <a href="#plan-tools" class="journey-link">
-                        <span class="journey-icon">🔵</span>
-                        <p>{{ trans('core_step2_plan') | default('Step 2: Plan') }}</p>
-                    </a>
-                </div>
-                <div class="journey-step">
-                    <a href="#track-tools" class="journey-link">
-                        <span class="journey-icon">🟣</span>
-                        <p>{{ trans('core_step3_track') | default('Step 3: Track & Learn') }}</p>
-                    </a>
-                </div>
-                <div class="journey-step">
-                    <a href="#grow-tools" class="journey-link">
-                        <span class="journey-icon">🌱</span>
-                        <p>{{ trans('core_step4_grow') | default('Step 4: Grow') }}</p>
-                    </a>
-                </div>
+                <a href="#assess-tools" class="journey-step">
+                    <span class="step-badge">1</span>
+                    <span class="journey-icon"><i class="fas fa-stethoscope"></i></span>
+                    <p>{{ trans('core_step1_assess') | default('Step 1: Assess') }}</p>
+                </a>
+                <a href="#plan-tools" class="journey-step">
+                    <span class="step-badge">2</span>
+                    <span class="journey-icon"><i class="fas fa-clipboard-list"></i></span>
+                    <p>{{ trans('core_step2_plan') | default('Step 2: Plan') }}</p>
+                </a>
+                <a href="#track-tools" class="journey-step">
+                    <span class="step-badge">3</span>
+                    <span class="journey-icon"><i class="fas fa-chart-line"></i></span>
+                    <p>{{ trans('core_step3_track') | default('Step 3: Track & Learn') }}</p>
+                </a>
+                <a href="#grow-tools" class="journey-step">
+                    <span class="step-badge">4</span>
+                    <span class="journey-icon"><i class="fas fa-graduation-cap"></i></span>
+                    <p>{{ trans('core_step4_grow') | default('Step 4: Grow') }}</p>
+                </a>
             </div>
         </div>
     </section>
@@ -61,7 +57,8 @@
                             <div class="col-md-6 mb-3">
                                 <div class="card tool-card custom-card">
                                     <div class="card-body">
-                                        <h3 class="card-title"><i class="fas fa-heartbeat"></i> {{ trans('financial_health_financial_health_score') | default('Financial Health Score') }} <span class="badge badge-success">Recommended First Step</span></h3>
+                                        <h3 class="card-title"><i class="fas fa-heartbeat"></i> {{ trans('financial_health_financial_health_score') | default('Financial Health Score') }}</h3>
+                                        <span class="badge badge-success">Recommended First Step</span>
                                         <p class="card-text">{{ trans('financial_health_evaluate_finances') | default('Evaluates income, expenses, and debt for a health score') }}</p>
                                         <a href="{{ url_for('financial_health.step1') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('financial_health_start_financial_health') | default('Start Financial Health Score') }}">{{ trans('core_start') | default('Start') }}</a>
                                     </div>
@@ -283,6 +280,18 @@
         const carousel = new bootstrap.Carousel(document.getElementById('testimonialCarousel'), {
             interval: 5000,
             ride: 'carousel'
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
         });
     });
 </script>
