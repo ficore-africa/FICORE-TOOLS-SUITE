@@ -226,7 +226,38 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* Tool Group */
+/* Journey Strip */
+.journey-strip {
+    background-color: #E3F2FD;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.journey-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.journey-step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+}
+.journey-icon {
+    font-size: 1.2rem;
+}
+
+/* Tools Section */
+.tools-section {
+    background-color: #E8F5E9; /* Light green tint */
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
 .tool-group {
     margin-bottom: 1.5rem;
     padding: 1rem 2rem;
@@ -240,8 +271,8 @@ body {
     transform: translateY(-5px);
 }
 .group-title {
-    font-size: 1.6rem;
-    font-weight: 600;
+    font-size: 1.8rem; /* Increased font size */
+    font-weight: 700;
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -378,6 +409,9 @@ body {
     max-height: 250px;
     width: 100%;
     position: relative;
+}
+.chart-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Slight elevation */
 }
 
 /* Progress Bar */
@@ -582,6 +616,124 @@ body {
     margin-left: 0.5em;
 }
 
+/* Testimonials */
+.testimonials-section {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    border-radius: 5px;
+}
+.testimonial {
+    color: #333;
+    padding: 1rem;
+}
+.testimonial-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #0288D1;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0 auto 0.5rem;
+}
+.testimonial p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+.testimonial .quote {
+    color: #0288D1;
+    font-size: 1.2rem;
+    margin-right: 5px;
+}
+.testimonial .name {
+    color: #0288D1;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Recommended Learning */
+.recommended-learning {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+/* FAQ Section */
+.faq-section {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    padding: 1rem;
+    border-radius: 5px;
+}
+.faq-item {
+    margin-bottom: 1rem;
+}
+.faq-item h3 {
+    font-size: 1.4rem;
+    color: #333;
+}
+.faq-item h3 i {
+    color: #0288D1;
+    font-size: 1rem;
+}
+.faq-item p {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+/* Why Section */
+.why-section {
+    background-color: #E3F2FD;
+    border: 2px solid #343a40;
+    padding: 1rem;
+    border-radius: 5px;
+}
+.why-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.why-list li i {
+    color: #0288D1;
+    margin-right: 8px;
+}
+
+/* Footer */
+.social-icons a {
+    color: white !important;
+    margin: 0 8px;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+.social-icons a:hover {
+    color: #E3F2FD !important;
+    text-decoration: underline;
+}
+.footer-disclaimer {
+    font-size: 0.8rem;
+    color: #E3F2FD;
+    margin: 0.3rem 0;
+}
+.footer-disclaimer i,
+.footer-disclaimer a {
+    color: #E3F2FD;
+}
+.footer-disclaimer a:hover {
+    color: #fff;
+}
+.learn-more {
+    color: #0288D1;
+    text-decoration: underline;
+}
+.learn-more:hover {
+    color: #01579B;
+}
+
 /* Mobile Optimizations */
 @media (max-width: 576px) {
     .container {
@@ -605,7 +757,14 @@ body {
         margin-bottom: 0.5rem !important;
     }
     .tools-section {
-        padding: 0.5rem;
+        padding: 1rem;
+    }
+    .journey-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .journey-step {
+        font-size: 0.9rem;
     }
     .accordion-body {
         padding: 0.5rem 1rem;
@@ -636,6 +795,9 @@ body {
         font-size: 0.85rem;
         padding: 8px;
     }
+    .group-title {
+        font-size: 1.4rem;
+    }
     .hero h2,
     .tools-section h2,
     .why-section h2,
@@ -648,7 +810,7 @@ body {
     }
     .hero,
     .tools-section,
-    .testimonials-section,
+    .test testimonials-section,
     .recommended-learning,
     .why-section,
     .faq-section {
@@ -676,6 +838,11 @@ body {
     }
     .testimonial + .testimonial {
         margin-top: 0.8rem;
+    }
+    .testimonial-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 0.8rem;
     }
     .social-icons a {
         font-size: 0.85rem;
@@ -725,9 +892,6 @@ body {
     .tool-group {
         padding: 0.3rem 0.5rem;
         margin-bottom: 0.8rem;
-    }
-    .group-title {
-        font-size: 1.2rem;
     }
     .group-subtext {
         font-size: 0.85rem;
@@ -924,96 +1088,4 @@ h1, h3,
 .faq-section h2 i {
     color: #0288D1;
     margin-right: 8px;
-}
-
-/* Testimonials */
-.testimonials-section {
-    background-color: #E3F2FD;
-    border: 2px solid #343a40;
-    border-radius: 5px;
-}
-.testimonial {
-    color: #333;
-    padding: 1rem;
-}
-.testimonial .quote {
-    color: #0288D1;
-    font-size: 1.2rem;
-    margin-right: 5px;
-}
-.testimonial .name {
-    color: #0288D1;
-    font-weight: bold;
-}
-
-/* Recommended Learning */
-.recommended-learning {
-    background-color: #E3F2FD;
-    border: 2px solid #343a40;
-    padding: 1rem;
-    border-radius: 5px;
-}
-
-/* FAQ Section */
-.faq-section {
-    background-color: #E3F2FD;
-    border: 2px solid #343a40;
-    padding: 1rem;
-    border-radius: 5px;
-}
-.faq-item {
-    margin-bottom: 1rem;
-}
-.faq-item h3 {
-    font-size: 1.4rem;
-    color: #333;
-}
-.faq-item h3 i {
-    color: #0288D1;
-    font-size: 1rem;
-}
-.faq-item p {
-    font-size: 0.9rem;
-    color: #333;
-}
-
-/* Why Section */
-.why-section {
-    background-color: #E3F2FD;
-    border: 2px solid #343a40;
-    padding: 1rem;
-    border-radius: 5px;
-}
-.why-list li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-.why-list li i {
-    color: #0288D1;
-    margin-right: 8px;
-}
-
-/* Footer */
-.social-icons a {
-    color: white !important;
-    margin: 0 8px;
-    font-size: 0.9rem;
-    text-decoration: none;
-}
-.social-icons a:hover {
-    color: #E3F2FD !important;
-    text-decoration: underline;
-}
-.footer-disclaimer {
-    font-size: 0.8rem;
-    color: #E3F2FD;
-    margin: 0.3rem 0;
-}
-.footer-disclaimer i,
-.footer-disclaimer a {
-    color: #E3F2FD;
-}
-.footer-disclaimer a:hover {
-    color: #fff;
 }
