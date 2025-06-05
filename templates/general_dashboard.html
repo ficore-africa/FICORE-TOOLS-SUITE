@@ -106,10 +106,10 @@
               <p>{{ trans('emergency_fund_target_amount') | default('Target Amount') }}: {{ data.emergency_fund.target_amount | default(0) | format_currency }}</p>
               <p>{{ trans('emergency_fund_savings_gap') | default('Savings Gap') }}: {{ data.emergency_fund.savings_gap | default(0) | format_currency }}</p>
             {% else %}
-              <p>{{ trans('core_not_calculated') }}</p>
+              <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('emergency_fund.step1') }}" class="btn btn-primary" aria-label='{{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}'>
-                <i class="fas fa-piggy-bank"></i> {{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}
+            <a href="{{ url_for('emergency_fund.step1') }}" class="btn btn-primary" aria-label="{{ trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}">
+              <i class="fas fa-piggy-bank"></i> {{ trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}
             </a>
           </div>
         </div>
