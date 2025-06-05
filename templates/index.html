@@ -18,16 +18,28 @@
             <h3>{{ trans('core_your_financial_journey') | default('Your Financial Journey') }}</h3>
             <div class="journey-steps d-flex justify-content-center gap-3">
                 <div class="journey-step">
-                    <span class="journey-icon">🟢</span>
-                    <p>{{ trans('core_step1_assess') | default('Step 1: Assess') }}</p>
+                    <a href="#assess-tools" class="journey-link">
+                        <span class="journey-icon">🟢</span>
+                        <p>{{ trans('core_step1_assess') | default('Step 1: Assess') }}</p>
+                    </a>
                 </div>
                 <div class="journey-step">
-                    <span class="journey-icon">🔵</span>
-                    <p>{{ trans('core_step2_plan') | default('Step 2: Plan') }}</p>
+                    <a href="#plan-tools" class="journey-link">
+                        <span class="journey-icon">🔵</span>
+                        <p>{{ trans('core_step2_plan') | default('Step 2: Plan') }}</p>
+                    </a>
                 </div>
                 <div class="journey-step">
-                    <span class="journey-icon">🟣</span>
-                    <p>{{ trans('core_step3_track') | default('Step 3: Track & Learn') }}</p>
+                    <a href="#track-tools" class="journey-link">
+                        <span class="journey-icon">🟣</span>
+                        <p>{{ trans('core_step3_track') | default('Step 3: Track & Learn') }}</p>
+                    </a>
+                </div>
+                <div class="journey-step">
+                    <a href="#grow-tools" class="journey-link">
+                        <span class="journey-icon">🌱</span>
+                        <p>{{ trans('core_step4_grow') | default('Step 4: Grow') }}</p>
+                    </a>
                 </div>
             </div>
         </div>
@@ -36,7 +48,7 @@
     <section class="tools-section my-4" id="tools-section">
         <h2 class="text-center"><i class="fas fa-tools"></i> {{ trans('core_choose_tool') | default('Choose a Tool') }}</h2>
         <div class="accordion" id="toolsAccordion">
-            <div class="tool-group accordion-item">
+            <div class="tool-group accordion-item" id="assess-tools">
                 <h3 class="group-title accordion-header" id="headingFinancialAssessment">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinancialAssessment" aria-expanded="true" aria-controls="collapseFinancialAssessment">
                         <i class="fas fa-stethoscope"></i> {{ trans('core_financial_assessment_group') | default('Financial Assessment') }}
@@ -77,7 +89,7 @@
                     </div>
                 </div>
             </div>
-            <div class="tool-group accordion-item">
+            <div class="tool-group accordion-item" id="plan-tools">
                 <h3 class="group-title accordion-header" id="headingPlanningTools">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePlanningTools" aria-expanded="false" aria-controls="collapsePlanningTools">
                         <i class="fas fa-clipboard-list"></i> {{ trans('core_planning_tools_group') | default('Planning Tools') }}
@@ -118,7 +130,7 @@
                     </div>
                 </div>
             </div>
-            <div class="tool-group accordion-item">
+            <div class="tool-group accordion-item" id="track-tools">
                 <h3 class="group-title accordion-header" id="headingWealthTracking">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseWealthTracking" aria-expanded="false" aria-controls="collapseWealthTracking">
                         <i class="fas fa-chart-line"></i> {{ trans('core_wealth_tracking_group') | default('Wealth Tracking') }}
@@ -141,7 +153,7 @@
                     </div>
                 </div>
             </div>
-            <div class="tool-group accordion-item">
+            <div class="tool-group accordion-item" id="grow-tools">
                 <h3 class="group-title accordion-header" id="headingLearningGrowth">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLearningGrowth" aria-expanded="false" aria-controls="collapseLearningGrowth">
                         <i class="fas fa-graduation-cap"></i> {{ trans('core_learning_growth_group') | default('Learning & Growth') }}
