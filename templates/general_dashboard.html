@@ -18,11 +18,9 @@
       <div class="alert-container mt-3">
         {% if messages %}
           {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show"
-                 role="alert">
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
               {{ message }}
-              <button type="button" class="btn-close" data-bs-dismiss="alert"
-                      aria-label="{{ trans('core_close') | default('Close') }}"></button>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close') | default('Close') }}"></button>
             </div>
           {% endfor %}
         {% endif %}
@@ -42,9 +40,7 @@
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('financial_health.step1') }}"
-               class="btn btn-primary"
-               aria-label="{{ trans('financial_health_go_financial_health') | default('Go to Financial Health') }}">
+            <a href="{{ url_for('financial_health.step1') }}" class="btn btn-primary" aria-label="{{ trans('financial_health_go_financial_health') | default('Go to Financial Health') }}">
               <i class="fas fa-heartbeat"></i> {{ trans('financial_health_go_financial_health') | default('Go to Financial Health') }}
             </a>
           </div>
@@ -61,9 +57,7 @@
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('budget.step1') }}"
-               class="btn btn-primary"
-               aria-label="{{ trans('budget_go_budget') | default('Go to Budget Planner') }}">
+            <a href="{{ url_for('budget.step1') }}" class="btn btn-primary" aria-label="{{ trans('budget_go_budget') | default('Go to Budget Planner') }}">
               <i class="fas fa-chart-pie"></i> {{ trans('budget_go_budget') | default('Go to Budget Planner') }}
             </a>
           </div>
@@ -80,9 +74,7 @@
             {% else %}
               <p>{{ trans('bill_no_bills') | default('No bills added.') }}</p>
             {% endif %}
-            <a href="{{ url_for('bill.form_step1') }}"
-               class="btn btn-primary"
-               aria-label="{{ trans('bill_go_bill') | default('Go to Bill Planner') }}">
+            <a href="{{ url_for('bill.form_step1') }}" class="btn btn-primary" aria-label="{{ trans('bill_go_bill') | default('Go to Bill Planner') }}">
               <i class="fas fa-file-invoice"></i> {{ trans('bill_go_bill') | default('Go to Bill Planner') }}
             </a>
           </div>
@@ -99,9 +91,7 @@
             {% else %}
               <p>{{ trans('core_not_calculated') | default('Not yet calculated.') }}</p>
             {% endif %}
-            <a href="{{ url_for('net_worth.step1') }}"
-               class="btn btn-primary"
-               aria-label="{{ trans('net_worth_go_net_worth') | default('Go to Net Worth') }}">
+            <a href="{{ url_for('net_worth.step1') }}" class="btn btn-primary" aria-label="{{ trans('net_worth_go_net_worth') | default('Go to Net Worth') }}">
               <i class="fas fa-balance-scale"></i> {{ trans('net_worth_go_net_worth') | default('Go to Net Worth') }}
             </a>
           </div>
@@ -118,9 +108,7 @@
             {% else %}
               <p>{{ trans('core_not_calculated') }}</p>
             {% endif %}
-            <a href="{{ url_for('emergency_fund.step1') }}"
-                class="btn btn-primary"
-                aria-label='{{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}'>
+            <a href="{{ url_for('emergency_fund.step1') }}" class="btn btn-primary" aria-label='{{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}'>
                 <i class="fas fa-piggy-bank"></i> {{trans('emergency_fund_go_emergency_fund') | default('Go to Emergency Fund') }}
             </a>
           </div>
@@ -137,9 +125,7 @@
             {% else %}
               <p>{{ trans('quiz_not_completed') | default('Quiz not completed.') }}</p>
             {% endif %}
-            <a href="{{ url_for('quiz.step1') }}"
-               class="btn btn-primary"
-               aria-label="{{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}">
+            <a href="{{ url_for('quiz.step1') }}" class="btn btn-primary" aria-label="{{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}">
               <i class="fas fa-question-circle"></i> {{ trans('quiz_go_personality_quiz') | default('Go to Personality Quiz') }}
             </a>
           </div>
@@ -156,16 +142,12 @@
                 <strong>{{ trans('courses_course_budgeting') | default('Budgeting Basics') }}:</strong>
                 {{ trans('core_lessons_completed') | default('Lessons Completed') }}: {{ user_progress.lessons_completed | length }}
               </p>
-              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}"
-                 class="btn btn-primary"
-                 aria-label="{{ trans('courses_continue_budgeting') | default('Continue Budgeting Basics Course') }}">
+              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}" class="btn btn-primary" aria-label="{{ trans('courses_continue_budgeting') | default('Continue Budgeting Basics Course') }}">
                 <i class="fas fa-play"></i> {{ trans('courses_continue_course') | default('Continue Course') }}
               </a>
             {% else %}
               <p>{{ trans('courses_no_course_progress') | default('No course progress.') }}</p>
-              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}"
-                 class="btn btn-primary"
-                 aria-label="{{ trans('courses_start_budgeting') | default('Start Budgeting Basics Course') }}">
+              <a href="{{ url_for('learning_hub.courses', course_id='budgeting_learning_101') }}" class="btn btn-primary" aria-label="{{ trans('courses_start_budgeting') | default('Start Budgeting Basics Course') }}">
                 <i class="fas fa-book"></i> {{ trans('courses_start_budgeting_course') | default('Start Budgeting Basics') }}
               </a>
             {% endif %}
@@ -174,12 +156,11 @@
       </div>
     </div>
 
-    <div class="card mb-4">
+    <div class="card mb-4 chart-card">
       <div class="card-body">
         <h3>{{ trans('core_metrics') | default('Financial Metrics') }}</h3>
         <div class="chart-container">
-          <canvas id="overviewChart"
-                  aria-label="{{ trans('core_metrics_chart') | default('Financial Metrics Chart') }}"></canvas>
+          <canvas id="overviewChart" aria-label="{{ trans('core_metrics_chart') | default('Financial Metrics Chart') }}"></canvas>
         </div>
       </div>
     </div>
