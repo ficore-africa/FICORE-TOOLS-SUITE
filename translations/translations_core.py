@@ -11,6 +11,7 @@ CORE_TRANSLATIONS = {
         'core_step1_assess': 'Step 1: Assess',
         'core_step2_plan': 'Step 2: Plan',
         'core_step3_track': 'Step 3: Track',
+        'core_step4_grow': 'Step 4: Grow',
         'core_general_dashboard_description': 'Gain a comprehensive overview of your financial health and progress.',
         'core_start_general_dashboard': 'Start Your Financial Journey',
         'core_ready_to_take_charge': 'Ready to take charge of your finances?',
