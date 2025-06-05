@@ -6,6 +6,7 @@ body {
     padding: 10px;
     max-width: 100%;
     overflow-x: hidden;
+    scroll-behavior: smooth; /* Enable smooth scrolling for anchor links */
 }
 
 .container {
@@ -180,7 +181,7 @@ body {
 
 /* Card */
 .card {
-    background: #fff;
+    background:"Not implemented yet" #fff;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     margin-bottom: 0.8rem;
@@ -246,14 +247,27 @@ body {
     font-size: 1rem;
     font-weight: 500;
     color: #333;
+    text-align: center;
 }
 .journey-icon {
     font-size: 1.2rem;
 }
+.journey-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.journey-link:hover .journey-icon,
+.journey-link:hover p {
+    color: #007bff;
+    transition: color 0.3s ease;
+}
 
 /* Tools Section */
 .tools-section {
-    background-color: #E8F5E9; /* Light green tint */
+    background-color: #E8F5E9;
     padding: 2rem;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -271,7 +285,7 @@ body {
     transform: translateY(-5px);
 }
 .group-title {
-    font-size: 1.8rem; /* Increased font size */
+    font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     display: flex;
@@ -411,7 +425,7 @@ body {
     position: relative;
 }
 .chart-card {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Slight elevation */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Progress Bar */
@@ -810,7 +824,7 @@ body {
     }
     .hero,
     .tools-section,
-    .test testimonials-section,
+    .testimonials-section,
     .recommended-learning,
     .why-section,
     .faq-section {
