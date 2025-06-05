@@ -6,7 +6,6 @@ body {
     padding: 10px;
     max-width: 100%;
     overflow-x: hidden;
-    scroll-behavior: smooth; /* Enable smooth scrolling for anchor links */
 }
 
 .container {
@@ -181,7 +180,7 @@ body {
 
 /* Card */
 .card {
-    background:"Not implemented yet" #fff;
+    background: #FFFFFF;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     margin-bottom: 0.8rem;
@@ -199,7 +198,7 @@ body {
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 .tool-card.custom-card {
-    background-color: #E3F2FD;
+    background-color: #FFFFFF;
 }
 .card-body {
     padding: 1rem;
@@ -247,22 +246,27 @@ body {
     font-size: 1rem;
     font-weight: 500;
     color: #333;
-    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+}
+.journey-step:hover {
+    transform: scale(1.05);
 }
 .journey-icon {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
 }
-.journey-link {
-    text-decoration: none;
-    color: inherit;
+.step-badge {
     display: flex;
-    flex-direction: column;
     align-items: center;
-}
-.journey-link:hover .journey-icon,
-.journey-link:hover p {
-    color: #007bff;
-    transition: color 0.3s ease;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #0288D1, #2E7D32);
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-right: 0.5rem;
 }
 
 /* Tools Section */
@@ -309,7 +313,7 @@ body {
     font-size: 1.6rem;
     font-weight: 600;
     color: #0288D1;
-    background-color: #ffffff !important;
+    background-color: #f9f9f9;
     border: none;
     padding: 0.8rem 1rem;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -356,6 +360,18 @@ body {
 .tool-card button {
     padding: 0.6rem 1.2rem;
     font-size: 0.95rem;
+}
+
+/* Financial Health Score Badge */
+@media (max-width: 576px) {
+    .tool-card:has(.badge-success) .card-title {
+        flex-direction: column;
+        align-items: center;
+    }
+    .tool-card:has(.badge-success) .badge-success {
+        margin-top: 0.5rem;
+        margin-right: 0;
+    }
 }
 
 /* Tool Header */
