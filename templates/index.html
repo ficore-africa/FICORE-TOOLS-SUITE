@@ -17,22 +17,22 @@
         <div class="journey-container text-center">
             <h3>{{ trans('core_your_financial_journey') | default('Your Financial Journey') }}</h3>
             <div class="journey-steps d-flex justify-content-center gap-3">
-                <a href="#assess-tools" class="journey-step">
+                <a href="#assess-tools" class="journey-step" data-target="#collapseFinancialAssessment">
                     <span class="step-badge">1</span>
                     <span class="journey-icon"><i class="fas fa-stethoscope"></i></span>
                     <p>{{ trans('core_step1_assess') | default('Step 1: Assess') }}</p>
                 </a>
-                <a href="#plan-tools" class="journey-step">
+                <a href="#plan-tools" class="journey-step" data-target="#collapsePlanningTools">
                     <span class="step-badge">2</span>
                     <span class="journey-icon"><i class="fas fa-clipboard-list"></i></span>
                     <p>{{ trans('core_step2_plan') | default('Step 2: Plan') }}</p>
                 </a>
-                <a href="#track-tools" class="journey-step">
+                <a href="#track-tools" class="journey-step" data-target="#collapseWealthTracking">
                     <span class="step-badge">3</span>
                     <span class="journey-icon"><i class="fas fa-chart-line"></i></span>
                     <p>{{ trans('core_step3_track') | default('Step 3: Track & Learn') }}</p>
                 </a>
-                <a href="#grow-tools" class="journey-step">
+                <a href="#grow-tools" class="journey-step" data-target="#collapseLearningGrowth">
                     <span class="step-badge">4</span>
                     <span class="journey-icon"><i class="fas fa-graduation-cap"></i></span>
                     <p>{{ trans('core_step4_grow') | default('Step 4: Grow') }}</p>
@@ -282,14 +282,31 @@
             ride: 'carousel'
         });
 
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
+        // Link journey steps to accordions
+        document.querySelectorAll('.journey-step').forEach(step => {
+            step.addEventListener('click', function(e) {
                 e.preventDefault();
-                const targetId = this.getAttribute('href');
+                const targetId = this.getAttribute('data-target'); // e.g., #collapseFinancialAssessment
                 const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                const accordionItem = targetElement.closest('.accordion-item'); // e.g., #assess-tools
+
+                if (targetElement && accordionItem) {
+                    // Use Bootstrap's Collapse API to show the target accordion
+                    const collapseInstance = new bootstrap.Collapse(targetElement, {
+                        toggle: false // Prevent auto-toggle, we'll handle it manually
+                    });
+
+                    // If the accordion is not already open, open it
+                    if (!targetElement.classList.contains('show')) {
+                        collapseInstance.show();
+                    }
+
+                    // Scroll to the accordion item with an offset
+                    setTimeout(() => {
+                        const yOffset = -60; // Adjust for navbar height
+                        const y = accordionItem.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({ top: y, behavior: 'smooth' });
+                    }, 300); // Delay to allow accordion animation
                 }
             });
         });
