@@ -268,7 +268,7 @@ body {
     margin-bottom: 0.5rem;
 }
 
-/* Journey Strip */
+/* Journey Strip (Timeline Style) */
 .journey-strip {
     background-color: #E3F2FD;
     padding: 0.5rem;
@@ -277,27 +277,47 @@ body {
 }
 
 .journey-container {
+    position: relative;
+    padding: 2rem 0;
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* Central timeline line */
+.journey-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    background: linear-gradient(to bottom, #0288D1, #2E7D32);
+}
+
+.journey-steps {
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
-    padding: 1rem;
+    position: relative;
+    width: 100%;
+    max-width: 300px;
 }
 
 .journey-step {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    position: relative;
     text-align: center;
     font-size: 0.9rem;
     font-weight: 500;
     color: #333;
     text-decoration: none;
     transition: transform 0.2s ease, background-color 0.2s ease;
-    position: relative;
-    width: 100%;
-    max-width: 300px;
     padding: 1rem;
+    z-index: 1;
 }
 
 .journey-step:hover {
@@ -313,6 +333,7 @@ body {
 
 .journey-icon {
     font-size: 1.5rem;
+    color: #0288D1;
     margin-bottom: 0.5rem;
 }
 
@@ -320,27 +341,26 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     background: linear-gradient(135deg, #0288D1, #2E7D32);
     color: white;
     border-radius: 50%;
     font-weight: 600;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    text-wrap: balance;
-    white-space: normal;
-}
-
-.journey-step:not(:last-child)::after {
-    content: '';
+    font-size: 1rem;
     position: absolute;
-    bottom: -1.5rem;
     left: 50%;
     transform: translateX(-50%);
-    width: 2px;
-    height: 1.5rem;
-    background: linear-gradient(to bottom, #0288D1, transparent);
+    z-index: 2;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Step content (icon and text) */
+.journey-step p {
+    margin: 0.5rem 0 0;
+    text-wrap: balance;
+    white-space: normal;
 }
 
 /* Tools Section */
@@ -357,7 +377,7 @@ body {
     padding: 0.3rem 0.5rem;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    background-color: #f8f9fa;
     transition: transform 0.3s ease-in-out;
 }
 
@@ -392,7 +412,7 @@ body {
     font-size: 1.4rem;
     font-weight: 600;
     color: #0288D1;
-    background-color: #f9f9f9;
+    background-color: #f8f9fa;
     border: none;
     padding: 0.8rem 1rem;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -1065,8 +1085,14 @@ h1, h3,
         font-size: 1rem;
     }
 
-    .journey-step {
+    .journey-steps {
         max-width: 250px;
+    }
+
+    .step-badge {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.9rem;
     }
 }
 
@@ -1168,37 +1194,50 @@ h1, h3,
         font-size: 0.95rem;
     }
 
+    /* Horizontal Timeline for Desktop */
     .journey-container {
+        padding: 1rem 0;
+    }
+
+    .journey-container::before {
+        top: 50%;
+        bottom: auto;
+        left: 0;
+        right: 0;
+        transform: translateY(-50%);
+        width: auto;
+        height: 4px;
+        background: linear-gradient(to right, #0288D1, #2E7D32);
+    }
+
+    .journey-steps {
         flex-direction: row;
-        gap: 2rem;
-        flex-wrap: wrap;
-        justify-content: center;
+        justify-content: space-between;
+        max-width: none;
+        gap: 1rem;
     }
 
     .journey-step {
-        flex-direction: row;
-        font-size: 1rem;
-        max-width: none;
-        width: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        width: 20%;
         padding: 0.5rem;
     }
 
-    .journey-step:not(:last-child)::after {
-        content: none;
+    .step-badge {
+        position: static;
+        transform: none;
+        margin-bottom: 0.5rem;
+    }
+
+    .journey-step p {
+        margin: 0.5rem 0;
     }
 
     .journey-icon {
         font-size: 1.4rem;
-        margin-bottom: 0;
-        margin-right: 0.5rem;
-    }
-
-    .step-badge {
-        width: 30px;
-        height: 30px;
-        font-size: 1rem;
-        margin-bottom: 0;
-        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .tools-section {
@@ -1420,7 +1459,7 @@ h1, h3,
     }
 
     .container, .step-container {
-        background-color: #343a40;
+        background-color: transparent;
     }
 
     .navbar {
@@ -1441,21 +1480,31 @@ h1, h3,
     }
 
     .card {
-        background: #343a40;
+        background: #FFFFFF; /* Keep pure white for cards even in dark mode */
         border: 2px solid #4dabf7;
     }
 
     .card-text {
-        color: #adb5bd;
+        color: #6c757d; /* Keep text color readable on white background */
     }
 
     .tool-card.custom-card {
-        background-color: #343a40;
+        background-color: #FFFFFF; /* Keep pure white */
     }
 
-    .journey-strip, .tools-section, .testimonials-section, .recommended-learning, .why-section, .faq-section {
+    .journey-strip, .tools-section, .testimonials-section, .recommended-learning, .why-section, .faq-section, .team-why {
         background-color: #495057;
         border-color: #6c757d;
+    }
+
+    .journey-container::before {
+        background: linear-gradient(to bottom, #0056b3, #1b5e20);
+    }
+
+    @media (min-width: 768px) {
+        .journey-container::before {
+            background: linear-gradient(to right, #0056b3, #1b5e20);
+        }
     }
 
     .journey-step {
@@ -1508,11 +1557,15 @@ h1, h3,
         color: #e9ecef;
     }
 
-    .mission-statement, .team-why {
+    .mission-statement {
         background-color: #6c757d;
     }
 
     .mission-statement p, .team-why p {
         color: #adb5bd;
+    }
+
+    .insights-box, .comparison-box {
+        background: #495057;
     }
 }
