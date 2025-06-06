@@ -1,8 +1,203 @@
-/* Mobile-First Base Styles (Dark Mode Default) */
+/* Define CSS Custom Properties for Colors */
+:root {
+    /* Light Mode Colors */
+    --background-gradient: linear-gradient(135deg, #E3F2FD, #F5F7FA);
+    --text-color: #333;
+    --navbar-gradient: linear-gradient(90deg, #0288D1, #2E7D32);
+    --header-message-gradient: linear-gradient(90deg, #0288D1, #2E7D32);
+    --consent-banner-bg: #E3F2FD;
+    --consent-banner-text: #333;
+    --accent-blue: #0288D1;
+    --accent-blue-dark: #01579B;
+    --accent-green: #2E7D32;
+    --accent-green-dark: #1B5E20;
+    --button-gradient: linear-gradient(135deg, #2E7D32, #0288D1);
+    --button-gradient-hover: linear-gradient(135deg, #1B5E20, #01579B);
+    --button-nav-gradient: linear-gradient(90deg, #0288D1, #2E7D32);
+    --button-nav-gradient-hover: linear-gradient(90deg, #0277BD, #27632A);
+    --hero-gradient: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(135deg, #0288D1, #2E7D32);
+    --hero-subtext-icon: #E3F2FD;
+    --card-border: #0288D1;
+    --card-text: #6c757d;
+    --journey-strip-bg: #E3F2FD;
+    --journey-line-gradient: linear-gradient(to bottom, #0288D1, #2E7D32);
+    --journey-line-gradient-horizontal: linear-gradient(to right, #0288D1, #2E7D32);
+    --journey-step-hover-bg: #f8f9fa;
+    --journey-icon: #0288D1;
+    --tool-group-bg: #f9f9f9;
+    --tool-group-border: #e0e0e0;
+    --group-title: #0288D1;
+    --group-subtext: #6c757d;
+    --accordion-button-bg: #f9f9f9;
+    --accordion-button-bg-hover: #E3F2FD;
+    --accordion-button-text: #0288D1;
+    --accordion-button-text-hover: #2E7D32;
+    --accordion-border: #e0e0e0;
+    --tool-header-bg: #f8f9fa;
+    --tool-header-border: #ddd;
+    --tool-title-gradient: linear-gradient(90deg, #2E7D32, #0288D1);
+    --tool-icon: #0288D1;
+    --tool-subtitle: #6c757d;
+    --step-indicator: #333;
+    --step-dot-bg: #ccc;
+    --step-dot-active-bg: #0288D1;
+    --step-connector-bg: #ccc;
+    --progress-bg: #e9ecef;
+    --progress-bar-bg: #2E7D32;
+    --badge-success-bg: #2E7D32;
+    --badge-blue-bg: #0288D1;
+    --badge-blue-border: #01579B;
+    --badge-gray-bg: #e9ecef;
+    --badge-gray-text: #333;
+    --badge-gray-border: #ced4da;
+    --net-worth-highlight: #2E7D32;
+    --about-container-gradient: linear-gradient(135deg, #E3F2FD, #F8F9FA);
+    --about-header-gradient: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), linear-gradient(135deg, #0288D1, #2E7D32);
+    --about-subtitle: #E3F2FD;
+    --about-content: #333;
+    --mission-statement-bg: #F8F9FA;
+    --mission-statement-border: #0288D1;
+    --mission-statement-title: #0288D1;
+    --mission-statement-text: #555;
+    --team-why-bg: #E3F2FD;
+    --team-why-border: #2E7D32;
+    --team-why-title: #2E7D32;
+    --team-why-text: #555;
+    --info-box-bg: #fff3cd;
+    --info-box-text: #856404;
+    --info-box-border: #ffeeba;
+    --section-bg: #E3F2FD;
+    --section-border: #343a40;
+    --testimonial-text: #333;
+    --testimonial-quote: #0288D1;
+    --social-icon-hover: #E3F2FD;
+    --footer-disclaimer: #E3F2FD;
+    --footer-disclaimer-hover: #fff;
+    --section-header: #0288D1;
+    --insights-box-bg: #E3F2FD;
+    --list-group-item-bg: #f8f9fa;
+    --link-color: #0288D1;
+}
+
+/* Dark Mode Overrides */
+.dark-mode {
+    --background-gradient: linear-gradient(135deg, #343a40, #495057);
+    --text-color: #e9ecef;
+    --navbar-gradient: linear-gradient(90deg, #0056b3, #1b5e20);
+    --header-message-gradient: linear-gradient(90deg, #0056b3, #1b5e20);
+    --consent-banner-bg: #495057;
+    --consent-banner-text: #e9ecef;
+    --accent-blue: #4dabf7;
+    --accent-blue-dark: #003d82;
+    --accent-green: #1b5e20;
+    --accent-green-dark: #123e14;
+    --button-gradient: linear-gradient(135deg, #1b5e20, #0056b3);
+    --button-gradient-hover: linear-gradient(135deg, #123e14, #003d82);
+    --button-nav-gradient: linear-gradient(90deg, #0056b3, #1b5e20);
+    --button-nav-gradient-hover: linear-gradient(90deg, #004a99, #144d17);
+    --hero-gradient: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(135deg, #0056b3, #1b5e20);
+    --hero-subtext-icon: #4dabf7;
+    --card-border: #4dabf7;
+    --card-text: #adb5bd;
+    --journey-strip-bg: #495057;
+    --journey-line-gradient: linear-gradient(to bottom, #0056b3, #1b5e20);
+    --journey-line-gradient-horizontal: linear-gradient(to right, #0056b3, #1b5e20);
+    --journey-step-hover-bg: #6c757d;
+    --journey-icon: #4dabf7;
+    --tool-group-bg: #495057;
+    --tool-group-border: #6c757d;
+    --group-title: #4dabf7;
+    --group-subtext: #adb5bd;
+    --accordion-button-bg: #495057;
+    --accordion-button-bg-hover: #6c757d;
+    --accordion-button-text: #4dabf7;
+    --accordion-button-text-hover: #1b5e20;
+    --accordion-border: #333;
+    --tool-header-bg: #6c757d;
+    --tool-header-border: #adb5bd;
+    --tool-title-gradient: linear-gradient(90deg, #1b5e20, #0056b3);
+    --tool-icon: #4dabf7;
+    --tool-subtitle: #adb5bd;
+    --step-indicator: #e9ecef;
+    --step-dot-bg: #666;
+    --step-dot-active-bg: #4dabf7;
+    --step-connector-bg: #666;
+    --progress-bg: #6c757d;
+    --progress-bar-bg: #1b5e20;
+    --badge-success-bg: #1b5e20;
+    --badge-blue-bg: #4dabf7;
+    --badge-blue-border: #003d82;
+    --badge-gray-bg: #6c757d;
+    --badge-gray-text: #e9ecef;
+    --badge-gray-border: #495057;
+    --net-worth-highlight: #1b5e20;
+    --about-container-gradient: linear-gradient(135deg, #343a40, #495057);
+    --about-header-gradient: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), linear-gradient(135deg, #0056b3, #1b5e20);
+    --about-subtitle: #4dabf7;
+    --about-content: #e9ecef;
+    --mission-statement-bg: #6c757d;
+    --mission-statement-border: #4dabf7;
+    --mission-statement-title: #4dabf7;
+    --mission-statement-text: #adb5bd;
+    --team-why-bg: #495057;
+    --team-why-border: #1b5e20;
+    --team-why-title: #1b5e20;
+    --team-why-text: #adb5bd;
+    --info-box-bg: #664d03;
+    --info-box-text: #fff3cd;
+    --info-box-border: #997404;
+    --section-bg: #495057;
+    --section-border: #6c757d;
+    --testimonial-text: #e9ecef;
+    --testimonial-quote: #4dabf7;
+    --social-icon-hover: #4dabf7;
+    --footer-disclaimer: #adb5bd;
+    --footer-disclaimer-hover: #4dabf7;
+    --section-header: #4dabf7;
+    --insights-box-bg: #495057;
+    --list-group-item-bg: #6c757d;
+    --link-color: #4dabf7;
+}
+
+/* Add Transitions for Smooth Color Changes */
+body, .navbar, .header-message, .consent-banner, .btn-primary, .hero, .card, .journey-strip, .journey-step,
+.tool-group, .accordion-button, .accordion-item, .tool-header-container, .progress, .badge, .about-container,
+.about-header, .mission-statement, .team-why, .testimonials-section, .recommended-learning, .faq-section,
+.why-section, .footer-disclaimer, .social-icons a, .insights-box, .course-link, .resources a, .list-group-item {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+
+/* Mode Toggle Button */
+#modeToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--button-gradient);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+#modeToggle:hover {
+    background: var(--button-gradient-hover);
+    transform: scale(1.05);
+}
+
+#modeToggle i {
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+/* Mobile-First Base Styles */
 body {
     font-family: 'Poppins', 'Arial', sans-serif;
-    background: linear-gradient(135deg, #343a40, #495057);
-    color: #e9ecef;
+    background: var(--background-gradient);
+    color: var(--text-color);
     padding: 0.5rem;
     margin: 0;
     max-width: 100%;
@@ -23,7 +218,7 @@ body {
 
 /* Navbar */
 .navbar {
-    background: linear-gradient(90deg, #0056b3, #1b5e20);
+    background: var(--navbar-gradient);
     animation: gradientShift 5s ease infinite;
     z-index: 1000;
 }
@@ -64,7 +259,7 @@ body {
 
 /* Header Message */
 .header-message {
-    background: linear-gradient(90deg, #0056b3, #1b5e20);
+    background: var(--header-message-gradient);
     color: white;
     text-align: center;
     padding: 0.5rem;
@@ -81,8 +276,8 @@ body {
 
 /* Consent Banner */
 .consent-banner {
-    background-color: #495057;
-    color: #e9ecef;
+    background-color: var(--consent-banner-bg);
+    color: var(--consent-banner-text);
     text-align: center;
     padding: 0.5rem;
     font-size: 0.85rem;
@@ -99,7 +294,7 @@ body {
 }
 
 .consent-banner i {
-    color: #4dabf7;
+    color: var(--accent-blue);
     font-size: 0.9rem;
 }
 
@@ -107,7 +302,7 @@ body {
     background: none;
     border: none;
     font-size: 1rem;
-    color: #4dabf7;
+    color: var(--accent-blue);
     cursor: pointer;
     padding: 0.2rem;
 }
@@ -118,7 +313,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: linear-gradient(135deg, #1b5e20, #0056b3);
+    background: var(--button-gradient);
     color: white;
     text-decoration: none;
     border-radius: 6px;
@@ -133,15 +328,15 @@ body {
 
 .btn-primary:hover {
     transform: scale(1.05);
-    background: linear-gradient(135deg, #123e14, #003d82);
+    background: var(--button-gradient-hover);
 }
 
 .btn-primary.navbar-btn {
-    background: linear-gradient(90deg, #0056b3, #1b5e20);
+    background: var(--button-nav-gradient);
 }
 
 .btn-primary.navbar-btn:hover {
-    background: linear-gradient(90deg, #004a99, #144d17);
+    background: var(--button-nav-gradient-hover);
 }
 
 .btn-explore {
@@ -172,7 +367,7 @@ body {
 
 /* Hero */
 .hero {
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(135deg, #0056b3, #1b5e20);
+    background: var(--hero-gradient);
     color: white;
     padding: 0.5rem;
     margin-top: 30px;
@@ -205,7 +400,7 @@ body {
 }
 
 .hero-subtext i {
-    color: #4dabf7;
+    color: var(--hero-subtext-icon);
     font-size: 0.9rem;
 }
 
@@ -215,7 +410,7 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     margin-bottom: 0.8rem;
-    border: 2px solid #4dabf7;
+    border: 2px solid var(--card-border);
     opacity: 0;
     transform: translateY(20px);
     animation: slideIn 0.5s forwards;
@@ -258,20 +453,20 @@ body {
 }
 
 .card-title i {
-    color: #4dabf7;
+    color: var(--accent-blue);
     font-size: 1.2rem;
 }
 
 .card-text {
-    color: #adb5bd;
+    color: var(--card-text);
     font-size: 0.85rem;
     margin-bottom: 0.5rem;
 }
 
 /* Journey Strip (Timeline Style) */
 .journey-strip {
-    background-color: #495057;
-    padding: #e9c0c0;
+    background-color: var(--journey-strip-bg);
+    padding: 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -286,14 +481,14 @@ body {
 
 /* Central timeline line */
 .journey-container::before {
-    content: absolute;
-    position: relative;
+    content: '';
+    position: absolute;
     top: 0;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     width: 4px;
-    background: linear-gradient(to bottom, #0056b3, #1b5e20);
+    background: var(--journey-line-gradient);
 }
 
 .journey-steps {
@@ -313,29 +508,27 @@ body {
     text-align: center;
     font-size: 0.9rem;
     font-weight: 500;
-    color: #e9ecef;
+    color: var(--text-color);
     text-decoration: none;
-    transition: transform 0.2s ease, background-color: 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease;
     padding: 1rem;
     z-index: 1;
 }
 
 .journey-step:hover {
     transform: scale(1.05);
-    background-color: #6c757d;
-
+    background-color: var(--journey-step-hover-bg);
     border-radius: 8px;
 }
 
 .journey-step:focus {
-    outline: 2px solid #4dabf7;
+    outline: 2px solid var(--accent-blue);
     outline-offset: 2px;
 }
 
 .journey-icon {
     font-size: 1.5rem;
-    color: #4dabf7;
-
+    color: var(--journey-icon);
     margin-bottom: 0.5rem;
 }
 
@@ -345,7 +538,7 @@ body {
     justify-content: center;
     width: 2.5rem;
     height: 2.5rem;
-    background: linear-gradient(135deg, #0056b3, #1b5e20);
+    background: var(--button-gradient);
     color: white;
     border-radius: 50%;
     font-weight: 600;
@@ -355,8 +548,7 @@ body {
     transform: translateX(-50%);
     z-index: 2;
     border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0, 0,0,0.1);
-
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Step content (icon and text) */
@@ -370,63 +562,57 @@ body {
 .tool-group {
     margin-bottom: 0.8rem;
     padding: 0.5rem 0.5rem;
-    border: 1px solid #6c757d;
+    border: 1px solid var(--tool-group-border);
     border-radius: 6px;
-    background-color: #6c495057d;
-
+    background-color: var(--tool-group-bg);
     transition: box-shadow 0.3s ease-in-out;
 }
 
 .tool-group:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0,0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .group-title {
     font-size: 1.2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
-    display: #4d;
-    flex;
--items: center;
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
-    color: #4dabf7;
+    color: var(--group-title);
 }
 
 .group-subtext {
     font-size: 0.85rem;
-    color: #adb5bd;
+    color: var(--group-subtext);
     margin-bottom: 0.5rem;
 }
 
 .tools-grid {
     display: flex;
     flex-direction: column;
-    gap: none;
+    gap: 0.8rem;
 }
-
- display: 0.8rem;
 
 /* Accordion */
 .accordion-button {
     font-size: 1.4rem;
     font-weight: 600;
-    color: #4dabf7;
-    background-color: #495057;
-
+    color: var(--accordion-button-text);
+    background-color: var(--accordion-button-bg);
     border: none;
     padding: 0.8rem 1rem;
-    transition: background 0.3s ease, color: 0.3 ease;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .accordion-button:hover {
-    background-color: #6c757d;
-    color: #1b5e20;
+    background-color: var(--accordion-button-bg-hover);
+    color: var(--accordion-button-text-hover);
 }
 
 .accordion-button:not(.collapsed) {
-    background-color: #6c757d;
-
-    color: #1b5e20;
+    background-color: var(--accordion-button-bg-hover);
+    color: var(--accordion-button-text-hover);
 }
 
 .accordion-button:focus {
@@ -438,10 +624,8 @@ body {
 }
 
 .accordion-item {
-    padding: none;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--accordion-border);
     margin-bottom: 0.5rem;
-
 }
 
 .accordion-item:last-child {
@@ -457,41 +641,31 @@ body {
 .tool-card p {
     font-size: 0.85rem;
     margin-bottom: 1rem;
-
 }
 
 .tool-card button {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
-
 }
 
 /* Financial Health Score Badge */
 .card:has(.badge-success) .card-title {
     flex-direction: column;
     align-items: center;
-
 }
 
-.card-title {
-    flex-direction: .badge-success;
-
+.card-title .badge-success {
     align-items: center;
     margin-top: 0;
     margin-right: 0.5rem;
-
 }
 
 /* Tool Header */
-.resources {
-    margin-top: 2px;
-
-}
 .tool-header-container {
-    background-color: #6c757d;
+    background-color: var(--tool-header-bg);
     padding: 0.5rem;
-    border-radius: 8px solid;
-    border: 1px solid #adb5bd;
+    border-radius: 8px;
+    border: 1px solid var(--tool-header-border);
 }
 
 .tool-title {
@@ -500,22 +674,20 @@ body {
     gap: 0.5rem;
     font-size: 1.4rem;
     font-weight: 700;
-    background: linear-gradient(90deg, #1b5e20, #0056b3);
+    background: var(--tool-title-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
 }
 
 .tool-icon {
-    color: #4dabf7;
+    color: var(--tool-icon);
     font-size: 1.4rem;
-
 }
 
 .tool-subtitle {
     font-size: 0.8rem;
-    color: #adb5bd;
-
+    color: var(--tool-subtitle);
     margin-top: 0.3rem;
     margin-bottom: 0;
 }
@@ -523,7 +695,7 @@ body {
 .step-indicator {
     margin-top: 0.5rem;
     font-size: 0.8rem;
-    color: #e9ecef;
+    color: var(--step-indicator);
 }
 
 .step-text {
@@ -534,28 +706,24 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.3s;
-
+    margin-top: 0.3rem;
 }
 
 .step-dot {
     width: 6px;
     height: 6px;
-    background-color: #666;
+    background-color: var(--step-dot-bg);
     border-radius: 50%;
 }
 
 .step-dot.active {
-    background-color: #4dabf7;
-
+    background-color: var(--step-dot-active-bg);
 }
 
-.step-connector-color {
+.step-connector {
     width: 12px;
     height: 2px;
-
-    color: #666;
-
+    background-color: var(--step-connector-bg);
 }
 
 /* Chart */
@@ -566,25 +734,22 @@ body {
 }
 
 .chart-card {
-    box-shadow: 0 4px 8px rgba(0, 0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Progress Bar */
-.progress-bar {
+.progress {
     height: 1rem;
     border-radius: 0.25rem;
-    background-color: #6c757d;
-
+    background-color: var(--progress-bg);
 }
 
 .progress-bar {
-    transition: 0.5s ease-in-out {
-    background-color: #1b5e20;
+    transition: width 0.5s ease-in-out;
+    background-color: var(--progress-bar-bg);
 }
 
 /* Score Gauge */
-}
-
 .score-gauge {
     max-width: 200px;
     margin: 0 auto 0.8rem;
@@ -592,20 +757,17 @@ body {
 
 /* Badges */
 .status-badge, .badge {
-    font-size: 0;
-.85rem;
+    font-size: 0.85rem;
     padding: 0.4rem 0.8rem;
-    border-radius: 4px 20px;
-;
+    border-radius: 20px;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     white-space: normal;
     text-wrap: wrap;
-
     max-width: 100%;
     box-sizing: border-box;
-    margin-bottom: margin 0.3rem;
+    margin-bottom: 0.3rem;
     margin-right: 0.3rem;
 }
 
@@ -614,7 +776,7 @@ body {
 }
 
 .badge-success {
-    background-color: #1b5e20;
+    background-color: var(--badge-success-bg);
     color: white;
 }
 
@@ -648,20 +810,20 @@ body {
 }
 
 .badge-blue {
-    background-color: #4dabf7;
+    background-color: var(--badge-blue-bg);
     color: white;
-    border: 2px solid #003d82;
+    border: 2px solid var(--badge-blue-border);
 }
 
 .badge-gray {
-    background-color: #6c757d;
-    color: #e9ecef;
-    border: 2px solid #495057;
+    background-color: var(--badge-gray-bg);
+    color: var(--badge-gray-text);
+    border: 2px solid var(--badge-gray-border);
 }
 
 .net-worth-highlight {
     font-weight: bold;
-    color: #1b5e20;
+    color: var(--net-worth-highlight);
 }
 
 /* About Page Specific Styles */
@@ -670,7 +832,7 @@ body {
 }
 
 .about-container {
-    background: linear-gradient(135deg, #343a40, #495057);
+    background: var(--about-container-gradient);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -679,7 +841,7 @@ body {
 .about-header {
     text-align: center;
     margin-bottom: 0.8rem;
-    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), linear-gradient(135deg, #0056b3, #1b5e20);
+    background: var(--about-header-gradient);
     color: white;
     padding: 0.5rem;
     border-radius: 8px;
@@ -695,13 +857,13 @@ body {
 .about-subtitle {
     font-size: 0.9rem;
     font-weight: 400;
-    color: #4dabf7;
+    color: var(--about-subtitle);
 }
 
 .about-content {
     font-size: 0.9rem;
     line-height: 1.6;
-    color: #e9ecef;
+    color: var(--about-content);
     margin-bottom: 0.8rem;
 }
 
@@ -717,8 +879,8 @@ body {
 .mission-statement {
     margin: 0.8rem 0;
     padding: 0.5rem;
-    background-color: #6c757d;
-    border-left: 5px solid #4dabf7;
+    background-color: var(--mission-statement-bg);
+    border-left: 5px solid var(--mission-statement-border);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
@@ -726,7 +888,7 @@ body {
 .mission-statement h3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #4dabf7;
+    color: var(--mission-statement-title);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -735,15 +897,15 @@ body {
 
 .mission-statement p {
     font-size: 0.9rem;
-    color: #adb5bd;
+    color: var(--mission-statement-text);
     line-height: 1.6;
 }
 
 .team-why {
     margin: 0.8rem 0;
     padding: 0.5rem;
-    background-color: #495057;
-    border-left: 5px solid #1b5e20;
+    background-color: var(--team-why-bg);
+    border-left: 5px solid var(--team-why-border);
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
@@ -751,7 +913,7 @@ body {
 .team-why h3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: #1b5e20;
+    color: var(--team-why-title);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
@@ -760,7 +922,7 @@ body {
 
 .team-why p {
     font-size: 0.9rem;
-    color: #adb5bd;
+    color: var(--team-why-text);
     line-height: 1.6;
 }
 
@@ -775,9 +937,9 @@ body {
 
 /* Info Box */
 .info-box {
-    background-color: #664d03;
-    color: #fff3cd;
-    border: 1px solid #997404;
+    background-color: var(--info-box-bg);
+    color: var(--info-box-text);
+    border: 1px solid var(--info-box-border);
     padding: 0.5rem;
     border-radius: 8px;
     margin-bottom: 0.8rem;
@@ -802,15 +964,15 @@ body {
 
 /* Testimonials */
 .testimonials-section {
-    background-color: #495057;
-    border: 2px solid #6c757d;
+    background-color: var(--section-bg);
+    border: 2px solid var(--section-border);
     border-radius: 5px;
     padding: 0.5rem;
     margin-bottom: 0.8rem;
 }
 
 .testimonial {
-    color: #e9ecef;
+    color: var(--testimonial-text);
     padding: 0.5rem;
 }
 
@@ -821,7 +983,7 @@ body {
 .testimonial-avatar {
     width: 30px;
     height: 30px;
-    background-color: #4dabf7;
+    background-color: var(--accent-blue);
     color: white;
     border-radius: 50%;
     display: flex;
@@ -838,13 +1000,13 @@ body {
 }
 
 .testimonial .quote {
-    color: #4dabf7;
+    color: var(--testimonial-quote);
     font-size: 1rem;
     margin-right: 5px;
 }
 
 .testimonial .name {
-    color: #4dabf7;
+    color: var(--testimonial-quote);
     font-weight: bold;
     font-size: 0.85rem;
     margin-top: 0.5rem;
@@ -852,8 +1014,8 @@ body {
 
 /* Recommended Learning */
 .recommended-learning {
-    background-color: #495057;
-    border: 2px solid #6c757d;
+    background-color: var(--section-bg);
+    border: 2px solid var(--section-border);
     padding: 0.5rem;
     border-radius: 5px;
     margin-bottom: 0.8rem;
@@ -861,8 +1023,8 @@ body {
 
 /* FAQ Section */
 .faq-section {
-    background-color: #495057;
-    border: 2px solid #6c757d;
+    background-color: var(--section-bg);
+    border: 2px solid var(--section-border);
     padding: 0.5rem;
     border-radius: 5px;
     margin-bottom: 0.8rem;
@@ -874,23 +1036,23 @@ body {
 
 .faq-item h3 {
     font-size: 1.1rem;
-    color: #e9ecef;
+    color: var(--text-color);
 }
 
 .faq-item h3 i {
-    color: #4dabf7;
+    color: var(--accent-blue);
     font-size: 0.9rem;
 }
 
 .faq-item p {
     font-size: 0.85rem;
-    color: #e9ecef;
+    color: var(--text-color);
 }
 
 /* Why Section */
 .why-section {
-    background-color: #495057;
-    border: 2px solid #6c757d;
+    background-color: var(--section-bg);
+    border: 2px solid var(--section-border);
     padding: 0.5rem;
     border-radius: 5px;
     margin-bottom: 0.8rem;
@@ -903,7 +1065,7 @@ body {
 }
 
 .why-list li i {
-    color: #4dabf7;
+    color: var(--accent-blue);
     margin-right: 8px;
 }
 
@@ -916,33 +1078,33 @@ body {
 }
 
 .social-icons a:hover {
-    color: #4dabf7 !important;
+    color: var(--social-icon-hover) !important;
     text-decoration: underline;
 }
 
 .footer-disclaimer {
     font-size: 0.75rem;
-    color: #adb5bd;
+    color: var(--footer-disclaimer);
     margin: 0.3rem 0;
 }
 
 .footer-disclaimer i,
 .footer-disclaimer a {
-    color: #adb5bd;
+    color: var(--footer-disclaimer);
     font-size: 0.8rem;
 }
 
 .footer-disclaimer a:hover {
-    color: #4dabf7;
+    color: var(--footer-disclaimer-hover);
 }
 
 .learn-more {
-    color: #4dabf7;
+    color: var(--link-color);
     text-decoration: underline;
 }
 
 .learn-more:hover {
-    color: #003d82;
+    color: var(--accent-blue-dark);
 }
 
 /* Section Headers */
@@ -953,7 +1115,7 @@ h1, h3,
 .recommended-learning h2,
 .faq-section h2 {
     font-family: 'Poppins', 'Arial', sans-serif;
-    color: #4dabf7;
+    color: var(--section-header);
     font-size: 1.4rem;
     font-weight: 600;
     text-align: center;
@@ -966,13 +1128,13 @@ h1, h3,
 .why-section h2 i,
 .testimonials-section h2 i,
 .faq-section h2 i {
-    color: #4dabf7;
+    color: var(--accent-blue);
     margin-right: 8px;
 }
 
 /* Insights and Comparison Boxes */
 .insights-box, .comparison-box {
-    background: #495057;
+    background: var(--insights-box-bg);
     border-radius: 8px;
     padding: 0.5rem;
     margin-bottom: 0.8rem;
@@ -987,7 +1149,7 @@ h1, h3,
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: linear-gradient(135deg, #1b5e20, #0056b3);
+    background: var(--button-gradient);
     border: none;
     color: white;
     text-decoration: none;
@@ -996,7 +1158,7 @@ h1, h3,
 
 .course-link:hover {
     transform: scale(1.05);
-    background: linear-gradient(135deg, #123e14, #003d82);
+    background: var(--button-gradient-hover);
     text-decoration: none;
 }
 
@@ -1006,7 +1168,7 @@ h1, h3,
 }
 
 .resources a {
-    color: #4dabf7;
+    color: var(--link-color);
     text-decoration: none;
     display: block;
     margin: 0.3rem 0;
@@ -1025,7 +1187,7 @@ h1, h3,
 .list-group-item {
     border: none;
     padding: 0.5rem;
-    background-color: #6c757d;
+    background-color: var(--list-group-item-bg);
     border-radius: 8px;
     margin-bottom: 0.3rem;
 }
@@ -1040,7 +1202,7 @@ h1, h3,
 }
 
 .list-group-item a {
-    color: #4dabf7;
+    color: var(--link-color);
     text-decoration: none;
     font-size: 0.85rem;
 }
@@ -1114,6 +1276,11 @@ h1, h3,
         width: 2rem;
         height: 2rem;
         font-size: 0.9rem;
+    }
+
+    #modeToggle {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.8rem;
     }
 }
 
@@ -1228,7 +1395,7 @@ h1, h3,
         transform: translateY(-50%);
         width: auto;
         height: 4px;
-        background: linear-gradient(to right, #0056b3, #1b5e20);
+        background: var(--journey-line-gradient-horizontal);
     }
 
     .journey-steps {
@@ -1470,300 +1637,9 @@ h1, h3,
     .faq-section h2 {
         font-size: 2rem;
     }
-}
 
-/* Light Theme Adjustments (Override if prefers light mode) */
-@media (prefers-color-scheme: light) {
-    body {
-        background: linear-gradient(135deg, #E3F2FD, #F5F7FA);
-        color: #333;
-    }
-
-    .container, .step-container {
-        background-color: transparent;
-    }
-
-    .navbar {
-        background: linear-gradient(90deg, #0288D1, #2E7D32);
-    }
-
-    .header-message {
-        background: linear-gradient(90deg, #0288D1, #2E7D32);
-    }
-
-    .consent-banner {
-        background-color: #E3F2FD;
-        color: #333;
-    }
-
-    .consent-banner i, .consent-banner .close-btn {
-        color: #0288D1;
-    }
-
-    .btn-primary {
-        background: linear-gradient(135deg, #2E7D32, #0288D1);
-    }
-
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #1B5E20, #01579B);
-    }
-
-    .btn-primary.navbar-btn {
-        background: linear-gradient(90deg, #0288D1, #2E7D32);
-    }
-
-    .btn-primary.navbar-btn:hover {
-        background: linear-gradient(90deg, #0277BD, #27632A);
-    }
-
-    .hero {
-        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(135deg, #0288D1, #2E7D32);
-    }
-
-    .hero-subtext i {
-        color: #E3F2FD;
-    }
-
-    .card {
-        background: #FFFFFF;
-        border: 2px solid #0288D1;
-    }
-
-    .card-title i {
-        color: #0288D1;
-    }
-
-    .card-text {
-        color: #6c757d;
-    }
-
-    .tool-card.custom-card {
-        background-color: #FFFFFF;
-    }
-
-    .journey-strip, .testimonials-section, .recommended-learning, .why-section, .faq-section, .team-why {
-        background-color: #E3F2FD;
-        border-color: #343a40;
-    }
-
-    .journey-container::before {
-        background: linear-gradient(to bottom, #0288D1, #2E7D32);
-    }
-
-    @media (min-width: 768px) {
-        .journey-container::before {
-            background: linear-gradient(to right, #0288D1, #2E7D32);
-        }
-    }
-
-    .journey-step {
-        color: #333;
-    }
-
-    .journey-step:hover {
-        background-color: #f8f9fa;
-    }
-
-    .step-badge {
-        background: linear-gradient(135deg, #0288D1, #2E7D32);
-    }
-
-    .journey-icon {
-        color: #0288D1;
-    }
-
-    .tool-group {
-        background-color: #f9f9f9;
-        border-color: #e0e0e0;
-    }
-
-    .tool-group:hover {
-        transform: translateY(-5px);
-    }
-
-    .group-title {
-        color: #0288D1;
-    }
-
-    .group-subtext {
-        color: #6c757d;
-    }
-
-    .accordion-button {
-        background-color: #f9f9f9;
-        color: #0288D1;
-    }
-
-    .accordion-button:hover, .accordion-button:not(.collapsed) {
-        background-color: #E3F2FD;
-        color: #2E7D32;
-    }
-
-    .accordion-item {
-        border-bottom: 1px solid #e0e0e0;
-    }
-
-    .tool-header-container {
-        background-color: #f8f9fa;
-        border-color: #ddd;
-    }
-
-    .tool-title {
-        background: linear-gradient(90deg, #2E7D32, #0288D1);
-    }
-
-    .tool-icon {
-        color: #0288D1;
-    }
-
-    .tool-subtitle {
-        color: #6c757d;
-    }
-
-    .step-indicator {
-        color: #333;
-    }
-
-    .step-dot {
-        background-color: #ccc;
-    }
-
-    .step-dot.active {
-        background-color: #0288D1;
-    }
-
-    .step-connector {
-        background-color: #ccc;
-    }
-
-    .progress {
-        background-color: #e9ecef;
-    }
-
-    .progress-bar {
-        background-color: #2E7D32;
-    }
-
-    .badge-success {
-        background-color: #2E7D32;
-    }
-
-    .badge-blue {
-        background-color: #0288D1;
-        border: 2px solid #01579B;
-    }
-
-    .badge-gray {
-        background-color: #e9ecef;
-        color: #333;
-        border: 2px solid #ced4da;
-    }
-
-    .net-worth-highlight {
-        color: #2E7D32;
-    }
-
-    .about-container {
-        background: linear-gradient(135deg, #E3F2FD, #F8F9FA);
-    }
-
-    .about-header {
-        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), linear-gradient(135deg, #0288D1, #2E7D32);
-    }
-
-    .about-subtitle {
-        color: #E3F2FD;
-    }
-
-    .about-content {
-        color: #333;
-    }
-
-    .mission-statement {
-        background-color: #F8F9FA;
-        border-left: 5px solid #0288D1;
-    }
-
-    .mission-statement h3 {
-        color: #0288D1;
-    }
-
-    .mission-statement p {
-        color: #555;
-    }
-
-    .team-why {
-        background-color: #E3F2FD;
-        border-left: 5px solid #2E7D32;
-    }
-
-    .team-why h3 {
-        color: #2E7D32;
-    }
-
-    .team-why p {
-        color: #555;
-    }
-
-    .info-box {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffeeba;
-    }
-
-    .testimonials-section, .recommended-learning, .why-section, .faq-section {
-        border: 2px solid #343a40;
-    }
-
-    .testimonial {
-        color: #333;
-    }
-
-    .testimonial .quote, .testimonial .name, .faq-item h3 i, .why-list li i {
-        color: #0288D1;
-    }
-
-    .faq-item h3, .faq-item p {
-        color: #333;
-    }
-
-    .social-icons a:hover {
-        color: #E3F2FD !important;
-    }
-
-    .footer-disclaimer, .footer-disclaimer i, .footer-disclaimer a {
-        color: #E3F2FD;
-    }
-
-    .footer-disclaimer a:hover {
-        color: #fff;
-    }
-
-    h1, h3, .tools-section h2, .why-section h2, .testimonials-section h2, .recommended-learning h2, .faq-section h2 {
-        color: #0288D1;
-    }
-
-    .card-title i, .tools-section h2 i, .why-section h2 i, .testimonials-section h2 i, .faq-section h2 i {
-        color: #0288D1;
-    }
-
-    .insights-box, .comparison-box {
-        background: #E3F2FD;
-    }
-
-    .course-link {
-        background: linear-gradient(135deg, #2E7D32, #0288D1);
-    }
-
-    .course-link:hover {
-        background: linear-gradient(135deg, #1B5E20, #01579B);
-    }
-
-    .resources a, .list-group-item a {
-        color: #0288D1;
-    }
-
-    .list-group-item {
-        background-color: #f8f9fa;
+    #modeToggle {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
     }
 }
