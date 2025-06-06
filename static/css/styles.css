@@ -1,22 +1,24 @@
-/* General */
+/* Mobile-First Base Styles */
 body {
     font-family: 'Poppins', 'Arial', sans-serif;
     background: linear-gradient(135deg, #E3F2FD, #F5F7FA);
     color: #333;
-    padding: 10px;
+    padding: 0.5rem;
+    margin: 0;
     max-width: 100%;
     overflow-x: hidden;
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 1rem 2rem;
+    padding: 0.5rem 1rem;
 }
 
 .step-container {
-    max-width: 600px;
-    margin: 1rem auto;
+    max-width: 100%;
+    margin: 0.5rem auto;
+    padding: 0.5rem;
 }
 
 /* Navbar */
@@ -25,23 +27,35 @@ body {
     animation: gradientShift 5s ease infinite;
     z-index: 1000;
 }
+
 .navbar-brand {
     padding: 0.2rem;
-    margin-right: 0.5rem;
-}
-.logo-centered {
-    max-width: 120px;
-}
-.navbar-toggler {
-    margin-left: auto;
-}
-.navbar-nav {
-    gap: 0.5rem;
-}
-.navbar-brand, .nav-link {
+    margin: 0.2rem auto;
     color: #FFFFFF !important;
     font-weight: bold;
+    text-align: center;
 }
+
+.logo-centered {
+    max-width: 80px;
+}
+
+.navbar-toggler {
+    margin: 0.2rem auto;
+}
+
+.navbar-nav {
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+}
+
+.nav-link {
+    color: #FFFFFF !important;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
 @keyframes gradientShift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
@@ -53,10 +67,11 @@ body {
     background: linear-gradient(90deg, #0288D1, #2E7D32);
     color: white;
     text-align: center;
-    padding: 8px;
-    font-size: 1rem;
+    padding: 0.5rem;
+    font-size: 0.85rem;
     animation: fadeInOut 6s ease-in-out infinite;
 }
+
 @keyframes fadeInOut {
     0% { opacity: 0; }
     20% { opacity: 1; }
@@ -69,8 +84,8 @@ body {
     background-color: #E3F2FD;
     color: #333;
     text-align: center;
-    padding: 10px;
-    font-size: 0.9rem;
+    padding: 0.5rem;
+    font-size: 0.85rem;
     position: fixed;
     bottom: 0;
     width: 100%;
@@ -82,16 +97,19 @@ body {
     gap: 0.5rem;
     word-break: break-word;
 }
+
 .consent-banner i {
     color: #0288D1;
+    font-size: 0.9rem;
 }
+
 .consent-banner .close-btn {
     background: none;
     border: none;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #0288D1;
     cursor: pointer;
-    padding: 0.3rem;
+    padding: 0.2rem;
 }
 
 /* Buttons */
@@ -99,32 +117,40 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.6rem 1.2rem;
+    padding: 0.5rem 1rem;
     background: linear-gradient(135deg, #2E7D32, #0288D1);
     color: white;
     text-decoration: none;
     border-radius: 6px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     border: none;
     transition: transform 0.2s ease, background 0.3s ease;
+    width: 95%;
+    margin: 0.5rem auto;
+    text-align: center;
 }
+
 .btn-primary:hover {
     transform: scale(1.05);
     background: linear-gradient(135deg, #1B5E20, #01579B);
 }
+
 .btn-primary.navbar-btn {
     background: linear-gradient(90deg, #0288D1, #2E7D32);
 }
+
 .btn-primary.navbar-btn:hover {
     background: linear-gradient(90deg, #0277BD, #27632A);
 }
+
 .btn-explore {
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
     border-radius: 8px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .btn-explore:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -132,50 +158,55 @@ body {
 
 /* Language Button */
 .language-btn {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-    min-width: 80px;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+    min-width: 70px;
     text-align: center;
     border-radius: 5px;
     white-space: nowrap;
 }
+
 .language-btn i {
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 /* Hero */
 .hero {
     background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), linear-gradient(135deg, #0288D1, #2E7D32);
     color: white;
-    padding: 1rem;
-    margin-top: 40px;
+    padding: 0.5rem;
+    margin-top: 30px;
     position: relative;
-    left: 0;
-    right: 0;
     z-index: 900;
 }
+
 .hero-content {
-    max-width: 90%;
+    max-width: 95%;
     margin: 0 auto;
     text-align: center;
 }
+
 .hero h2 {
-    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
     color: white;
     margin-bottom: 0.5rem;
 }
+
 .hero p {
     margin-bottom: 0.5rem;
-}
-.hero-subtext {
     font-size: 0.9rem;
+}
+
+.hero-subtext {
+    font-size: 0.85rem;
     color: white;
     margin: 0.5rem 0 1rem;
     font-weight: 400;
 }
+
 .hero-subtext i {
     color: #E3F2FD;
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 /* Card */
@@ -189,81 +220,104 @@ body {
     transform: translateY(20px);
     animation: slideIn 0.5s forwards;
 }
+
 @keyframes slideIn {
     to { opacity: 1; transform: translateY(0); }
 }
+
 .card.custom-card {
     border-radius: 10px;
     border: none;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
+
 .tool-card.custom-card {
     background-color: #FFFFFF;
+    width: 100%;
+    max-width: none;
+    margin: 0.5rem 0;
+    padding: 1rem;
 }
+
 .card-body {
     padding: 1rem;
     text-align: center;
 }
+
 .card-title {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 0.5rem;
     font-weight: 600;
     margin-bottom: 0.4rem;
-    max-width: 100%;
-    overflow-x: hidden;
-    text-overflow: ellipsis;
+    font-size: 1.1rem;
+    text-wrap: balance;
     white-space: normal;
 }
+
 .card-title i {
     color: #0288D1;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
 }
+
 .card-text {
     color: #6c757d;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     margin-bottom: 0.5rem;
 }
 
 /* Journey Strip */
 .journey-strip {
     background-color: #E3F2FD;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
+
 .journey-container {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     gap: 2rem;
-    flex-wrap: wrap;
+    padding: 1rem;
 }
-.journey-steps {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-}
+
 .journey-step {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: #333;
+    text-decoration: none;
     transition: transform 0.2s ease, background-color 0.2s ease;
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    padding: 1rem;
 }
+
 .journey-step:hover {
     transform: scale(1.05);
     background-color: #f8f9fa;
     border-radius: 8px;
 }
+
 .journey-step:focus {
     outline: 2px solid #0288D1;
     outline-offset: 2px;
 }
+
+.journey-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
 .step-badge {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 2rem;
@@ -271,85 +325,48 @@ body {
     background: linear-gradient(135deg, #0288D1, #2E7D32);
     color: white;
     border-radius: 50%;
-    font-weight: bold;
-    font-size: 1rem;
+    font-weight: 600;
+    font-size: 0.9rem;
     margin-bottom: 0.5rem;
-}
-.journey-icon {
-    font-size: 1.75rem;
-    margin-bottom: 0.5rem;
-}
-.journey-step p {
-    font-size: 1rem;
-    margin: 0;
+    text-wrap: balance;
+    white-space: normal;
 }
 
-/* Mobile styles for journey steps */
-@media (max-width: 600px) {
-    .journey-steps {
-        flex-direction: column;
-        gap: 2rem;
-        padding: 1rem;
-    }
-    .journey-step {
-        position: relative;
-        padding: 1rem;
-        width: 100%;
-        max-width: 300px;
-        margin: 0 auto;
-    }
-    .journey-icon {
-        font-size: 1.5rem;
-    }
-    .journey-step p {
-        font-size: 0.9rem;
-    }
-    .journey-step:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        bottom: -1.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 2px;
-        height: 1.5rem;
-        background: linear-gradient(to bottom, #0288D1, transparent);
-    }
-}
-
-/* Dark theme adjustments for journey steps */
-@media (prefers-color-scheme: dark) {
-    .journey-step {
-        color: #e9ecef;
-    }
-    .step-badge {
-        background: linear-gradient(135deg, #0056b3, #27632A);
-    }
-    .journey-step:hover {
-        background-color: #343a40;
-    }
+.journey-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 1.5rem;
+    background: linear-gradient(to bottom, #0288D1, transparent);
 }
 
 /* Tools Section */
 .tools-section {
     background-color: #E8F5E9;
-    padding: 2rem;
+    padding: 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    margin-bottom: 0.8rem;
 }
+
 .tool-group {
-    margin-bottom: 1.5rem;
-    padding: 1rem 2rem;
+    margin-bottom: 0.8rem;
+    padding: 0.3rem 0.5rem;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     background-color: #f9f9f9;
     transition: transform 0.3s ease-in-out;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
 .tool-group:hover {
     transform: translateY(-5px);
 }
+
 .group-title {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
     display: flex;
@@ -357,20 +374,22 @@ body {
     gap: 0.5rem;
     color: #0288D1;
 }
+
 .group-subtext {
-    font-size: 1rem;
+    font-size: 0.85rem;
     color: #6c757d;
     margin-bottom: 0.5rem;
 }
+
 .tools-grid {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.8rem;
 }
 
 /* Accordion */
 .accordion-button {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-weight: 600;
     color: #0288D1;
     background-color: #f9f9f9;
@@ -378,138 +397,150 @@ body {
     padding: 0.8rem 1rem;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
+
 .accordion-button:hover {
     background-color: #E3F2FD;
     color: #2E7D32;
 }
+
 .accordion-button:not(.collapsed) {
     background-color: #E3F2FD;
     color: #2E7D32;
 }
+
 .accordion-button:focus {
     box-shadow: none;
 }
+
 .accordion-body {
-    padding: 1rem;
+    padding: 0.5rem 1rem;
 }
+
 .accordion-item {
     border: none;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid #e0e0e0;
 }
+
 .accordion-item:last-child {
     border-bottom: none;
 }
 
 /* Tool Card */
-.tool-card {
-    padding: 1.2rem;
-    margin: 0.8rem auto;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    max-width: 400px;
-}
 .tool-card h3 {
+    font-size: 1.1rem;
     margin-bottom: 0.4rem;
-    font-size: 1.25rem;
 }
+
 .tool-card p {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     margin-bottom: 1rem;
 }
+
 .tool-card button {
-    padding: 0.6rem 1.2rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
 }
 
 /* Financial Health Score Badge */
-@media (max-width: 576px) {
-    .tool-card:has(.badge-success) .card-title {
-        flex-direction: column;
-        align-items: center;
-    }
-    .tool-card:has(.badge-success) .badge-success {
-        margin-top: 0.5rem;
-        margin-right: 0;
-    }
+.tool-card:has(.badge-success) .card-title {
+    flex-direction: column;
+    align-items: center;
+}
+
+.tool-card:has(.badge-success) .badge-success {
+    margin-top: 0.5rem;
+    margin-right: 0;
 }
 
 /* Tool Header */
 .tool-header {
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
 }
+
 .tool-header-container {
     background-color: #f8f9fa;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 8px;
     border: 1px solid #ddd;
 }
+
 .tool-title {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 700;
     background: linear-gradient(90deg, #2E7D32, #0288D1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
 }
+
 .tool-icon {
     color: #0288D1;
-    font-size: 1.8rem;
+    font-size: 1.4rem;
 }
+
 .tool-subtitle {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #6c757d;
     margin-top: 0.3rem;
     margin-bottom: 0;
 }
+
 .step-indicator {
     margin-top: 0.5rem;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #333;
 }
+
 .step-text {
     font-weight: 500;
 }
+
 .step-progress {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.3rem;
 }
+
 .step-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background-color: #ccc;
     border-radius: 50%;
 }
+
 .step-dot.active {
     background-color: #0288D1;
 }
+
 .step-connector {
-    width: 15px;
+    width: 12px;
     height: 2px;
     background-color: #ccc;
 }
 
 /* Chart */
 .chart-container {
-    max-height: 250px;
+    max-height: 200px;
     width: 100%;
     position: relative;
 }
+
 .chart-card {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Progress Bar */
 .progress {
-    height: 1.2rem;
+    height: 1rem;
     border-radius: 0.25rem;
     background-color: #e9ecef;
 }
+
 .progress-bar {
     transition: width 0.5s ease-in-out;
     background-color: #2E7D32;
@@ -517,69 +548,76 @@ body {
 
 /* Score Gauge */
 .score-gauge {
-    max-width: 250px;
-    margin: 0 auto 1rem;
+    max-width: 200px;
+    margin: 0 auto 0.8rem;
 }
 
 /* Badges */
 .status-badge, .badge {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     padding: 0.4rem 0.8rem;
     border-radius: 20px;
-    display: inline-block;
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     white-space: normal;
+    text-wrap: balance;
     max-width: 100%;
     box-sizing: border-box;
-}
-.badge {
-    font-size: 0.85rem;
-    transition: transform 0.3s ease;
     margin-bottom: 0.3rem;
     margin-right: 0.3rem;
 }
+
 .badge:hover {
     transform: scale(1.1);
 }
+
 .badge-success {
     background-color: #2E7D32;
     color: white;
 }
+
 .badge-info {
     background-color: #17a2b8;
     color: white;
 }
+
 .badge-bronze {
     background-color: #cd7f32;
     color: white;
     border: 2px solid #8c5523;
 }
+
 .badge-silver {
     background-color: #c0c0c0;
     color: #333;
     border: 2px solid #a9a9a9;
 }
+
 .badge-gold {
     background-color: #ffd700;
     color: #333;
     border: 2px solid #daa520;
 }
+
 .badge-platinum {
     background-color: #e5e4e2;
     color: #333;
     border: 2px solid #b0b0b0;
 }
+
 .badge-blue {
     background-color: #0288D1;
     color: white;
     border: 2px solid #01579B;
 }
+
 .badge-gray {
     background-color: #e9ecef;
     color: #333;
     border: 2px solid #ced4da;
 }
+
 .net-worth-highlight {
     font-weight: bold;
     color: #2E7D32;
@@ -587,58 +625,65 @@ body {
 
 /* About Page Specific Styles */
 .about-page {
-    padding-top: 10px;
-    padding-bottom: 40px;
+    padding: 0.5rem 0 0.8rem;
 }
+
 .about-container {
     background: linear-gradient(135deg, #E3F2FD, #F8F9FA);
-    padding: 1rem 2rem;
-    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
+
 .about-header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.8rem;
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), linear-gradient(135deg, #0288D1, #2E7D32);
     color: white;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 8px;
 }
+
 .about-title {
-    font-size: 2.5rem;
+    font-size: 1.8rem;
     font-weight: 700;
     color: white;
     margin-bottom: 0.5rem;
 }
+
 .about-subtitle {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 400;
     color: #E3F2FD;
 }
+
 .about-content {
-    font-size: 1rem;
+    font-size: 0.9rem;
     line-height: 1.6;
     color: #333;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.8rem;
 }
+
 .about-content p {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
+
 .about-disclaimer {
     color: #dc3545;
     font-style: italic;
 }
+
 .mission-statement {
-    margin-top: 1.5rem;
-    padding: 1rem;
+    margin: 0.8rem 0;
+    padding: 0.5rem;
     background-color: #F8F9FA;
     border-left: 5px solid #0288D1;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
+
 .mission-statement h3 {
-    font-size: 1.6rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #0288D1;
     margin-bottom: 0.5rem;
@@ -646,22 +691,24 @@ body {
     align-items: center;
     gap: 0.5rem;
 }
+
 .mission-statement p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #555;
     line-height: 1.6;
 }
+
 .team-why {
-    margin-top: 1.5rem;
-    padding: 1rem;
+    margin: 0.8rem 0;
+    padding: 0.5rem;
     background-color: #E3F2FD;
     border-left: 5px solid #2E7D32;
     border-radius: 8px;
-    margin-bottom: 1.5rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
+
 .team-why h3 {
-    font-size: 1.6rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #2E7D32;
     margin-bottom: 0.5rem;
@@ -669,17 +716,20 @@ body {
     align-items: center;
     gap: 0.5rem;
 }
+
 .team-why p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #555;
     line-height: 1.6;
 }
+
 .call-to-action {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.8rem;
 }
+
 .call-to-action p {
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 /* Info Box */
@@ -687,23 +737,26 @@ body {
     background-color: #fff3cd;
     color: #856404;
     border: 1px solid #ffeeba;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 8px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
+
 .info-box i {
     color: #dc3545;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
+
 .question-icon {
-    font-size: 1.1em;
-    margin-right: 0.5em;
+    font-size: 1rem;
+    margin-right: 0.5rem;
 }
+
 .question-status {
-    margin-left: 0.5em;
+    margin-left: 0.5rem;
 }
 
 /* Testimonials */
@@ -711,37 +764,48 @@ body {
     background-color: #E3F2FD;
     border: 2px solid #343a40;
     border-radius: 5px;
+    padding: 0.5rem;
+    margin-bottom: 0.8rem;
 }
+
 .testimonial {
     color: #333;
-    padding: 1rem;
+    padding: 0.5rem;
 }
+
+.testimonial + .testimonial {
+    margin-top: 0.8rem;
+}
+
 .testimonial-avatar {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     background-color: #0288D1;
     color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: bold;
     margin: 0 auto 0.5rem;
 }
+
 .testimonial p {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     line-height: 1.5;
 }
+
 .testimonial .quote {
     color: #0288D1;
-    font-size: 1.2rem;
+    font-size: 1rem;
     margin-right: 5px;
 }
+
 .testimonial .name {
     color: #0288D1;
     font-weight: bold;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin-top: 0.5rem;
 }
 
@@ -749,30 +813,36 @@ body {
 .recommended-learning {
     background-color: #E3F2FD;
     border: 2px solid #343a40;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 5px;
+    margin-bottom: 0.8rem;
 }
 
 /* FAQ Section */
 .faq-section {
     background-color: #E3F2FD;
     border: 2px solid #343a40;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 5px;
+    margin-bottom: 0.8rem;
 }
+
 .faq-item {
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
 }
+
 .faq-item h3 {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     color: #333;
 }
+
 .faq-item h3 i {
     color: #0288D1;
-    font-size: 1rem;
-}
-.faq-item p {
     font-size: 0.9rem;
+}
+
+.faq-item p {
+    font-size: 0.85rem;
     color: #333;
 }
 
@@ -780,24 +850,669 @@ body {
 .why-section {
     background-color: #E3F2FD;
     border: 2px solid #343a40;
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 5px;
+    margin-bottom: 0.8rem;
 }
+
 .why-list li {
     display: flex;
     align-items: center;
     margin-bottom: 0.5rem;
 }
+
 .why-list li i {
     color: #0288D1;
-    margin-right Jon: Here’s the fully updated `styles.css` file with the mobile-optimized journey steps solution merged into the "Journey Strip" section. The changes replace the existing `.journey-step`, `.journey-steps`, and related styles, while preserving all other sections of the original file. The new styles include:
+    margin-right: 8px;
+}
 
-- A vertical stack for `.journey-steps` on mobile (max-width: 600px) using `flex-direction: column`.
-- Centered icons and text with `gap: 2rem` for spacing.
-- Enhanced `.step-badge` styling for clarity (2rem size, bold font, gradient background).
-- Subtle connectors between steps using a pseudo-element (`::after`) with a gradient effect.
-- Accessibility improvements with focus styles and dark theme support.
-- Adjusted font and icon sizes for mobile readability (e.g., `font-size: 0.9rem`, icon size `1.5rem`).
-- Hover effects with `transform: scale(1.05)` and subtle background changes.
+/* Footer */
+.social-icons a {
+    color: white !important;
+    margin: 0 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
 
-The rest of the file remains unchanged, ensuring compatibility with the existing design. The `artifact_id` is reused since this is an update to the previously provided `styles.css`.
+.social-icons a:hover {
+    color: #E3F2FD !important;
+    text-decoration: underline;
+}
+
+.footer-disclaimer {
+    font-size: 0.75rem;
+    color: #E3F2FD;
+    margin: 0.3rem 0;
+}
+
+.footer-disclaimer i,
+.footer-disclaimer a {
+    color: #E3F2FD;
+    font-size: 0.8rem;
+}
+
+.footer-disclaimer a:hover {
+    color: #fff;
+}
+
+.learn-more {
+    color: #0288D1;
+    text-decoration: underline;
+}
+
+.learn-more:hover {
+    color: #01579B;
+}
+
+/* Section Headers */
+h1, h3,
+.tools-section h2,
+.why-section h2,
+.testimonials-section h2,
+.recommended-learning h2,
+.faq-section h2 {
+    font-family: 'Poppins', 'Arial', sans-serif;
+    color: #0288D1;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.5;
+    padding: 0.5rem;
+}
+
+.card-title i,
+.tools-section h2 i,
+.why-section h2 i,
+.testimonials-section h2 i,
+.faq-section h2 i {
+    color: #0288D1;
+    margin-right: 8px;
+}
+
+/* Insights and Comparison Boxes */
+.insights-box, .comparison-box {
+    background: #E3F2FD;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Course Link */
+.course-link {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #2E7D32, #0288D1);
+    border: none;
+    color: white;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.course-link:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #1B5E20, #01579B);
+    text-decoration: none;
+}
+
+/* Resources */
+.resources {
+    margin-top: 0.5rem;
+}
+
+.resources a {
+    color: #0288D1;
+    text-decoration: none;
+    display: block;
+    margin: 0.3rem 0;
+    font-size: 0.85rem;
+}
+
+.resources a:hover {
+    text-decoration: underline;
+}
+
+/* List Group */
+.list-group {
+    margin-top: 0.5rem;
+}
+
+.list-group-item {
+    border: none;
+    padding: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.3rem;
+}
+
+.list-group-item ul {
+    list-style-type: none;
+    padding-left: 0.5rem;
+}
+
+.list-group-item ul li {
+    margin-bottom: 0.3rem;
+}
+
+.list-group-item a {
+    color: #0288D1;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.list-group-item a:hover {
+    text-decoration: underline;
+}
+
+/* Form Validation */
+.form-check-input.is-invalid {
+    border-color: #dc3545;
+}
+
+.form-control.is-invalid ~ .invalid-feedback,
+.form-check-input.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+/* Override centering for form labels and inputs in quiz forms */
+.step-container .card-body,
+.quiz-container .card-body {
+    text-align: left !important;
+}
+
+.step-container .form-label,
+.quiz-container .form-label,
+.step-container .form-control,
+.quiz-container .form-control {
+    text-align: left !important;
+}
+
+/* Ensure tool titles are centered only on index page */
+.index-page .tool-title,
+.index-container .tool-card .card-title {
+    text-align: center !important;
+}
+
+/* Very Small Screens */
+@media (max-width: 360px) {
+    .navbar-brand, .language-btn {
+        font-size: 0.8rem;
+        min-width: 60px;
+    }
+
+    .navbar-toggler {
+        padding: 0.2rem;
+    }
+
+    .container {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .btn-primary {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .hero h2 {
+        font-size: clamp(1rem, 3.5vw, 1.4rem);
+    }
+
+    .card-title {
+        font-size: 1rem;
+    }
+
+    .journey-step {
+        max-width: 250px;
+    }
+}
+
+/* Desktop Optimizations */
+@media (min-width: 768px) {
+    .container {
+        max-width: 1200px;
+        padding: 1rem 2rem;
+    }
+
+    .step-container {
+        max-width: 600px;
+        padding: 1rem;
+    }
+
+    .navbar-nav {
+        flex-direction: row;
+    }
+
+    .navbar-brand {
+        margin-right: 0.5rem;
+    }
+
+    .logo-centered {
+        max-width: 120px;
+    }
+
+    .nav-link {
+        font-size: 1rem;
+    }
+
+    .header-message {
+        font-size: 1rem;
+        padding: 0.8rem;
+    }
+
+    .consent-banner {
+        font-size: 0.9rem;
+        padding: 0.8rem;
+    }
+
+    .btn-primary {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+        width: auto;
+        margin: 0;
+    }
+
+    .btn-explore {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .language-btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+        min-width: 80px;
+    }
+
+    .hero {
+        padding: 1rem;
+        margin-top: 40px;
+    }
+
+    .hero-content {
+        max-width: 90%;
+    }
+
+    .hero h2 {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+
+    .hero p {
+        font-size: 1rem;
+    }
+
+    .hero-subtext {
+        font-size: 0.9rem;
+    }
+
+    .hero-subtext i {
+        font-size: 1rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        flex-direction: row;
+        font-size: 1.25rem;
+    }
+
+    .card-title i {
+        font-size: 1.4rem;
+    }
+
+    .card-text {
+        font-size: 0.95rem;
+    }
+
+    .journey-container {
+        flex-direction: row;
+        gap: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .journey-step {
+        flex-direction: row;
+        font-size: 1rem;
+        max-width: none;
+        width: auto;
+        padding: 0.5rem;
+    }
+
+    .journey-step:not(:last-child)::after {
+        content: none;
+    }
+
+    .journey-icon {
+        font-size: 1.4rem;
+        margin-bottom: 0;
+        margin-right: 0.5rem;
+    }
+
+    .step-badge {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+        margin-bottom: 0;
+        margin-right: 0.5rem;
+    }
+
+    .tools-section {
+        padding: 2rem 4rem;
+        max-width: 1200px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .tools-grid {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .tools-grid .col-md-4 {
+        flex: 0 0 30%;
+        max-width: 30%;
+    }
+
+    .tools-grid .col-md-6 {
+        flex: 0 0 45%;
+        max-width: 45%;
+    }
+
+    .tool-card {
+        max-width: 400px;
+        margin: 0.8rem auto;
+        padding: 1.2rem;
+    }
+
+    .tool-card h3 {
+        font-size: 1.25rem;
+    }
+
+    .tool-card p {
+        font-size: 0.95rem;
+    }
+
+    .tool-card button {
+        font-size: 0.95rem;
+        padding: 0.6rem 1.2rem;
+    }
+
+    .group-title {
+        font-size: 1.8rem;
+    }
+
+    .group-subtext {
+        font-size: 1rem;
+    }
+
+    .accordion-button {
+        font-size: 1.6rem;
+    }
+
+    .accordion-body {
+        padding: 1rem;
+    }
+
+    .tool-header-container {
+        padding: 1rem;
+    }
+
+    .tool-title {
+        font-size: 1.8rem;
+    }
+
+    .tool-icon {
+        font-size: 1.8rem;
+    }
+
+    .tool-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .step-indicator {
+        font-size: 0.85rem;
+    }
+
+    .step-dot {
+        width: 8px;
+        height: 8px;
+    }
+
+    .step-connector {
+        width: 15px;
+    }
+
+    .score-gauge {
+        max-width: 250px;
+    }
+
+    .about-page {
+        padding: 1rem 0 2rem;
+    }
+
+    .about-container {
+        padding: 1rem 2rem;
+    }
+
+    .about-header {
+        padding: 1rem;
+    }
+
+    .about-title {
+        font-size: 2.5rem;
+    }
+
+    .about-subtitle {
+        font-size: 1rem;
+    }
+
+    .about-content {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .about-content p {
+        margin-bottom: 1rem;
+    }
+
+    .mission-statement, .team-why {
+        padding: 1rem;
+        margin: 1.5rem 0;
+    }
+
+    .mission-statement h3, .team-why h3 {
+        font-size: 1.6rem;
+    }
+
+    .mission-statement p, .team-why p {
+        font-size: 1rem;
+    }
+
+    .call-to-action p {
+        font-size: 1rem;
+    }
+
+    .info-box {
+        padding: 1rem;
+    }
+
+    .info-box i {
+        font-size: 1.1rem;
+    }
+
+    .testimonial {
+        padding: 1rem;
+    }
+
+    .testimonial-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .testimonial p {
+        font-size: 0.95rem;
+    }
+
+    .testimonial .name {
+        font-size: 0.9rem;
+    }
+
+    .faq-item h3 {
+        font-size: 1.4rem;
+    }
+
+    .faq-item h3 i {
+        font-size: 1rem;
+    }
+
+    .faq-item p {
+        font-size: 0.9rem;
+    }
+
+    .social-icons a {
+        font-size: 0.9rem;
+        margin: 0 8px;
+    }
+
+    .footer-disclaimer {
+        font-size: 0.8rem;
+    }
+
+    .footer-disclaimer i {
+        font-size: 0.9rem;
+    }
+
+    .course-link {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+
+    .resources a {
+        font-size: 0.9rem;
+    }
+
+    .list-group-item a {
+        font-size: 0.9rem;
+    }
+
+    h1, h3,
+    .tools-section h2,
+    .why-section h2,
+    .testimonials-section h2,
+    .recommended-learning h2,
+    .faq-section h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Dark Theme Adjustments */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg, #343a40, #495057);
+        color: #e9ecef;
+    }
+
+    .container, .step-container {
+        background-color: #343a40;
+    }
+
+    .navbar {
+        background: linear-gradient(90deg, #0056b3, #1b5e20);
+    }
+
+    .header-message {
+        background: linear-gradient(90deg, #0056b3, #1b5e20);
+    }
+
+    .consent-banner {
+        background-color: #495057;
+        color: #e9ecef;
+    }
+
+    .consent-banner i, .consent-banner .close-btn {
+        color: #4dabf7;
+    }
+
+    .card {
+        background: #343a40;
+        border: 2px solid #4dabf7;
+    }
+
+    .card-text {
+        color: #adb5bd;
+    }
+
+    .tool-card.custom-card {
+        background-color: #343a40;
+    }
+
+    .journey-strip, .tools-section, .testimonials-section, .recommended-learning, .why-section, .faq-section {
+        background-color: #495057;
+        border-color: #6c757d;
+    }
+
+    .journey-step {
+        color: #e9ecef;
+    }
+
+    .journey-step:hover {
+        background-color: #6c757d;
+    }
+
+    .step-badge {
+        background: linear-gradient(135deg, #0056b3, #1b5e20);
+    }
+
+    .tool-group {
+        background-color: #495057;
+        border-color: #6c757d;
+    }
+
+    .group-subtext {
+        color: #adb5bd;
+    }
+
+    .accordion-button {
+        background-color: #495057;
+        color: #4dabf7;
+    }
+
+    .accordion-button:hover, .accordion-button:not(.collapsed) {
+        background-color: #6c757d;
+        color: #1b5e20;
+    }
+
+    .tool-header-container {
+        background-color: #6c757d;
+        border-color: #adb5bd;
+    }
+
+    .info-box {
+        background-color: #664d03;
+        color: #fff3cd;
+        border-color: #997404;
+    }
+
+    .about-container {
+        background: linear-gradient(135deg, #343a40, #495057);
+    }
+
+    .about-content {
+        color: #e9ecef;
+    }
+
+    .mission-statement, .team-why {
+        background-color: #6c757d;
+    }
+
+    .mission-statement p, .team-why p {
+        color: #adb5bd;
+    }
+}
