@@ -5,8 +5,7 @@
     <section class="hero text-center my-4">
         <div class="hero-content">
             <h2><i class="fas fa-wallet"></i> {{ trans('core_all_in_one_toolkit') | default('Your All-in-One Toolkit for Financial Health Across Africa') }}</h2>
-            <p class="mt-3">{{ trans('core_money_control') | default('Your Money. Your Control. Your Tools.') }}</p>
-            <p class="hero-subtext mt-2" aria-describedby="no-fund-handling-desc"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i> {{ trans('core_no_fund_handling') | default('Track and manage your money, we never touch it.') }}</p>
+            <p class="mt-3"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i> {{ trans('core_money_control') | default('Your Money. Your Control. Your Tools.') }}</p>
             <div class="d-flex justify-content-center mt-3">
                 <a href="{{ url_for('financial_health.step1') }}" class="btn btn-primary btn-explore" aria-label="{{ trans('financial_health_get_health_score') | default('Start Here – Check Your Financial Health') }}">{{ trans('financial_health_get_health_score') | default('Start Here – Check Your Financial Health') }}</a>
             </div>
@@ -211,7 +210,7 @@
     </section>
 
     <section class="why-section my-4">
-        <h2 class="text-center"><i class="fas fa-check-circle"></i> {{ trans('core_why_ficore') | default('Why Ficore Africa?') }}</h2>
+        <h2 class="text-center"><i class="fas fa-info-circle"></i> {{ trans('core_why_ficore') | default('Why Ficore Africa?') }}</h2>
         <ul class="why-list list-unstyled">
             <li><i class="fas fa-check-circle"></i> {{ trans('core_localized') | default('Localized for Africa with support for Naira and regional financial contexts') }}</li>
             <li><i class="fas fa-check-circle"></i> {{ trans('core_empowers') | default('Empowers financial literacy with easy-to-use tools') }}</li>
