@@ -290,7 +290,7 @@ body {
 }
 
 .dropdown-menu {
-    background-color: var(--navbar-gradient);
+    background: #ffffff;
     border: none;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -298,14 +298,14 @@ body {
 
 .dropdown-item {
     font-size: 0.85rem;
-    color: #FFFFFF !important;
+    color: #004d26 !important;
     padding: 0.5rem 1rem;
     transition: background-color 0.3s ease;
 }
 
 .dropdown-item:hover {
-    background-color: var(--button-nav-gradient-hover);
-    color: #FFFFFF !important;
+    background-color: #c8f0d2;
+    color: #003319 !important;
 }
 
 @keyframes gradientShift {
