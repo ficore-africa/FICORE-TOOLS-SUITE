@@ -1,10 +1,9 @@
 from extensions import db
 import json
 from datetime import datetime, date
-from flask_login import UserMixin  # Add UserMixin import
+from flask_login import UserMixin
 
-
-class User(db.Model, UserMixin):  # Add UserMixin
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -333,4 +332,31 @@ class QuizResult(db.Model):
             'badges': json.loads(self.badges) if self.badges else [],
             'insights': json.loads(self.insights) if self.insights else [],
             'tips': json.loads(self.tips) if self.tips else []
+        }
+
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+    id = db.Column(db.String(36), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    session_id = db.Column(db.String(36), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    tool_name = db.Column(db.String(50), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    user = db.relationship('User', backref='feedback_records')
+
+    __table_args__ = (
+        db.Index('ix_feedback_session_id', 'session_id'),
+        db.Index('ix_feedback_user_id', 'user_id')
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'session_id': self.session_id,
+            'created_at': self.created_at.isoformat() + "Z",
+            'tool_name': self.tool_name,
+            'rating': self.rating,
+            'comment': self.comment
         }
