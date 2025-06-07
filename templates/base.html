@@ -52,7 +52,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='img/ficore_logo.png') }}" alt="{{ trans('core_ficore_africa_logo') | default('Ficore Africa Logo') }}" class="logo-centered"></a>
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='img/ficore_logo.png') }}" alt="{{ trans('core_ficore_africa_logo') | default('Ficore Africa Logo') }}" class="logo-centered" style="border-radius: 50%; object-fit: contain; width: 80px; height: 80px;">
+            </a>
             <a href="{{ url_for('set_language', lang='ha' if session.lang == 'en' else 'en') }}"
                class="btn btn-primary navbar-btn btn-outline-light language-btn ms-1 me-1"
                title="{{ trans('core_change_language') | default('Change Language') }}"
@@ -61,39 +63,41 @@
                 <i class="fas fa-globe me-1" aria-hidden="true"></i>
                 {{ 'Hausa' if session.lang == 'en' else 'English' }}
             </a>
-            <!-- Add Mode Toggle Button -->
+            <!-- Mode Toggle Button -->
             <button id="modeToggle" class="ms-1 me-1" aria-label="{{ trans('core_toggle_dark_mode') | default('Toggle Dark Mode') }}">
                 <i class="fas fa-moon" aria-hidden="true"></i>
             </button>
             <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="{{ trans('core_toggle_navigation') | default('Toggle navigation') }}">
-                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon" style="font-size: 1.2rem; width: 2rem; height: 2rem; background-color: white; color: #003366; border-radius: 5px;"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="{{ url_for('index') }}">{{ trans('core_home') | default('Home') }}</a>
+                    <!-- Group 1: Home, Feedback, General Dashboard -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="mainMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem;">
+                            {{ trans('core_main_menu') | default('Main Menu') }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="mainMenuDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('index') }}" style="font-size: 0.85rem;">{{ trans('core_home') | default('Home') }}</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('feedback') }}" style="font-size: 0.85rem;">{{ trans('core_feedback') | default('Feedback') }}</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('general_dashboard') }}" style="font-size: 0.85rem;">{{ trans('core_general_dashboard') | default('General Dashboard') }}</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="#tools-section">{{ trans('core_tools') | default('Tools') }}</a>
+                    <!-- Group 2: Tools, Login, Sign Up/Logout -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="toolsAuthDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem;">
+                            {{ trans('core_tools_auth') | default('Tools & Account') }}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="toolsAuthDropdown">
+                            <li><a class="dropdown-item" href="#tools-section" style="font-size: 0.85rem;">{{ trans('core_tools') | default('Tools') }}</a></li>
+                            {% if current_user.is_authenticated %}
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}" style="font-size: 0.85rem;">{{ trans('core_logout') | default('Logout') }}</a></li>
+                            {% else %}
+                            <li><a class="dropdown-item" href="{{ url_for('auth.signin') }}" style="font-size: 0.85rem;">{{ trans('core_login') | default('Login') }}</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.signup') }}" style="font-size: 0.85rem;">{{ trans('core_signup') | default('Sign Up') }}</a></li>
+                            {% endif %}
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="{{ url_for('general_dashboard') }}">{{ trans('core_general_dashboard') | default('General Dashboard') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="{{ url_for('feedback') }}">{{ trans('core_feedback') | default('Feedback') }}</a>
-                    </li>
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="{{ url_for('logout') }}">{{ trans('core_logout') | default('Logout') }}</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="{{ url_for('auth.signin') }}">{{ trans('core_login') | default('Login') }}</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link btn-primary navbar-btn" href="{{ url_for('auth.signup') }}">{{ trans('core_signup') | default('Sign Up') }}</a>
-                    </li>
-                    {% endif %}
                 </ul>
             </div>
         </div>
