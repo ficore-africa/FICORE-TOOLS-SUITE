@@ -141,7 +141,7 @@
                                     <div class="card-body">
                                         <h3 class="card-title"><i class="fas fa-balance-scale"></i> {{ trans('net_worth_net_worth_calculator') | default('Net Worth Tracker') }}</h3>
                                         <p class="card-text">{{ trans('net_worth_description') | default('Your Net worth is your assets minus liabilities') }}</p>
-                                        <a href="{{ url_for('net_worth.step1') }}" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('net_worth_start_net_worth') | default('Start Net Worth Tracker') }}">{{ trans('core_start') | default('Start') }}</a>
+                                        <a href="{{ url_for('net_worth.step1') }}" class="btn btn-primary" data- bs-toggle="tooltip" data-bs-placement="top" title="{{ trans('core_advisory_only') | default('This is an advisory tool only. Ficore does not store or access your funds.') }}" aria-label="{{ trans('net_worth_start_net_worth') | default('Start Net Worth Tracker') }}">{{ trans('core_start') | default('Start') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -210,7 +210,7 @@
     </section>
 
     <section class="why-section my-4">
-        <h2 class="text-center"><i class="fas fa-info-circle"></i> {{ trans('core_why_ficore') | default('Why Ficore Africa?') }}</h2>
+        <h2 class="section-heading text-center"><i class="fas fa-info-circle"></i> {{ trans('core_why_ficore') | default('Why Ficore Africa?') }}</h2>
         <ul class="why-list list-unstyled">
             <li><i class="fas fa-check-circle"></i> {{ trans('core_localized') | default('Localized for Africa with support for Naira and regional financial contexts') }}</li>
             <li><i class="fas fa-check-circle"></i> {{ trans('core_empowers') | default('Empowers financial literacy with easy-to-use tools') }}</li>
@@ -219,7 +219,7 @@
     </section>
 
     <section class="testimonials-section my-4">
-        <h2 class="text-center"><i class="fas fa-quote-left"></i> {{ trans('core_testimonials') | default('What People Are Saying About Us') }}</h2>
+        <h2 class="section-heading text-center"><i class="fas fa-quote-left"></i> {{ trans('core_testimonials') | default('What People Are Saying About Us') }}</h2>
         <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 <div class="carousel-item active">
@@ -256,7 +256,7 @@
     </section>
 
     <section class="faq-section my-4">
-        <h2 class="text-center"><i class="fas fa-question-circle"></i> {{ trans('core_faq') | default('Frequently Asked Questions') }}</h2>
+        <h2 class="section-heading text-center"><i class="fas fa-question-circle"></i> {{ trans('core_faq') | default('Frequently Asked Questions') }}</h2>
         <div class="container">
             <div class="faq-item">
                 <h3><i class="fas fa-shield-alt me-1" aria-hidden="true"></i> {{ trans('faq_fund_handling') | default('Does Ficore store or manage my money?') }}</h3>
