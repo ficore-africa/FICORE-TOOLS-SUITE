@@ -1,7 +1,7 @@
 /* Define CSS Custom Properties for Colors */
 :root {
     /* Light Mode Colors */
-    --background-gradient: linear-gradient(135deg, #E3F2FD, #F5F7FA);
+    --background-gradient: #f9fbff; /* Soft blue site-wide background */
     --text-color: #333;
     --navbar-gradient: linear-gradient(90deg, #0288D1, #2E7D32);
     --header-message-gradient: linear-gradient(90deg, #0288D1, #2E7D32);
@@ -28,11 +28,11 @@
     --tool-group-border: #e0e0e0;
     --group-title: #0288D1;
     --group-subtext: #6c757d;
-    --accordion-button-bg: #f0f0f0;
+    --accordion-button-bg: #ffffff; /* Clean white for accordion cards */
     --accordion-button-bg-hover: #E3F2FD;
     --accordion-button-text: #0288D1;
     --accordion-button-text-hover: #2E7D32;
-    --accordion-border: #e0e0e0;
+    --accordion-border: #e0e0e0; /* Light border for accordion */
     --tool-header-bg: #f8f9fa;
     --tool-header-border: #ddd;
     --tool-title-gradient: linear-gradient(90deg, #2E7D32, #0288D1);
@@ -204,6 +204,18 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 1rem;
+    position: relative;
+}
+
+.navbar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), transparent);
+    pointer-events: none;
 }
 
 .navbar-brand {
@@ -330,6 +342,19 @@ body {
     transition: color 0.3s ease;
 }
 
+/* Language Toggle Button */
+.language-btn {
+    font-size: 0.85rem;
+    min-width: 80px;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.language-btn i {
+    font-size: 0.9rem;
+}
+
 /* Header Message */
 .header-message {
     background: var(--header-message-gradient);
@@ -435,16 +460,6 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.language-btn {
-    font-size: 0.85rem;
-    min-width: 80px;
-    white-space: nowrap;
-}
-
-.language-btn i {
-    font-size: 0.9rem;
-}
-
 /* Hero */
 .hero {
     background: var(--hero-gradient);
@@ -496,10 +511,10 @@ body {
 /* Card */
 .card {
     background: #FFFFFF;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     margin-bottom: 0.8rem;
-    border: 2px solid var(--card-border);
+    border: 1px solid var(--card-border);
     opacity: 0;
     transform: translateY(20px);
     animation: slideIn 0.5s forwards;
@@ -510,7 +525,7 @@ body {
 }
 
 .card.custom-card {
-    border-radius: 10px;
+    border-radius: 8px;
     border: none;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
@@ -521,6 +536,8 @@ body {
     max-width: none;
     margin: 0.5rem 0;
     padding: 1rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
 }
 
 .card-body {
@@ -539,6 +556,7 @@ body {
     font-size: 1.1rem;
     text-wrap: balance;
     white-space: normal;
+    color: #212529;
 }
 
 .card-title i {
@@ -549,6 +567,17 @@ body {
 .card-text {
     color: var(--card-text);
     font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Recommended Label */
+.recommended-label {
+    background: #198754;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: white;
+    display: inline-block;
     margin-bottom: 0.5rem;
 }
 
@@ -576,6 +605,9 @@ body {
     z-index: 3;
     margin-bottom: 2rem;
     margin-top: 1rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--section-header);
 }
 
 /* Horizontal timeline line for mobile */
@@ -589,13 +621,14 @@ body {
     height: 4px;
     background: var(--journey-line-gradient-horizontal);
     z-index: 0;
+    margin-top: 2rem; /* Lowered to avoid text overlap */
 }
 
 .journey-steps {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.5rem;
     position: relative;
     width: 100%;
     max-width: 100%;
@@ -675,11 +708,15 @@ body {
 
 /* Step content (icon and text) */
 .journey-step p {
-    margin: 0.5rem 0 0;
+    margin: 0.75rem 0 0; /* Increased margin-top for balance */
     text-wrap: balance;
     white-space: normal;
     position: relative;
     z-index: 3;
+}
+
+.journey-step p strong {
+    font-weight: 600; /* Emphasize "Step X:" */
 }
 
 /* Tool Group */
@@ -703,7 +740,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--group-title);
+    color: #212529;
 }
 
 .group-subtext {
@@ -715,7 +752,7 @@ body {
 .tools-grid {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 1.5rem; /* Consistent spacing */
 }
 
 /* Accordion */
@@ -725,8 +762,9 @@ body {
     color: var(--accordion-button-text);
     background-color: var(--accordion-button-bg);
     border: none;
-    padding: 0.8rem 1rem;
+    padding: 1.2rem 1.5rem; /* Increased padding */
     transition: background 0.3s ease, color 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
 
 .accordion-button:hover {
@@ -744,28 +782,36 @@ body {
 }
 
 .accordion-body {
-    padding: 0.5rem 1rem;
+    padding: 1.5rem; /* Increased padding */
+    background-color: #ffffff; /* Clean white */
+    border: 1px solid var(--accordion-border);
+    border-top: none;
 }
 
 .accordion-item {
-    border-bottom: 1px solid var(--accordion-border);
+    border: 1px solid var(--accordion-border);
+    border-radius: 8px;
     margin-bottom: 0.5rem;
     transition: max-height 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Soft shadow */
 }
 
 .accordion-item:last-child {
-    border-bottom: none;
+    border-bottom: 1px solid var(--accordion-border);
 }
 
 /* Tool Card */
 .tool-card h3 {
     margin-bottom: 0.4rem;
     font-size: 1.1rem;
+    font-weight: 600;
+    color: #212529;
 }
 
 .tool-card p {
     font-size: 0.85rem;
     margin-bottom: 1rem;
+    color: var(--card-text);
 }
 
 /* Financial Health Score Badge */
@@ -969,7 +1015,7 @@ body {
 
 .about-title {
     font-size: 1.8rem;
-    font-weight: 700;
+    font-weight: 600;
     color: white;
     margin-bottom: 0.5rem;
 }
@@ -1086,7 +1132,7 @@ body {
 .testimonials-section {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
-    border-radius: 5px;
+    border-radius: 8px;
     padding: 2rem 0.3rem;
     margin-bottom: 2rem;
 }
@@ -1147,7 +1193,7 @@ body {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
     padding: 0.3rem;
-    border-radius: 5px;
+    border-radius: 8px;
     margin-bottom: 0.8rem;
 }
 
@@ -1156,7 +1202,7 @@ body {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
     padding: 2rem 0.3rem;
-    border-radius: 5px;
+    border-radius: 8px;
     margin-bottom: 2rem;
 }
 
@@ -1185,7 +1231,7 @@ body {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
     padding: 2rem 0.3rem;
-    border-radius: 5px;
+    border-radius: 8px;
     margin-bottom: 2rem;
 }
 
@@ -1380,13 +1426,13 @@ h1, h3,
     .btn, .btn-primary, .btn-explore, .language-btn, .course-link, .modal .btn {
         padding: 0.75rem 1.5rem;
         font-size: 1rem;
-        border-radius: 10px;
+        border-radius: 8px;
     }
 
     .index-page .tool-card button {
         padding: 0.75rem 1.75rem;
         font-size: 1rem;
-        border-radius: 10px;
+        border-radius: 8px;
     }
 
     .hero h2 {
@@ -1399,7 +1445,7 @@ h1, h3,
 
     .journey-steps {
         max-width: 100%;
-        gap: 0.8rem;
+        gap: 1rem;
     }
 
     .journey-step {
@@ -1431,13 +1477,26 @@ h1, h3,
     .btn-primary.btn-explore {
         padding: 0.75rem 1.5rem;
         font-size: 1rem;
-        border-radius: 10px;
+        border-radius: 8px;
     }
 
     .index-page .tool-card button {
         padding: 0.75rem 1.75rem;
         font-size: 1rem;
-        border-radius: 10px;
+        border-radius: 8px;
+    }
+
+    .journey-steps {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        justify-content: center;
+    }
+
+    .journey-step {
+        flex: 1 1 45%;
+        max-width: 150px;
+        margin-bottom: 1rem;
     }
 }
 
@@ -1576,13 +1635,14 @@ h1, h3,
         width: auto;
         height: 4px;
         background: var(--journey-line-gradient-horizontal);
+        margin-top: 2rem;
     }
 
     .journey-steps {
         flex-direction: row;
         justify-content: space-between;
         max-width: none;
-        gap: 1rem;
+        gap: 1.5rem;
         flex-wrap: nowrap;
     }
 
@@ -1604,7 +1664,7 @@ h1, h3,
     }
 
     .journey-step p {
-        margin: 0.5rem 0;
+        margin: 0.75rem 0;
     }
 
     .journey-icon {
@@ -1622,7 +1682,7 @@ h1, h3,
         flex-direction: row;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 1rem;
+        gap: 1.5rem;
     }
 
     .tools-grid .col-md-4 {
@@ -1663,10 +1723,11 @@ h1, h3,
 
     .accordion-button {
         font-size: 1.6rem;
+        padding: 1.5rem 2rem;
     }
 
     .accordion-body {
-        padding: 1rem;
+        padding: 2rem;
     }
 
     .tool-header-container {
@@ -1840,5 +1901,17 @@ h1, h3,
 
     .testimonials-section, .why-section, .faq-section {
         padding: 2.5rem 1rem;
+    }
+
+    .journey-steps {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 1.5rem;
+        flex-wrap: nowrap;
+    }
+
+    .journey-step {
+        flex: 0 0 22%;
+        max-width: 22%;
     }
 }
