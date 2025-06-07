@@ -24,11 +24,11 @@
     --journey-line-gradient-horizontal: linear-gradient(to right, #0288D1, #2E7D32);
     --journey-step-hover-bg: #f8f9fa;
     --journey-icon: #0288D1;
-    --tool-group-bg: #f9f9f9;
+    --tool-group-bg: #f0f0f0; /* Updated for darker background */
     --tool-group-border: #e0e0e0;
     --group-title: #0288D1;
     --group-subtext: #6c757d;
-    --accordion-button-bg: #f9f9f9;
+    --accordion-button-bg: #f0f0f0; /* Updated for darker background */
     --accordion-button-bg-hover: #E3F2FD;
     --accordion-button-text: #0288D1;
     --accordion-button-text-hover: #2E7D32;
@@ -66,7 +66,7 @@
     --info-box-bg: #fff3cd;
     --info-box-text: #856404;
     --info-box-border: #ffeeba;
-    --section-bg: #E3F2FD;
+    --section-bg: #f0f0f0; /* Updated for darker background */
     --section-border: #e0e0e0;
     --testimonial-text: #333;
     --testimonial-quote: #0288D1;
@@ -104,11 +104,11 @@
     --journey-line-gradient-horizontal: linear-gradient(to right, #0056b3, #1b5e20);
     --journey-step-hover-bg: #6c757d;
     --journey-icon: #4dabf7;
-    --tool-group-bg: #495057;
+    --tool-group-bg: #40444b; /* Updated for darker background in dark mode */
     --tool-group-border: #6c757d;
     --group-title: #4dabf7;
     --group-subtext: #adb5bd;
-    --accordion-button-bg: #495057;
+    --accordion-button-bg: #40444b; /* Updated for darker background in dark mode */
     --accordion-button-bg-hover: #6c757d;
     --accordion-button-text: #4dabf7;
     --accordion-button-text-hover: #1b5e20;
@@ -146,7 +146,7 @@
     --info-box-bg: #664d03;
     --info-box-text: #fff3cd;
     --info-box-border: #997404;
-    --section-bg: #495057;
+    --section-bg: #40444b; /* Updated for darker background in dark mode */
     --section-border: #6c757d;
     --testimonial-text: #e9ecef;
     --testimonial-quote: #4dabf7;
@@ -1047,17 +1047,18 @@ body {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
     border-radius: 5px;
-    padding: 0.3rem;
-    margin-bottom: 0.8rem;
+    padding: 2rem 0.3rem; /* Updated with vertical spacing */
+    margin-bottom: 2rem; /* Updated with vertical spacing */
 }
 
-.testimonials-section h2 {
-    font-size: 1.3rem;
+.testimonials-section h2.section-heading {
+    font-size: 1.4rem; /* Reduced font size */
     font-weight: 600;
     color: var(--section-header);
     text-align: center;
     line-height: 1.5;
-    padding: 0.5rem;
+    padding: 1rem; /* Added padding */
+    border-bottom: 1px solid var(--section-border); /* Added subtle border-bottom */
 }
 
 .testimonial {
@@ -1114,9 +1115,9 @@ body {
 .faq-section {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
-    padding: 0.3rem;
+    padding: 2rem 0.3rem; /* Updated with vertical spacing */
     border-radius: 5px;
-    margin-bottom: 0.8rem;
+    margin-bottom: 2rem; /* Updated with vertical spacing */
 }
 
 .faq-item {
@@ -1142,18 +1143,19 @@ body {
 .why-section {
     background-color: var(--section-bg);
     border: 1px solid var(--section-border);
-    padding: 0.3rem;
+    padding: 2rem 0.3rem; /* Updated with vertical spacing */
     border-radius: 5px;
-    margin-bottom: 0.8rem;
+    margin-bottom: 2rem; /* Updated with vertical spacing */
 }
 
-.why-section h2 {
-    font-size: 1.3rem;
+.why-section h2.section-heading {
+    font-size: 1.4rem; /* Reduced font size */
     font-weight: 600;
     color: var(--section-header);
     text-align: center;
     line-height: 1.5;
-    padding: 0.5rem;
+    padding: 1rexm; /* Added padding */
+    border-bottom: 1px solid var(--section-border); /* Added subtle border-bottom */
 }
 
 .why-list li {
@@ -1209,14 +1211,17 @@ body {
 h1, h3,
 .tools-section h2,
 .recommended-learning h2,
-.faq-section h2 {
+.faq-section h2.section-heading,
+.why-section h2.section-heading,
+.testimonials-section h2.section-heading {
     font-family: 'Poppins', 'Arial', sans-serif;
     color: var(--section-header);
-    font-size: 1.4rem;
+    font-size: 1.4rem; /* Reduced font size */
     font-weight: 600;
     text-align: center;
     line-height: 1.5;
-    padding: 0.5rem;
+    padding: 1rem; /* Added padding */
+    border-bottom: 1px solid var(--section-border); /* Added subtle border-bottom */
 }
 
 .card-title i,
@@ -1364,6 +1369,13 @@ h1, h3,
         width: 2rem;
         height: 2rem;
         font-size: 0.9rem;
+    }
+
+    .testimonials-section h2.section-heading,
+    .why-section h2.section-heading,
+    .faq-section h2.section-heading {
+        font-size: 1.2rem; /* Adjusted for smaller screens */
+        padding: 0.8rem;
     }
 
     #modeToggle {
@@ -1694,11 +1706,13 @@ h1, h3,
     }
 
     .testimonials-section {
-        padding: 0.8rem;
+        padding: 2rem 0.8rem; /* Updated with vertical spacing */
     }
 
-    .testimonials-section h2 {
-        font-size: 1.5rem;
+    .testimonials-section h2.section-heading {
+        font-size: 1.4rem; /* Reduced font size */
+        padding: 1rem; /* Added padding */
+        border-bottom: 1px solid var(--section-border); /* Added subtle border-bottom */
     }
 
     .testimonial {
@@ -1720,59 +1734,68 @@ h1, h3,
     }
 
     .why-section {
-        padding: 0.8rem;
+        padding: 2rem 0.8rem; /* Updated with vertical spacing */
     }
 
-    .why-section h2 {
-        font-size: 1.5rem;
+    .why-section h2.section-heading {
+        font-size: 1.4rem; /* Reduced font size */
+        padding: 1rem; /* Added padding */
+        border-bottom: 1px solid var(--section-border); /* Added subtle border-bottom */
+    }
+
+    .faq-section {
+        padding: 2rem 0.8rem; /* Updated with vertical spacing */
     }
 
     .faq-item h3 {
         font-size: 1.4rem;
     }
 
-    .faq-item h3 i {
-        font-size: 1rem;
+.faq-item h3 i {
+    color: var(--accent-blue);
+    font-size: 1.1rem;
+    margin-right: 8px;
+}
+
+/* Ensure proper closure of the media query */
+}
+
+/* Additional Media Query for Larger Screens (Optional) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1400px;
+        padding: 1.5rem 3rem;
     }
 
-    .faq-item p {
-        font-size: 0.9rem;
+    .hero h2 {
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
     }
 
-    .social-icons a {
-        font-size: 0.9rem;
-        margin: 0 8px;
+    .card-title {
+        font-size: 1.4rem;
     }
 
-    .footer-disclaimer {
-        font-size: 0.8rem;
+    .tool-card {
+        max-width: 450px;
     }
 
-    .footer-disclaimer i {
-        font-size: 0.9rem;
+    .group-title {
+        font-size: 1.8rem;
     }
 
-    .course-link {
-        font-size: 0.95rem;
+    .accordion-button {
+        font-size: 1.8rem;
     }
 
-    .resources a {
-        font-size: 0.9rem;
-    }
-
-    .list-group-item a {
-        font-size: 0.9rem;
-    }
-
-    h1, h3,
-    .tools-section h2,
-    .recommended-learning h2,
-    .faq-section h2 {
+    .tool-title {
         font-size: 2rem;
     }
 
-    #modeToggle {
-        padding: 0.75rem 1.25rem;
-        font-size: 0.95rem;
+    .about-title {
+        font-size: 3rem;
+    }
+
+    .testimonials-section, .why-section, .faq-section {
+        padding: 2.5rem 1rem;
     }
 }
