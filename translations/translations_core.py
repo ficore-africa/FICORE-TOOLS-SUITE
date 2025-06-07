@@ -458,7 +458,7 @@ CORE_TRANSLATIONS = {
         'core_faq': 'Frequently Asked Questions',
         'faq_fund_handling': 'Does Ficore handle my funds?',
         'faq_fund_handling_answer': 'No, Ficore is not a bank and does not hold or move funds. We provide you with easy tools for your daily financial management and planning.',
-        'core_learn_more': 'Learn more',
+        'core_learn_more': 'Learn More About Us',
         'learning_hub_error_message': 'An error occurred',
         'learning_hub_success_language_updated': 'Language updated successfully',
         'learning_hub_success_logout': 'Successfully logged out',
