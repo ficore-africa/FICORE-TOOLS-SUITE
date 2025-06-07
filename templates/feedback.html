@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ t('core_feedback_page_title', default='Provide Feedback', lang=lang) }}{% endblock %}
 {% block content %}
+<div class="tool-header">
+  <div class="tool-header-container">
+    <h2 class="tool-title">
+      {{ t('core_feedback_page_title', default='Provide Feedback', lang=lang) }}
+    </h2>
+  </div>
+</div>
 <div class="container mt-5">
     <h1 class="text-center mb-4">{{ t('core_feedback_page_title', default='Provide Feedback', lang=lang) }}</h1>
     <p class="text-center mb-5">{{ t('core_feedback_page_description', default='We value your input! Choose how you’d like to share your feedback below.', lang=lang) }}</p>
