@@ -67,7 +67,7 @@
     --info-box-text: #856404;
     --info-box-border: #ffeeba;
     --section-bg: #E3F2FD;
-    --section-border: #343a40;
+    --section-border: #e0e0e0;
     --testimonial-text: #333;
     --testimonial-quote: #0288D1;
     --social-icon-hover: #E3F2FD;
@@ -160,27 +160,34 @@
 }
 
 /* Add Transitions for Smooth Color Changes */
-body, .navbar, .header-message, .consent-banner, .btn-primary, .hero, .card, .journey-strip, .journey-step,
+body, .navbar, .header-message, .consent-banner, .btn, .hero, .card, .journey-strip, .journey-step,
 .tool-group, .accordion-button, .accordion-item, .tool-header-container, .progress, .badge, .about-container,
 .about-header, .mission-statement, .team-why, .testimonials-section, .recommended-learning, .faq-section,
 .why-section, .footer-disclaimer, .social-icons a, .insights-box, .course-link, .resources a, .list-group-item {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
 }
 
+/* Smooth Scroll for Auto-Scrolling */
+body {
+    scroll-behavior: smooth;
+}
+
 /* Mode Toggle Button */
 #modeToggle {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    padding: 0.3rem 0.6rem;
+    padding: 0.75rem 1.25rem;
     background: var(--button-gradient);
     color: white;
     border: none;
-    border-radius: 5px;
-    font-size: 0.85rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.3s ease, transform 0.2s ease;
+    width: auto;
 }
 
 #modeToggle:hover {
@@ -221,14 +228,18 @@ body {
     background: var(--navbar-gradient);
     animation: gradientShift 5s ease infinite;
     z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
 }
 
 .navbar-brand {
-    padding: 0.2rem;
-    margin: 0.2rem auto;
     color: #FFFFFF !important;
     font-weight: bold;
+    font-size: 1rem;
     text-align: center;
+    margin: 0;
 }
 
 .logo-centered {
@@ -236,19 +247,41 @@ body {
 }
 
 .navbar-toggler {
-    margin: 0.2rem auto;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.9rem;
+    border: none;
+    background: var(--button-nav-gradient);
+    color: white;
+    border-radius: 8px;
+}
+
+.navbar-toggler:hover {
+    background: var(--button-nav-gradient-hover);
 }
 
 .navbar-nav {
     gap: 0.5rem;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .nav-link {
     color: #FFFFFF !important;
     font-weight: bold;
     font-size: 0.9rem;
+}
+
+.navbar-collapse {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-end;
 }
 
 @keyframes gradientShift {
@@ -299,36 +332,50 @@ body {
 }
 
 .consent-banner .close-btn {
-    background: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    background: var(--button-gradient);
+    color: white;
     border: none;
-    font-size: 1rem;
-    color: var(--accent-blue);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    padding: 0.2rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+    width: auto;
+}
+
+.consent-banner .close-btn:hover {
+    background: var(--button-gradient-hover);
+    transform: scale(1.05);
 }
 
 /* Buttons */
-.btn-primary {
+.btn, .btn-primary, .btn-explore, .language-btn, .course-link, .tool-card button, .modal .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.25rem;
     background: var(--button-gradient);
     color: white;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.9rem;
     font-weight: 600;
     border: none;
-    transition: transform 0.2s ease, background 0.3s ease;
-    width: 95%;
-    margin: 0.5rem auto;
+    transition: background 0.3s ease, transform 0.2s ease;
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
     text-align: center;
 }
 
-.btn-primary:hover {
-    transform: scale(1.05);
+.btn:hover, .btn-primary:hover, .btn-explore:hover, .language-btn:hover, .course-link:hover, .tool-card button:hover, .modal .btn:hover {
     background: var(--button-gradient-hover);
+    transform: scale(1.05);
 }
 
 .btn-primary.navbar-btn {
@@ -340,24 +387,17 @@ body {
 }
 
 .btn-explore {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.9rem;
-    border-radius: 8px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 0.95rem;
+    transition: box-shadow 0.3s ease;
 }
 
 .btn-explore:hover {
-    transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Language Button */
 .language-btn {
     font-size: 0.85rem;
-    padding: 0.3rem 0.6rem;
-    min-width: 70px;
-    text-align: center;
-    border-radius: 5px;
+    min-width: 80px;
     white-space: nowrap;
 }
 
@@ -402,6 +442,15 @@ body {
 .hero-subtext i {
     color: var(--hero-subtext-icon);
     font-size: 0.9rem;
+}
+
+.hero-disclaimer {
+    font-style: italic;
+    font-weight: 300;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    color: white;
+    margin: 0.5rem 0;
 }
 
 /* Card */
@@ -469,6 +518,8 @@ body {
     padding: 1rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 1;
 }
 
 .journey-container {
@@ -477,31 +528,44 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 2;
 }
 
-/* Central timeline line */
+.journey-container h2 {
+    position: relative;
+    z-index: 3;
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+}
+
+/* Horizontal timeline line for mobile */
 .journey-container::before {
     content: '';
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    background: var(--journey-line-gradient);
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    height: 4px;
+    background: var(--journey-line-gradient-horizontal);
+    z-index: 0;
 }
 
 .journey-steps {
     display: flex;
-    flex-direction: column;
-    gap: 2rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
     position: relative;
     width: 100%;
-    max-width: 300px;
+    max-width: 100%;
+    z-index: 2;
+    justify-content: center;
 }
 
 .journey-step {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
@@ -512,7 +576,16 @@ body {
     text-decoration: none;
     transition: transform 0.2s ease, background-color 0.2s ease;
     padding: 1rem;
-    z-index: 1;
+    margin: 0;
+    z-index: 3;
+    opacity: 0;
+    animation: fadeInOnScroll 0.5s ease forwards;
+    flex: 1 1 45%;
+    max-width: 150px;
+}
+
+@keyframes fadeInOnScroll {
+    to { opacity: 1; }
 }
 
 .journey-step:hover {
@@ -524,6 +597,16 @@ body {
 .journey-step:focus {
     outline: 2px solid var(--accent-blue);
     outline-offset: 2px;
+}
+
+.journey-step:active .journey-icon {
+    animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
 
 .journey-icon {
@@ -543,10 +626,9 @@ body {
     border-radius: 50%;
     font-weight: 600;
     font-size: 1rem;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
+    position: static;
+    margin-bottom: 0.5rem;
+    z-index: 4;
     border: 2px solid #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -556,6 +638,8 @@ body {
     margin: 0.5rem 0 0;
     text-wrap: balance;
     white-space: normal;
+    position: relative;
+    z-index: 3;
 }
 
 /* Tool Group */
@@ -626,6 +710,7 @@ body {
 .accordion-item {
     border-bottom: 1px solid var(--accordion-border);
     margin-bottom: 0.5rem;
+    transition: max-height 0.3s ease;
 }
 
 .accordion-item:last-child {
@@ -641,11 +726,6 @@ body {
 .tool-card p {
     font-size: 0.85rem;
     margin-bottom: 1rem;
-}
-
-.tool-card button {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
 }
 
 /* Financial Health Score Badge */
@@ -965,15 +1045,24 @@ body {
 /* Testimonials */
 .testimonials-section {
     background-color: var(--section-bg);
-    border: 2px solid var(--section-border);
+    border: 1px solid var(--section-border);
     border-radius: 5px;
-    padding: 0.5rem;
+    padding: 0.3rem;
     margin-bottom: 0.8rem;
+}
+
+.testimonials-section h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--section-header);
+    text-align: center;
+    line-height: 1.5;
+    padding: 0.5rem;
 }
 
 .testimonial {
     color: var(--testimonial-text);
-    padding: 0.5rem;
+    padding: 0.3rem;
 }
 
 .testimonial + .testimonial {
@@ -1015,8 +1104,8 @@ body {
 /* Recommended Learning */
 .recommended-learning {
     background-color: var(--section-bg);
-    border: 2px solid var(--section-border);
-    padding: 0.5rem;
+    border: 1px solid var(--section-border);
+    padding: 0.3rem;
     border-radius: 5px;
     margin-bottom: 0.8rem;
 }
@@ -1024,8 +1113,8 @@ body {
 /* FAQ Section */
 .faq-section {
     background-color: var(--section-bg);
-    border: 2px solid var(--section-border);
-    padding: 0.5rem;
+    border: 1px solid var(--section-border);
+    padding: 0.3rem;
     border-radius: 5px;
     margin-bottom: 0.8rem;
 }
@@ -1052,10 +1141,19 @@ body {
 /* Why Section */
 .why-section {
     background-color: var(--section-bg);
-    border: 2px solid var(--section-border);
-    padding: 0.5rem;
+    border: 1px solid var(--section-border);
+    padding: 0.3rem;
     border-radius: 5px;
     margin-bottom: 0.8rem;
+}
+
+.why-section h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--section-header);
+    text-align: center;
+    line-height: 1.5;
+    padding: 0.5rem;
 }
 
 .why-list li {
@@ -1110,8 +1208,6 @@ body {
 /* Section Headers */
 h1, h3,
 .tools-section h2,
-.why-section h2,
-.testimonials-section h2,
 .recommended-learning h2,
 .faq-section h2 {
     font-family: 'Poppins', 'Arial', sans-serif;
@@ -1138,28 +1234,6 @@ h1, h3,
     border-radius: 8px;
     padding: 0.5rem;
     margin-bottom: 0.8rem;
-}
-
-/* Course Link */
-.course-link {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: transform 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--button-gradient);
-    border: none;
-    color: white;
-    text-decoration: none;
-    font-size: 0.85rem;
-}
-
-.course-link:hover {
-    transform: scale(1.05);
-    background: var(--button-gradient-hover);
-    text-decoration: none;
 }
 
 /* Resources */
@@ -1248,16 +1322,24 @@ h1, h3,
     }
 
     .navbar-toggler {
-        padding: 0.2rem;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
     }
 
     .container {
         padding: 0.3rem 0.5rem;
     }
 
-    .btn-primary {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
+    .btn, .btn-primary, .btn-explore, .language-btn, .course-link, .modal .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    .index-page .tool-card button {
+        padding: 0.75rem 1.75rem;
+        font-size: 1rem;
+        border-radius: 10px;
     }
 
     .hero h2 {
@@ -1269,7 +1351,13 @@ h1, h3,
     }
 
     .journey-steps {
-        max-width: 250px;
+        max-width: 100%;
+        gap: 0.8rem;
+    }
+
+    .journey-step {
+        flex: 1 1 40%;
+        max-width: 120px;
     }
 
     .step-badge {
@@ -1279,8 +1367,23 @@ h1, h3,
     }
 
     #modeToggle {
-        padding: 0.2rem 0.5rem;
+        padding: 0.75rem 1.25rem;
         font-size: 0.8rem;
+    }
+}
+
+/* Mobile-specific button styles for Start buttons */
+@media (max-width: 767px) {
+    .btn-primary.btn-explore {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    .index-page .tool-card button {
+        padding: 0.75rem 1.75rem;
+        font-size: 1rem;
+        border-radius: 10px;
     }
 }
 
@@ -1296,20 +1399,30 @@ h1, h3,
         padding: 1rem;
     }
 
-    .navbar-nav {
-        flex-direction: row;
+    .navbar {
+        padding: 0.8rem 2rem;
     }
 
     .navbar-brand {
-        margin-right: 0.5rem;
+        font-size: 1.2rem;
     }
 
     .logo-centered {
         max-width: 120px;
     }
 
+    .navbar-nav {
+        flex-direction: row;
+        align-items: center;
+    }
+
     .nav-link {
         font-size: 1rem;
+    }
+
+    .navbar-toggler {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
     }
 
     .header-message {
@@ -1322,22 +1435,19 @@ h1, h3,
         padding: 0.8rem;
     }
 
-    .btn-primary {
-        padding: 0.6rem 1.2rem;
+    .btn, .btn-primary, .btn-explore, .language-btn, .course-link, .tool-card button, .modal .btn {
+        padding: 0.75rem 1.25rem;
         font-size: 0.95rem;
-        width: auto;
-        margin: 0;
+        border-radius: 8px;
     }
 
     .btn-explore {
-        padding: 0.8rem 1.5rem;
         font-size: 1rem;
     }
 
     .language-btn {
         font-size: 0.9rem;
-        padding: 0.4rem 0.8rem;
-        min-width: 80px;
+        min-width: 90px;
     }
 
     .hero {
@@ -1363,6 +1473,13 @@ h1, h3,
 
     .hero-subtext i {
         font-size: 1rem;
+    }
+
+    .hero-disclaimer {
+        font-size: 0.75rem;
+        font-style: italic;
+        font-weight: 300;
+        opacity: 0.6;
     }
 
     .card-body {
@@ -1403,6 +1520,7 @@ h1, h3,
         justify-content: space-between;
         max-width: none;
         gap: 1rem;
+        flex-wrap: nowrap;
     }
 
     .journey-step {
@@ -1411,6 +1529,9 @@ h1, h3,
         justify-content: flex-start;
         width: 20%;
         padding: 0.5rem;
+        margin: 0;
+        flex: 0 0 auto;
+        max-width: none;
     }
 
     .step-badge {
@@ -1467,7 +1588,6 @@ h1, h3,
 
     .tool-card button {
         font-size: 0.95rem;
-        padding: 0.6rem 1.2rem;
     }
 
     .group-title {
@@ -1573,6 +1693,14 @@ h1, h3,
         font-size: 1.1rem;
     }
 
+    .testimonials-section {
+        padding: 0.8rem;
+    }
+
+    .testimonials-section h2 {
+        font-size: 1.5rem;
+    }
+
     .testimonial {
         padding: 1rem;
     }
@@ -1589,6 +1717,14 @@ h1, h3,
 
     .testimonial .name {
         font-size: 0.9rem;
+    }
+
+    .why-section {
+        padding: 0.8rem;
+    }
+
+    .why-section h2 {
+        font-size: 1.5rem;
     }
 
     .faq-item h3 {
@@ -1617,7 +1753,6 @@ h1, h3,
     }
 
     .course-link {
-        padding: 0.6rem 1.2rem;
         font-size: 0.95rem;
     }
 
@@ -1631,15 +1766,13 @@ h1, h3,
 
     h1, h3,
     .tools-section h2,
-    .why-section h2,
-    .testimonials-section h2,
     .recommended-learning h2,
     .faq-section h2 {
         font-size: 2rem;
     }
 
     #modeToggle {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
     }
 }
