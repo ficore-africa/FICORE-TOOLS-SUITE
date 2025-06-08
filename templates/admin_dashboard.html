@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}{{ trans('admin_dashboard_title', default='Admin Dashboard', lang=lang) }}{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1>{{ trans('admin_dashboard_title', default='Admin Dashboard', lang=lang) }}</h1>
+    <p class="lead">{{ trans('admin_dashboard_desc', default='View and analyze platform usage and engagement metrics', lang=lang) }}</p>
+    
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'admin.overview' }}" href="{{ url_for('admin.overview') }}">{{ trans('admin_overview', default='Overview', lang=lang) }}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if request.endpoint == 'admin.tool_usage' }}" href="{{ url_for('admin.tool_usage') }}">{{ trans('admin_tool_usage', default='Tool Usage', lang=lang) }}</a>
+        </li>
+    </ul>
+
+    <!-- Filters -->
+    <form method="GET" action="{{ url_for('admin.tool_usage') }}" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="tool_name" class="form-label">{{ trans('admin_filter_tool', default='Tool Name', lang=lang) }}</label>
+                <select name="tool_name" id="tool_name" class="form-select">
+                    <option value="">{{ trans('admin_all_tools', default='All Tools', lang=lang) }}</option>
+                    {% for tool in valid_tools %}
+                        <option value="{{ tool }}" {{ 'selected' if tool == tool_name }}>{{ trans('tool_' + tool, default=tool.replace('_', ' ').title(), lang=lang) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">{{ trans('admin_start_date', default='Start Date', lang=lang) }}</label>
+                <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date or '' }}">
+            </div>
+            <div class="col-md-3">
+                <label for="end_date" class="form-label">{{ trans('admin_end_date', default='End Date', lang=lang) }}</label>
+                <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date or '' }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">{{ trans('admin_filter', default='Filter', lang=lang) }}</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Overview Metrics -->
+    {% if request.endpoint == 'admin.overview' %}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ trans('admin_total_users', default='Total Users', lang=lang) }}</h5>
+                    <p class="card-text display-4">{{ metrics.total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ trans('admin_new_users_24h', default='New Users (24h)', lang=lang) }}</h5>
+                    <p class="card-text display-4">{{ metrics.new_users_last_24h }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ trans('admin_avg_feedback', default='Avg Feedback Rating', lang=lang) }}</h5>
+                    <p class="card-text display-4">{{ metrics.avg_feedback_rating }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ trans('admin_multi_tool_ratio', default='Multi-Tool Users (%)', lang=lang) }}</h5>
+                    <p class="card-text display-4">{{ metrics.multi_tool_ratio }}%</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ trans('admin_conversion_rate', default='Anon to Registered (%)', lang=lang) }}</h5>
+                    <p class="card-text display-4">{{ metrics.conversion_rate }}%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ trans('admin_auth_trends', default='Registration and Login Trends', lang=lang) }}</h5>
+            <canvas id="authChart"></canvas>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ trans('admin_tool_usage_dist', default='Tool Usage Distribution', lang=lang) }}</h5>
+            <canvas id="toolChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Authentication Trends Chart
+        const authCtx = document.getElementById('authChart').getContext('2d');
+        new Chart(authCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_data.labels | tojson }},
+                datasets: [
+                    {
+                        label: '{{ trans('admin_register', default='Registrations', lang=lang) }}',
+                        data: {{ chart_data.registrations | tojson }},
+                        borderColor: '#007bff',
+                        fill: false
+                    },
+                    {
+                        label: '{{ trans('admin_login', default='Logins', lang=lang) }}',
+                        data: {{ chart_data.logins | tojson }},
+                        borderColor: '#28a745',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Tool Usage Distribution Chart
+        const toolCtx = document.getElementById('toolChart').getContext('2d');
+        new Chart(toolCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_data.labels | tojson }},
+                datasets: [
+                    {% for tool, counts in chart_data.tool_usage.items() %}
+                    {
+                        label: '{{ trans('tool_' + tool, default=tool.replace('_', ' ').title(), lang=lang) }}',
+                        data: {{ counts | tojson }},
+                        backgroundColor: '{{ '#{:06x}'.format(loop.index * 123456 % 16777215) }}'
+                    }{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+
+    <!-- Tool Usage Logs -->
+    {% if request.endpoint == 'admin.tool_usage' %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ trans('admin_usage_logs', default='Usage Logs', lang=lang) }}</h5>
+            <a href="{{ url_for('admin.export_csv', tool_name=tool_name or '', start_date=start_date or '', end_date=end_date or '') }}" 
+               class="btn btn-success mb-3">{{ trans('admin_export_csv', default='Export CSV', lang=lang) }}</a>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{{ trans('admin_id', default='ID', lang=lang) }}</th>
+                        <th>{{ trans('admin_user_id', default='User ID', lang=lang) }}</th>
+                        <th>{{ trans('admin_session_id', default='Session ID', lang=lang) }}</th>
+                        <th>{{ trans('admin_tool_name', default='Tool Name', lang=lang) }}</th>
+                        <th>{{ trans('admin_created_at', default='Created At', lang=lang) }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in metrics %}
+                    <tr>
+                        <td>{{ log.id }}</td>
+                        <td>{{ log.user_id or 'anonymous' }}</td>
+                        <td>{{ log.session_id }}</td>
+                        <td>{{ trans('tool_' + log.tool_name, default=log.tool_name.replace('_', ' ').title(), lang=lang) }}</td>
+                        <td>{{ log.created_at | format_datetime }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">{{ trans('admin_no_logs', default='No logs found', lang=lang) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ trans('admin_usage_trend', default='Usage Trend', lang=lang) }}</h5>
+            <canvas id="usageChart"></canvas>
+        </div>
+    </div>
+    <script>
+        const usageCtx = document.getElementById('usageChart').getContext('2d');
+        new Chart(usageCtx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_data.labels | tojson }},
+                datasets: [{
+                    label: '{{ trans('admin_usage_count', default='Usage Count', lang=lang) }}',
+                    data: {{ chart_data.usage_counts | tojson }},
+                    borderColor: '#007bff',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+    {% endif %}
+</div>
+
+<!-- Chart.js (included once at the bottom) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.min.js"></script>
+{% endblock %}
