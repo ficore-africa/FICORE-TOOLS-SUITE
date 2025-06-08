@@ -15,6 +15,8 @@ from models import Course, FinancialHealth, Budget, Bill, NetWorth, EmergencyFun
 import json
 from functools import wraps
 from uuid import uuid4
+from alembic import command
+from alembic.config import Config
 
 # Load environment variables
 load_dotenv()
@@ -83,6 +85,18 @@ def initialize_courses_data(app):
             logger.info("Initialized courses in database")
         app.config['COURSES'] = [course.to_dict() for course in Course.query.all()]
 
+def apply_migrations(app):
+    alembic_cfg = Config(os.path.join(os.path.dirname(__file__), 'alembic.ini'))
+    alembic_cfg.set_main_option('sqlalchemy.url', app.config['SQLALCHEMY_DATABASE_URI'])
+    try:
+        with app.app_context():
+            logger.info("Applying database migrations")
+            command.upgrade(alembic_cfg, "head")
+            logger.info("Database migrations applied successfully")
+    except Exception as e:
+        logger.error(f"Failed to apply migrations: {str(e)}", exc_info=True)
+        raise
+
 # Constants
 SAMPLE_COURSES = [
     {
@@ -127,7 +141,7 @@ def create_app():
     flask_session.init_app(app)
     csrf.init_app(app)
 
-    # Configure SQLite database
+    # Configure database
     db_dir = os.path.join(os.path.dirname(__file__), 'data')
     try:
         os.makedirs(db_dir, exist_ok=True)
@@ -135,8 +149,9 @@ def create_app():
     except (PermissionError, OSError) as e:
         logger.critical(f"Failed to create database directory {db_dir}: {str(e)}")
         raise
-    db_path = os.path.join(db_dir, 'ficore.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', f'sqlite:///{os.path.join(db_dir, "ficore.db")}')
+    if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+        app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
@@ -155,7 +170,9 @@ def create_app():
     except Exception as e:
         logger.error(f"Failed to initialize scheduler: {str(e)}")
 
+    # Apply migrations and initialize database
     with app.app_context():
+        apply_migrations(app)  # Run migrations before creating tables
         db.create_all()
         initialize_courses_data(app)
         logger.info("Database tables created and courses initialized")
@@ -465,7 +482,6 @@ def create_app():
         response.headers['Content-Type'] = 'text/plain'
         return response
 
-    # Feedback route
     @app.route('/feedback', methods=['GET', 'POST'])
     @ensure_session_id
     def feedback():

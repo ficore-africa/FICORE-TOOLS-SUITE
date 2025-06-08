@@ -313,11 +313,6 @@ class QuizResult(db.Model):
     tips = db.Column(db.Text, nullable=True)  # JSON string
     user = db.relationship('User', backref='quiz_results')
 
-    __table_args__ = (
-        db.Index('ix_quiz_results_session_id', 'session_id'),
-        db.Index('ix_quiz_results_user_id', 'user_id')
-    )
-
     def to_dict(self):
         return {
             'id': self.id,
@@ -336,7 +331,7 @@ class QuizResult(db.Model):
 
 class Feedback(db.Model):
     __tablename__ = 'feedback'
-    id = db.Column(db.String(36), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     session_id = db.Column(db.String(36), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
