@@ -1,0 +1,133 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trans('budget_budget_plan_summary') | default('Your Budget Plan Summary') }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; color: #333333; margin: 0; padding: 0; background-color: #f8f9fa;">
+    <div style="max-width: 600px; margin: 20px auto; background: #ffffff; border: 1px solid #dddddd; border-radius: 8px;">
+        <div style="background: #2E7D32; color: #ffffff; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">{{ trans('budget_budget_plan_summary') | default('Your Budget Plan Summary') }}</h1>
+        </div>
+        <div style="padding: 20px;">
+            <p style="margin: 0 0 10px;">{{ trans('core_dear') | default('Dear') }} {{ data.first_name | default('User') }},</p>
+            <p style="margin: 0 0 20px;">{{ trans('budget_budget_summary_intro') | default('Thank you for creating your budget plan. Below is your personalized summary.') }}</p>
+            
+            <h2 style="color: #2E7D32; font-size: 20px; margin: 20px 0 10px;">{{ trans('budget_budget_summary') | default('Budget Summary') }}</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold; width: 50%;">{{ trans('core_created_at') | default('Created At') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">{{ data.created_at }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_monthly_income') | default('Monthly Income') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.income | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_total_expenses') | default('Total Expenses') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.expenses | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_savings_goal') | default('Savings Goal') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.savings_goal | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_surplus_deficit') | default('Surplus/Deficit') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd; {% if data.surplus_deficit < 0 %}color: #dc3545;{% endif %}">₦{{ data.surplus_deficit | format_number }}</td>
+                </tr>
+            </table>
+
+            <h2 style="color: #2E7D32; font-size: 20px; margin: 20px 0 10px;">{{ trans('budget_expense_breakdown') | default('Expense Breakdown') }}</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold; width: 50%;">{{ trans('budget_housing_rent') | default('Housing/Rent') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.housing | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_food') | default('Food') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.food | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_transport') | default('Transport') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.transport | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_dependents_support') | default('Dependents Support') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.dependents | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_miscellaneous') | default('Miscellaneous') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.miscellaneous | format_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 10px; border: 1px solid #dddddd; font-weight: bold;">{{ trans('budget_others') | default('Others') }}</td>
+                    <td style="padding: 10px; border: 1px solid #dddddd;">₦{{ data.others | format_number }}</td>
+                </tr>
+            </table>
+
+            <h2 style="color: #2E7D32; font-size: 20px; margin: 20px 0 10px;">{{ trans('budget_recommendations') | default('Recommendations') }}</h2>
+            <ul style="padding-left: 20px; margin: 0 0 20px;">
+                {% if data.surplus_deficit < 0 %}
+                    <li style="margin-bottom: 10px;">{{ trans('budget_insight_budget_deficit') | default('Your budget shows a deficit. Reduce non-essential expenses (e.g., miscellaneous or outings) or increase income.') }}</li>
+                {% elif data.surplus_deficit > 0 %}
+                    <li style="margin-bottom: 10px;">{{ trans('budget_insight_budget_surplus') | default('You have a budget surplus. Consider investing in Ajo or fixed deposits to grow your savings.') }}</li>
+                {% endif %}
+                {% if data.savings_goal == 0 %}
+                    <li style="margin-bottom: 10px;">{{ trans('budget_insight_set_savings_goal') | default('Set a savings goal to build financial security.') }}</li>
+                {% elif data.surplus_deficit < data.savings_goal %}
+                    <li style="margin-bottom: 10px;">{{ trans('budget_increase_savings') | default('Your surplus is below your savings goal. Cut expenses or boost income to meet your target.') }}</li>
+                {% endif %}
+                <li style="margin-bottom: 10px;">{{ trans('budget_tip_track_expenses') | default('Track expenses regularly to stay within your budget.') }}</li>
+            </ul>
+
+            <p style="margin: 0 0 20px; text-align: center;">
+                <a href="{{ data.cta_url }}" style="display: inline-block; padding: 12px 24px; background: #2E7D32; color: #ffffff; text-decoration: none; border-radius: 5px; font-size: 16px;">{{ trans('budget_view_dashboard') | default('View Your Dashboard') }}</a>
+            </p>
+            <p style="margin: 0 0 20px;">{{ trans('core_thank_you') | default('Thank you for using FiCore Africa!') }}</p>
+        </div>
+        <div style="text-align: center; font-size: 12px; color: #777777; padding: 10px; border-top: 1px solid #dddddd;">
+            <p style="margin: 0;">{{ trans('core_powered_by') | default('Powered by FiCore Africa') }}</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans('learning_hub_courses') }}
+{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = 'learning_hub_courses' %}
+    {% set tool_icon = 'fa-book' %}
+    {% set subtitle = trans('learning_hub_courses_subtitle') %}
+    {% include 'tool_header.html' %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="text-right">
+        <a href="{{ url_for('learning_hub.profile') }}" class="btn btn-primary">
+            <i class="fas fa-user"></i> {{ trans('learning_hub_set_profile') }}
+        </a>
+    </div>
+    <div class="course-grid">
+        {% for course_id, course in courses.items() %}
+        <div class="card">
+            <h2>{{ trans(course['title_key']) }}</h2>
+            <p>{{ trans(course['desc_key']) }}</p>
+            {% set cp = progress.get(course_id, {}) %}
+            {% set total_lessons = 0 %}
+            {% for module in course['modules'] %}
+                {% if module['lessons'] %}
+                    {% set total_lessons = total_lessons + module['lessons']|length %}
+                {% endif %}
+            {% endfor %}
+            {% if cp.get('lessons_completed') %}
+                <p class="text-success">
+                    {{ cp['lessons_completed']|length }}/{{ total_lessons }} {{ trans('learning_hub_lessons_completed') }}
+                </p>
+            {% endif %}
+            <a href="{{ url_for('learning_hub.course_overview', course_id=course_id) }}" class="btn btn-primary">
+                <i class="fas fa-book-open"></i> {{ trans('learning_hub_view_overview') }}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans(course['title_key']) }}
+{% endblock %}
+{% block content %}
+<div class="container">
+    {% set tool_name = 'learning_hub_course_overview' %}
+    {% set tool_icon = 'fa-book-open' %}
+    {% set subtitle = trans(course['title_key']) %}
+    {% include 'tool_header.html' %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="card">
+        <h2>{{ trans('learning_hub_what_you_learn') }}</h2>
+        <p>{{ trans(course['desc_key']) }}</p>
+        {% set total_lessons = 0 %}
+        {% for module in course['modules'] %}
+            {% if module['lessons'] %}
+                {% set total_lessons = total_lessons + module['lessons']|length %}
+            {% endif %}
+        {% endfor %}
+        <p>Total Lessons: {{ total_lessons }}</p>
+        {% if progress.get('lessons_completed') %}
+            <p class="text-success">Completed: {{ progress['lessons_completed']|length }}/{{ total_lessons }}</p>
+        {% else %}
+            <p>Completed: 0/{{ total_lessons }}</p>
+        {% endif %}
+        <div>
+            {% if progress.get('current_lesson') %}
+                <a href="{{ url_for('learning_hub.lesson', course_id=course['id'], lesson_id=progress['current_lesson']) }}" class="btn btn-success">
+                    <i class="fas fa-play"></i> {{ trans('learning_hub_continue_course') }}
+                </a>
+            {% elif course['modules'] and course['modules'][0]['lessons'] %}
+                <a href="{{ url_for('learning_hub.lesson', course_id=course['id'], lesson_id=course['modules'][0]['lessons'][0]['id']) }}" class="btn btn-success">
+                    <i class="fas fa-play"></i> {{ trans('learning_hub_start_course') }}
+                </a>
+            {% endif %}
+            <a href="{{ url_for('learning_hub.courses') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> {{ trans('learning_hub_back_to_courses') }}
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <h2>{{ trans('learning_hub_modules') }}</h2>
+        <ul>
+            {% for module in course['modules'] %}
+            <li>
+                <strong>{{ trans(module['title_key']) }}</strong>
+                <ul>
+                    {% for lesson in module['lessons'] %}
+                    <li>
+                        <a href="{{ url_for('learning_hub.lesson', course_id=course['id'], lesson_id=lesson['id']) }}">
+                            {{ trans(lesson['title_key']) }}
+                        </a>
+                        {% if progress.get('lessons_completed') and lesson['id'] in progress['lessons_completed'] %}
+                            <span class="text-success"><i class="fas fa-check"></i> {{ trans('learning_hub_completed') }}</span>
+                        {% endif %}
+                        {% if lesson['quiz_id'] %}
+                            <a href="{{ url_for('learning_hub.quiz', course_id=course['id'], quiz_id=lesson['quiz_id']) }}">
+                                <i class="fas fa-question-circle"></i> {{ trans('learning_hub_quiz') }}
+                            </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
