@@ -4,7 +4,20 @@ import logging
 import uuid
 from datetime import datetime, timedelta
 import atexit
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash, make_response, has_request_context, g, send_from_directory, session
+from flask import (
+    Flask, 
+    jsonify, 
+    request, 
+    render_template, 
+    redirect, 
+    url_for, 
+    flash, 
+    make_response, 
+    has_request_context, 
+    g, 
+    send_from_directory, 
+    session
+)
 from flask_wtf.csrf import CSRFProtect, CSRFError, generate_csrf
 from flask_login import LoginManager, current_user
 from flask_compress import Compress
@@ -568,20 +581,20 @@ def create_app():
         if request.method != 'POST':
             logger.warning(f"Invalid method {request.method} for consent acknowledgement")
             return '', 400
-            try:
-                session['consent_acknowledged'] = {
-                    'status': True,
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'ip': request.remote_addr,
-                    'user_agent': request.headers.get('User-Agent')
-                }
-                logger.info(f"Consent acknowledged for session {session.get('sid', 'no-session-id')} from IP {request.remote_addr}")
-            except InvalidOperation as e:
-                logger.error(f"Session operation failed: {str(e)}")
-                response = make_response('', 204)
-                response.headers['Cache-Control'] = 'no-store'
-                response.headers['X-Content-Type-Options'] = 'nosniff'
-                return response
+        try:
+            session['consent_acknowledged'] = {
+                'status': True,
+                'timestamp': datetime.utcnow().isoformat(),
+                'ip': request.remote_addr,
+                'user_agent': request.headers.get('User-Agent')
+            }
+            logger.info(f"Consent acknowledged for session {session.get('sid', 'no-session-id')} from IP {request.remote_addr}")
+        except InvalidOperation as e:
+            logger.error(f"Session operation failed: {str(e)}")
+        response = make_response('', 204)
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        return response
     @app.route('/general_dashboard')
     @ensure_session_id
     def general_dashboard():
@@ -589,7 +602,22 @@ def create_app():
         logger.info(f"Serving general_dashboard for {'anonymous' if session.get('is_anonymous') else 'authenticated' if current_user.is_authenticated else 'no_session'} user")
         data = {}
         try:
-            from models import get_financial_health, get_budgets, get_bills, get_net_worth, get_emergency_funds, get_learning_progress, get_quiz_results, to_dict_financial_health, to_dict_budget, to_dict_bill, to_dict_net_worth, to_dict_emergency_fund, to_dict_learning_progress, to_dict_quiz_result
+            from models import (
+                get_financial_health, 
+                get_budgets, 
+                get_bills, 
+                get_net_worth, 
+                get_emergency_funds, 
+                get_learning_progress, 
+                get_quiz_results, 
+                to_dict_financial_health, 
+                to_dict_budget, 
+                to_dict_bill, 
+                to_dict_net_worth, 
+                to_dict_emergency_fund, 
+                to_dict_learning_progress, 
+                to_dict_quiz_result
+            )
             filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session.get('sid', 'no-session-id')}
             fh_records = get_financial_health(mongo, filter_kwargs)
             fh_records = [to_dict_financial_health(fh) for fh in fh_records]
