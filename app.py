@@ -564,25 +564,24 @@ def create_app():
         flash(translate('learning_hub_success_language_updated', default='Language updated successfully', lang=new_lang) if lang in valid_langs else translate('Invalid language', default='Invalid language', lang=new_lang), 'success' if lang in valid_langs else 'danger')
         return redirect(request.referrer or url_for('index'))
     @app.route('/acknowledge_consent', methods=['POST'])
-    def acknowledge_consent():
-        if request.method != 'POST':
-            logger.warning(f"Invalid method {request.method} for consent acknowledgement")
-            return '', 400
-        try:
-            session['consent_acknowledged'] = {
-                'status': True,
-                'timestamp': datetime.utcnow().isoformat(),
-                'ip': request.remote_addr,
-                'user_agent': request.headers.get('User-Agent')
-            }
-            logger.info(f"Consent acknowledged for session {session.get('sid', 'no-session-id')} from IP {request.remote_addr}")
-        except InvalidOperation as e:
-            logger.error(f"Session operation failed: {str(e)}")
-        response = make_response('')
-        response.headers['Content-Type'] = None
-        response.headers['Cache-Control'] = 'no-store'
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        return response
+def acknowledge_consent():
+    if request.method != 'POST':
+        logger.warning(f"Invalid method {request.method} for consent acknowledgement")
+        return '', 400
+    try:
+        session['consent_acknowledged'] = {
+            'status': True,
+            'timestamp': datetime.utcnow().isoformat(),
+            'ip': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent')
+        }
+        logger.info(f"Consent acknowledged for session {session.get('sid', 'no-session-id')} from IP {request.remote_addr}")
+    except InvalidOperation as e:
+        logger.error(f"Session operation failed: {str(e)}")
+    response = make_response('', 204)
+    response.headers['Cache-Control'] = 'no-store'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    return response
     @app.route('/general_dashboard')
     @ensure_session_id
     def general_dashboard():
