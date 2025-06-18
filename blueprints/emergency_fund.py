@@ -8,10 +8,20 @@ from datetime import datetime
 import uuid
 import json
 from translations import trans
-from extensions import db
-from models import EmergencyFund, Budget
+from extensions import mongo
+from bson import ObjectId
+from models import log_tool_usage
+import os
+from session_utils import create_anonymous_session
+from app import custom_login_required
 
-emergency_fund_bp = Blueprint('emergency_fund', __name__, url_prefix='/emergency_fund')
+
+emergency_fund_bp = Blueprint(
+    'emergency_fund',
+    __name__,
+    template_folder='templates/EMERGENCYFUND',
+    url_prefix='/EMERGENCYFUND'
+)
 
 class CommaSeparatedFloatField(FloatField):
     def process_formdata(self, valuelist):
@@ -92,15 +102,15 @@ class Step4Form(FlaskForm):
     ])
     submit = SubmitField()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, lang, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        lang = session.get('lang', 'en')
+        self.lang = lang
         self.timeline.label.text = trans('emergency_fund_timeline', lang=lang)
         self.timeline.validators[0].message = trans('required_timeline', lang=lang, default='Please select a timeline.')
         self.timeline.choices = [
             ('6', trans('emergency_fund_6_months', lang=lang)),
             ('12', trans('emergency_fund_12_months', lang=lang)),
-            ('18', trans('emergency_fund_18_months', lang=lang))
+            ('18', trans('emergency_fund_18_months', default='18 Months', lang=lang))
         ]
         self.submit.label.text = trans('emergency_fund_calculate_button', lang=lang)
 
@@ -108,83 +118,140 @@ class Step4Form(FlaskForm):
 def step1():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        session.permanent = True
-        session.modified = True
+        session['permanent'] = True
+        session['modified'] = True
     lang = session.get('lang', 'en')
-    form_data = session.get('emergency_fund_step1', {})
+    form_data = session.get('emergency_fund_data', {})
     if current_user.is_authenticated:
-        form_data['email'] = form_data.get('email', current_user.email)
-        form_data['first_name'] = form_data.get('first_name', current_user.username)
+        form_data['email'] = form_data.get('email', '') or current_user.email
+        form_data['first_name'] = form_data.get('first_name', '') or current_user.username
+    current_app.logger.info(f"Form data: {form_data}, User: {current_user.id if current_user.is_authenticated else 'anonymous'}, Lang: {lang}")
     form = Step1Form(data=form_data)
+    current_app.logger.info(f"Form errors: {form.errors}, MongoDB: {mongo.db is not None}")
+    template_path = 'EMERGENCYFUND/emergency_fund_step1.html'
     try:
+        try:
+            log_tool_usage(
+                mongo=mongo.db,
+                tool_name='emergency_fund',
+                user_id=current_user.id if current_user.is_authenticated else None,
+                session_id=session['sid'],
+                action='step1_view'
+            )
+        except Exception as e:
+            current_app.logger.error(f"Failed to log tool usage: {str(e)}")
         if request.method == 'POST':
+            try:
+                log_tool_usage(
+                    mongo=mongo.db,
+                    tool_name='emergency_fund',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='step1_submit'
+                )
+            except Exception as e:
+                current_app.logger.error(f"Failed to log tool usage (POST): {str(e)}")
             current_app.logger.info(f"Step1 POST data: {request.form.to_dict()}")
             if form.validate_on_submit():
-                session['emergency_fund_step1'] = {
-                    'first_name': form.first_name.data,
-                    'email': form.email.data,
-                    'email_opt_in': form.email_opt_in.data
+                session['emergency_fund_data'] = {
+                    'step1_data': {
+                        'first_name': form.first_name.data,
+                        'email': form.email.data,
+                        'email_opt_in': form.email_opt_in.data
+                    }
                 }
-                session.modified = True
-                current_app.logger.info(f"Step1 data saved to session: {session['emergency_fund_step1']}")
+                session['modified'] = True
+                current_app.logger.info(f"Step1 data saved: {session['emergency_fund_data']}")
                 return redirect(url_for('emergency_fund.step2'))
             else:
-                current_app.logger.warning(f"Step1 form errors: {form.errors}")
+                current_app.logger.warning(f"Step1 form validation failed: {form.errors}")
                 for field, errors in form.errors.items():
                     for error in errors:
                         flash(f"{field}: {error}", 'danger')
-        return render_template('emergency_fund_step1.html', form=form, step=1, trans=trans, lang=lang)
+        current_app.logger.info(f"Rendering template: {template_path}, Blueprint template folder: {emergency_fund_bp.template_folder}")
+        return render_template(template_path, form=form, step_num=1, trans=trans, lang=lang)
     except Exception as e:
-        current_app.logger.exception(f"Error in step1: {str(e)}")
-        flash(trans('an_unexpected_error_occurred', lang=lang, default='An unexpected error occurred.'), 'danger')
-        return render_template('emergency_fund_step1.html', form=form, step=1, trans=trans, lang=lang)
+        current_app.logger.error(f"Error in step1 (template: {template_path}): {str(e)}", exc_info=True)
+        flash(trans('an_unexpected_error_occurred', default='An unexpected error occurred.', lang=lang), 'danger')
+        return render_template('error.html', template=template_path, form=form, step=1, trans=trans, lang=lang), 500
 
 @emergency_fund_bp.route('/step2', methods=['GET', 'POST'])
 def step2():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        session.permanent = True
-        session.modified = True
+        session['permanent'] = True
+        session['modified'] = True
     lang = session.get('lang', 'en')
-    if 'emergency_fund_step1' not in session:
-        flash(trans('emergency_fund_missing_step1', lang=lang, default='Please complete step 1 first.'), 'danger')
+    if 'emergency_fund_data' not in session:
+        flash(trans('emergency_fund_missing_step1', default='Please, complete step 1 first.', lang=lang), 'danger')
         return redirect(url_for('emergency_fund.step1'))
     form = Step2Form()
+    template_path = 'EMERGENCYFUND/emergency_fund_step2.html'
     try:
+        log_tool_usage(
+            mongo=mongo.db,
+            tool_name='emergency_fund',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step2_view'
+        )
         if request.method == 'POST':
+            log_tool_usage(
+                mongo=mongo.db,
+                tool_name='emergency_fund',
+                user_id=current_user.id if current_user.is_authenticated else None,
+                session_id=session['sid'],
+                action='step2_submit'
+            )
             current_app.logger.info(f"Step2 POST data: {request.form.to_dict()}")
             if form.validate_on_submit():
                 session['emergency_fund_step2'] = {
                     'monthly_expenses': float(form.monthly_expenses.data),
                     'monthly_income': float(form.monthly_income.data) if form.monthly_income.data else None
                 }
-                session.modified = True
-                current_app.logger.info(f"Step2 data saved to session: {session['emergency_fund_step2']}")
+                session['modified'] = True
+                current_app.logger.info(f"Step2 data saved successfully to session: {session['emergency_fund_step2']}")
                 return redirect(url_for('emergency_fund.step3'))
             else:
-                current_app.logger.warning(f"Step2 form errors: {form.errors}")
+                current_app.logger.warning(f"Step2 form validation failed: {form.errors}")
                 for field, errors in form.errors.items():
                     for error in errors:
                         flash(f"{field}: {error}", 'danger')
-        return render_template('emergency_fund_step2.html', form=form, step=2, trans=trans, lang=lang)
+        current_app.logger.info(f"Rendering template: {template_path}, Blueprint template folder: {emergency_fund_bp.template_folder}")
+        return render_template(template_path, form=form, step=2, trans=trans, lang=lang)
     except Exception as e:
-        current_app.logger.exception(f"Error in step2: {str(e)}")
-        flash(trans('an_unexpected_error_occurred', lang=lang, default='An unexpected error occurred.'), 'danger')
-        return render_template('emergency_fund_step2.html', form=form, step=2, trans=trans, lang=lang)
+        current_app.logger.error(f"Error in step2 (template: {template_path}): {str(e)}", exc_info=True)
+        flash(trans('an_unexpected_error_occurred', default='An unexpected error occurred.', lang=lang), 'danger')
+        return render_template('error.html', template=template_path, form=form, step=2, trans=trans, lang=lang), 500
 
 @emergency_fund_bp.route('/step3', methods=['GET', 'POST'])
 def step3():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        session.permanent = True
-        session.modified = True
+        session['permanent'] = True
+        session['modified'] = True
     lang = session.get('lang', 'en')
     if 'emergency_fund_step2' not in session:
-        flash(trans('emergency_fund_missing_step2', lang=lang, default='Please complete previous steps first.'), 'danger')
+        flash(trans('emergency_fund_missing_step2', default='Please complete previous steps first.', lang=lang), 'danger')
         return redirect(url_for('emergency_fund.step1'))
     form = Step3Form()
+    template_path = 'EMERGENCYFUND/emergency_fund_step3.html'
     try:
+        log_tool_usage(
+            mongo=mongo.db,
+            tool_name='emergency_fund',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step3_view'
+        )
         if request.method == 'POST':
+            log_tool_usage(
+                mongo=mongo.db,
+                tool_name='emergency_fund',
+                user_id=current_user.id if current_user.is_authenticated else None,
+                session_id=session['sid'],
+                action='step3_submit'
+            )
             current_app.logger.info(f"Step3 POST data: {request.form.to_dict()}")
             if form.validate_on_submit():
                 session['emergency_fund_step3'] = {
@@ -192,7 +259,7 @@ def step3():
                     'risk_tolerance_level': form.risk_tolerance_level.data,
                     'dependents': int(form.dependents.data) if form.dependents.data else 0
                 }
-                session.modified = True
+                session['modified'] = True
                 current_app.logger.info(f"Step3 data saved to session: {session['emergency_fund_step3']}")
                 return redirect(url_for('emergency_fund.step4'))
             else:
@@ -200,28 +267,44 @@ def step3():
                 for field, errors in form.errors.items():
                     for error in errors:
                         flash(f"{field}: {error}", 'danger')
-        return render_template('emergency_fund_step3.html', form=form, step=3, trans=trans, lang=lang)
+        current_app.logger.info(f"Rendering template: {template_path}, Blueprint template folder: {emergency_fund_bp.template_folder}")
+        return render_template(template_path, form=form, step=3, trans=trans, lang=lang)
     except Exception as e:
-        current_app.logger.exception(f"Error in step3: {str(e)}")
-        flash(trans('an_unexpected_error_occurred', lang=lang, default='An unexpected error occurred.'), 'danger')
-        return render_template('emergency_fund_step3.html', form=form, step=3, trans=trans, lang=lang)
+        current_app.logger.error(f"Error in step3 (template: {template_path}): {str(e)}", exc_info=True)
+        flash(trans('an_unexpected_error_occurred', default='An unexpected error occurred.', lang=lang), 'danger')
+        return render_template('error.html', template=template_path, form=form, step=3, trans=trans, lang=lang), 500
 
 @emergency_fund_bp.route('/step4', methods=['GET', 'POST'])
 def step4():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        session.permanent = True
-        session.modified = True
+        session['permanent'] = True
+        session['modified'] = True
     lang = session.get('lang', 'en')
     if 'emergency_fund_step3' not in session:
-        flash(trans('emergency_fund_missing_step3', lang=lang, default='Please complete previous steps first.'), 'danger')
+        flash(trans('emergency_fund_missing_step3', default='Please complete previous steps first.', lang=lang), 'danger')
         return redirect(url_for('emergency_fund.step1'))
-    form = Step4Form()
+    form = Step4Form(lang=lang)
+    template_path = 'EMERGENCYFUND/emergency_fund_step4.html'
     try:
+        log_tool_usage(
+            mongo=mongo.db,
+            tool_name='emergency_fund',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step4_view'
+        )
         if request.method == 'POST':
+            log_tool_usage(
+                mongo=mongo.db,
+                tool_name='emergency_fund',
+                user_id=current_user.id if current_user.is_authenticated else None,
+                session_id=session['sid'],
+                action='step4_submit'
+            )
             current_app.logger.info(f"Step4 POST data: {request.form.to_dict()}")
             if form.validate_on_submit():
-                step1_data = session['emergency_fund_step1']
+                step1_data = session['emergency_fund_data']['step1_data']
                 step2_data = session['emergency_fund_step2']
                 step3_data = session['emergency_fund_step3']
                 months = int(form.timeline.data)
@@ -249,31 +332,30 @@ def step4():
                 if step3_data['current_savings'] >= target_amount:
                     badges.append('Fund Master')
 
-                # Create and save EmergencyFund record to database
-                emergency_fund = EmergencyFund(
-                    id=str(uuid.uuid4()),
-                    user_id=current_user.id if current_user.is_authenticated else None,
-                    session_id=session['sid'],
-                    first_name=step1_data.get('first_name'),
-                    email=step1_data.get('email'),
-                    email_opt_in=step1_data.get('email_opt_in'),
-                    lang=lang,
-                    monthly_expenses=step2_data.get('monthly_expenses'),
-                    monthly_income=step2_data.get('monthly_income'),
-                    current_savings=step3_data.get('current_savings', 0),
-                    risk_tolerance_level=step3_data.get('risk_tolerance_level'),
-                    dependents=step3_data.get('dependents', 0),
-                    timeline=months,
-                    recommended_months=recommended_months,
-                    target_amount=target_amount,
-                    savings_gap=gap,
-                    monthly_savings=monthly_savings,
-                    percent_of_income=percent_of_income,
-                    badges=json.dumps(badges)
-                )
-                db.session.add(emergency_fund)
-                db.session.commit()
-                current_app.logger.info(f"Emergency fund record saved to database with ID {emergency_fund.id}")
+                emergency_fund = {
+                    '_id': str(uuid.uuid4()),
+                    'user_id': current_user.id if current_user.is_authenticated else None,
+                    'session_id': session['sid'],
+                    'first_name': step1_data.get('first_name'),
+                    'email': step1_data.get('email'),
+                    'email_opt_in': step1_data.get('email_opt_in'),
+                    'lang': lang,
+                    'monthly_expenses': step2_data.get('monthly_expenses'),
+                    'monthly_income': step2_data.get('monthly_income'),
+                    'current_savings': step3_data.get('current_savings', 0),
+                    'risk_tolerance_level': step3_data.get('risk_tolerance_level'),
+                    'dependents': step3_data.get('dependents', 0),
+                    'timeline': months,
+                    'recommended_months': recommended_months,
+                    'target_amount': target_amount,
+                    'savings_gap': gap,
+                    'monthly_savings': monthly_savings,
+                    'percent_of_income': percent_of_income,
+                    'badges': badges,
+                    'created_at': datetime.utcnow()
+                }
+                mongo.db.emergency_funds.insert_one(emergency_fund)
+                current_app.logger.info(f"Emergency fund record saved to MongoDB with ID {emergency_fund['_id']}")
 
                 if step1_data['email_opt_in'] and step1_data['email']:
                     try:
@@ -301,7 +383,7 @@ def step4():
                                 'monthly_savings': monthly_savings,
                                 'percent_of_income': percent_of_income,
                                 'badges': badges,
-                                'created_at': emergency_fund.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                                'created_at': emergency_fund['created_at'].strftime('%Y-%m-%d %H:%M:%S'),
                                 'cta_url': url_for('emergency_fund.dashboard', _external=True),
                                 'unsubscribe_url': url_for('emergency_fund.unsubscribe', email=step1_data['email'], _external=True)
                             },
@@ -311,43 +393,51 @@ def step4():
                         current_app.logger.error(f"Failed to send email: {str(e)}")
                         flash(trans("email_send_failed", lang=lang), "danger")
 
-                # Clear session data after saving
-                for key in ['emergency_fund_step1', 'emergency_fund_step2', 'emergency_fund_step3', 'emergency_fund_step4']:
+                for key in ['emergency_fund_data', 'emergency_fund_step2', 'emergency_fund_step3']:
                     session.pop(key, None)
-                session.modified = True
+                session['modified'] = True
 
-                flash(trans('emergency_fund_completed_successfully', lang=lang, default='Emergency fund calculation completed successfully!'), 'success')
+                flash(trans('emergency_fund_completed_successfully', default='Emergency fund calculation completed successfully!'), 'success')
                 return redirect(url_for('emergency_fund.dashboard'))
             else:
                 current_app.logger.warning(f"Step4 form errors: {form.errors}")
                 for field, errors in form.errors.items():
                     for error in errors:
                         flash(f"{field}: {error}", 'danger')
-        return render_template('emergency_fund_step4.html', form=form, step=4, trans=trans, lang=lang)
+        current_app.logger.info(f"Rendering template: {template_path}, Blueprint template folder: {emergency_fund_bp.template_folder}")
+        return render_template(template_path, form=form, step=4, trans=trans, lang=lang)
     except Exception as e:
-        current_app.logger.exception(f"Error in step4: {str(e)}")
-        flash(trans('an_unexpected_error_occurred', lang=lang, default='An unexpected error occurred.'), 'danger')
-        return render_template('emergency_fund_step4.html', form=form, step=4, trans=trans, lang=lang)
+        current_app.logger.error(f"Error in step4 (template: {template_path}): {str(e)}", exc_info=True)
+        flash(trans('an_unexpected_error_occurred', default='An unexpected error occurred.', lang=lang), 'danger')
+        return render_template('error.html', template=template_path, form=form, step=4, trans=trans, lang=lang), 500
 
 @emergency_fund_bp.route('/dashboard', methods=['GET'])
 def dashboard():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        session.permanent = True
-        session.modified = True
+        session['permanent'] = True
+        session['modified'] = True
     lang = session.get('lang', 'en')
+    template_path = 'EMERGENCYFUND/emergency_fund_dashboard.html'
     try:
-        # Filter by user_id if authenticated, else session_id
+        log_tool_usage(
+            mongo=mongo.db,
+            tool_name='emergency_fund',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='dashboard_view'
+        )
         filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
-        user_data = EmergencyFund.query.filter_by(**filter_kwargs).order_by(EmergencyFund.created_at.desc()).all()
-        current_app.logger.info(f"Retrieved {len(user_data)} records from database for session {session['sid']}")
+        user_data = mongo.db.emergency_funds.find(filter_kwargs).sort('created_at', -1)
+        user_data = list(user_data)
+        current_app.logger.info(f"Retrieved {len(user_data)} records from MongoDB for user {current_user.id if current_user.is_authenticated else 'anonymous'}")
 
-        # If no records and authenticated, check by email
         if not user_data and current_user.is_authenticated and current_user.email:
-            user_data = EmergencyFund.query.filter_by(email=current_user.email).order_by(EmergencyFund.created_at.desc()).all()
+            user_data = mongo.db.emergency_funds.find({'email': current_user.email}).sort('created_at', -1)
+            user_data = list(user_data)
             current_app.logger.info(f"Retrieved {len(user_data)} records for email {current_user.email}")
 
-        records = [(record.id, record.to_dict()) for record in user_data]
+        records = [(record['_id'], record) for record in user_data]
         latest_record = records[-1][1] if records else {}
 
         insights = []
@@ -365,17 +455,20 @@ def dashboard():
                         recommended_months=latest_record.get('recommended_months', 0)))
 
         cross_tool_insights = []
-        budget_data = Budget.query.filter_by(**filter_kwargs).order_by(Budget.created_at.desc()).all()
+        filter_kwargs_budget = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+        budget_data = mongo.db.budgets.find(filter_kwargs_budget).sort('created_at', -1)
+        budget_data = list(budget_data)
         if budget_data and latest_record and latest_record.get('savings_gap', 0) > 0:
             latest_budget = budget_data[0]
-            if latest_budget.income and latest_budget.fixed_expenses:
-                savings_possible = latest_budget.income - latest_budget.fixed_expenses
+            if latest_budget.get('income') and latest_budget.get('fixed_expenses'):
+                savings_possible = latest_budget['income'] - latest_budget['fixed_expenses']
                 if savings_possible > 0:
                     cross_tool_insights.append(trans('emergency_fund_cross_tool_savings_possible', lang=lang,
                                                    amount=savings_possible))
 
+        current_app.logger.info(f"Rendering template: {template_path}, Blueprint template folder: {emergency_fund_bp.template_folder}")
         return render_template(
-            'emergency_fund_dashboard.html',
+            template_path,
             records=records,
             latest_record=latest_record,
             insights=insights,
@@ -390,10 +483,10 @@ def dashboard():
             lang=lang
         )
     except Exception as e:
-        current_app.logger.exception(f"Error in dashboard: {str(e)}")
+        current_app.logger.error(f"Error in dashboard (template: {template_path}): {str(e)}", exc_info=True)
         flash(trans('emergency_fund_load_dashboard_error', lang=lang), 'danger')
         return render_template(
-            'emergency_fund_dashboard.html',
+            'error.html',
             records=[],
             latest_record={},
             insights=[],
@@ -406,29 +499,46 @@ def dashboard():
             ],
             trans=trans,
             lang=lang
-        )
+        ), 500
 
 @emergency_fund_bp.route('/unsubscribe/<email>')
-def unsubscribe(email):
+def unsubscribe():
     try:
         lang = session.get('lang', 'en')
-        filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
-        records = EmergencyFund.query.filter_by(email=email, **filter_kwargs).all()
-        for record in records:
-            record.email_opt_in = False
-        db.session.commit()
+        log_tool_usage(
+            mongo=mongo.db,
+            tool_name='emergency_fund',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='unsubscribe'
+        )
+        filter_kwargs = {'email': email}
+        if current_user.is_authenticated:
+            filter_kwargs['user_id'] = current_user.id
+        mongo.db.emergency_funds.update_many(
+            filter_kwargs,
+            {'$set': {'email_opt_in': False}}
+        )
         flash(trans("emergency_fund_unsubscribed_success", lang=lang), "success")
     except Exception as e:
-        current_app.logger.exception(f"Error in emergency_fund.unsubscribe: {str(e)}")
+        current_app.logger.error(f"Error in emergency_fund.unsubscribe: {str(e)}", exc_info=True)
         flash(trans("emergency_fund_unsubscribe_error", lang=lang), "danger")
     return redirect(url_for('index'))
 
 @emergency_fund_bp.route('/debug/storage', methods=['GET'])
 def debug_storage():
     try:
+        log_tool_usage(
+            mongo=mongo.db,
+            tool_name='emergency_fund',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='debug_storage_view'
+        )
         filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
-        records = EmergencyFund.query.filter_by(**filter_kwargs).all()
-        record_dicts = [record.to_dict() for record in records]
+        records = mongo.db.emergency_funds.find(filter_kwargs)
+        records = list(records)
+        record_dicts = [dict(record) for record in records]
         response = {
             "records": record_dicts,
             "count": len(records),
@@ -437,5 +547,16 @@ def debug_storage():
         current_app.logger.info(f"Debug storage: {response}")
         return jsonify(response)
     except Exception as e:
-        current_app.logger.error(f"Debug storage failed: {str(e)}")
+        current_app.logger.error(f"Debug storage failed: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@emergency_fund_bp.route('/debug/templates', methods=['GET'])
+def debug_templates():
+    try:
+        template_dir = os.path.join(current_app.root_path, 'templates', 'EMERGENCYFUND')
+        templates = os.listdir(template_dir) if os.path.exists(template_dir) else []
+        current_app.logger.info(f"Template directory: {template_dir}, Templates: {templates}")
+        return jsonify({"template_dir": template_dir, "templates": templates})
+    except Exception as e:
+        current_app.logger.error(f"Debug templates failed: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500

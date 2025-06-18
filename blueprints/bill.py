@@ -7,10 +7,22 @@ from mailersend_email import send_email, EMAIL_CONFIG
 from datetime import datetime, date, timedelta
 import uuid
 from translations import trans
-from extensions import db
-from models import Bill
+from pymongo.errors import DuplicateKeyError
+from bson import ObjectId
+from extensions import mongo
+from models import log_tool_usage
+from session_utils import create_anonymous_session
+from app import custom_login_required
 
-bill_bp = Blueprint('bill', __name__, url_prefix='/bill')
+
+bill_bp = Blueprint(
+    'bill',
+    __name__,
+    template_folder='templates/BILL',
+    url_prefix='/BILL'
+)
+
+bills_collection = mongo.db.bills
 
 def strip_commas(value):
     """Remove commas from string values for numerical fields."""
@@ -93,7 +105,6 @@ class BillFormStep2(FlaskForm):
         self.send_email.label.text = trans('bill_send_email', lang)
         self.reminder_days.label.text = trans('bill_reminder_days', lang)
 
-        # Set defaults to the first choice
         self.frequency.default = self.frequency.choices[0][0]
         self.category.default = self.category.choices[0][0]
         self.status.default = self.status.choices[0][0]
@@ -108,7 +119,6 @@ def form_step1():
         session.permanent = True
     lang = session.get('lang', 'en')
     bill_data = session.get('bill_step1', {})
-    # Prefill email and first_name for authenticated users
     if current_user.is_authenticated:
         bill_data['email'] = bill_data.get('email', current_user.email)
         bill_data['first_name'] = bill_data.get('first_name', current_user.username)
@@ -117,6 +127,13 @@ def form_step1():
     
     try:
         if request.method == 'POST' and form.validate_on_submit():
+            log_tool_usage(
+                mongo,
+                tool_name='bill',
+                user_id=current_user.id if current_user.is_authenticated else None,
+                session_id=session['sid'],
+                action='form_step1_submit'
+            )
             try:
                 due_date = datetime.strptime(form.due_date.data, '%Y-%m-%d').date()
                 if due_date < date.today():
@@ -137,7 +154,14 @@ def form_step1():
             }
             current_app.logger.info(f"Step 1 session data saved: {session['bill_step1']}")
             return redirect(url_for('bill.form_step2'))
-        return render_template('bill_form_step1.html', form=form, trans=trans, lang=lang)
+        log_tool_usage(
+            mongo,
+            tool_name='bill',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='form_step1_view'
+        )
+        return render_template('BILL/bill_form_step1.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Error in bill.form_step1: {str(e)}")
         flash(trans('bill_bill_form_load_error', lang), 'danger')
@@ -156,6 +180,13 @@ def form_step2():
 
     try:
         if request.method == 'POST':
+            log_tool_usage(
+                mongo,
+                tool_name='bill',
+                user_id=current_user.id if current_user.is_authenticated else None,
+                session_id=session['sid'],
+                action='form_step2_submit'
+            )
             form_data = request.form.to_dict()
             current_app.logger.info(f"Form data received: {form_data}")
             current_app.logger.info(f"Submitted form values - frequency: {form.frequency.data or 'None'}, category: {form.category.data or 'None'}, status: {form.status.data or 'None'}, send_email: {form.send_email.data}, reminder_days: {form.reminder_days.data or 'None'}")
@@ -163,14 +194,14 @@ def form_step2():
             if not form.csrf_token.validate(form):
                 current_app.logger.error(f"CSRF validation failed: {form.csrf_token.errors}")
                 flash(trans('bill_csrf_invalid', lang) or 'Invalid CSRF token', 'danger')
-                return render_template('bill_form_step2.html', form=form, trans=trans, lang=lang)
+                return render_template('BILL/bill_form_step2.html', form=form, trans=trans, lang=lang)
 
             if form.validate_on_submit():
                 current_app.logger.info("Form validated successfully")
                 if form.send_email.data and not form.reminder_days.data:
                     form.reminder_days.errors.append(trans('bill_reminder_days_required', lang))
                     current_app.logger.error("Validation failed: reminder_days required when send_email is checked")
-                    return render_template('bill_form_step2.html', form=form, trans=trans, lang=lang)
+                    return render_template('BILL/bill_form_step2.html', form=form, trans=trans, lang=lang)
 
                 if not bill_step1_data:
                     current_app.logger.error("Session data missing for bill_step1")
@@ -197,59 +228,40 @@ def form_step2():
 
                 bill_id = session.get('bill_id')
                 filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+                bill_data = {
+                    'user_id': current_user.id if current_user.is_authenticated else None,
+                    'session_id': session['sid'],
+                    'user_email': bill_step1_data['email'],
+                    'first_name': bill_step1_data['first_name'],
+                    'bill_name': bill_step1_data['bill_name'],
+                    'amount': float(bill_step1_data['amount']),
+                    'due_date': due_date.isoformat(),  # Convert datetime.date to ISO string
+                    'frequency': form.frequency.data,
+                    'category': form.category.data,
+                    'status': status,
+                    'send_email': form.send_email.data,
+                    'reminder_days': form.reminder_days.data if form.send_email.data else None
+                }
+
                 if bill_id:
                     # Update existing bill
-                    bill = Bill.query.filter_by(id=bill_id, **filter_kwargs).first()
+                    bill = bills_collection.find_one({'_id': ObjectId(bill_id), **filter_kwargs})
                     if bill:
-                        bill.first_name = bill_step1_data['first_name']
-                        bill.user_email = bill_step1_data['email']
-                        bill.bill_name = bill_step1_data['bill_name']
-                        bill.amount = float(bill_step1_data['amount'])
-                        bill.due_date = due_date
-                        bill.frequency = form.frequency.data
-                        bill.category = form.category.data
-                        bill.status = status
-                        bill.send_email = form.send_email.data
-                        bill.reminder_days = form.reminder_days.data if form.send_email.data else None
-                        try:
-                            db.session.commit()
-                            current_app.logger.info(f"Bill updated successfully: {bill_id}, category={bill.category}, frequency={bill.frequency}")
-                            flash(trans('bill_updated_success', lang) or 'Bill updated successfully', 'success')
-                        except Exception as e:
-                            db.session.rollback()
-                            current_app.logger.error(f"Failed to update bill: {str(e)}")
-                            flash(trans('bill_update_failed', lang) or 'Failed to update bill', 'danger')
-                            return render_template('bill_form_step2.html', form=form, trans=trans, lang=lang)
+                        bills_collection.update_one(
+                            {'_id': ObjectId(bill_id), **filter_kwargs},
+                            {'$set': bill_data}
+                        )
+                        current_app.logger.info(f"Bill updated successfully: {bill_id}, category={bill_data['category']}, frequency={bill_data['frequency']}")
+                        flash(trans('bill_updated_success', lang) or 'Bill updated successfully', 'success')
                     else:
                         flash(trans('bill_not_found', lang) or 'Bill not found', 'danger')
                         return redirect(url_for('bill.dashboard'))
                 else:
                     # Create new bill
-                    bill = Bill(
-                        id=str(uuid.uuid4()),
-                        user_id=current_user.id if current_user.is_authenticated else None,
-                        session_id=session['sid'],
-                        user_email=bill_step1_data['email'],
-                        first_name=bill_step1_data['first_name'],
-                        bill_name=bill_step1_data['bill_name'],
-                        amount=float(bill_step1_data['amount']),
-                        due_date=due_date,
-                        frequency=form.frequency.data,
-                        category=form.category.data,
-                        status=status,
-                        send_email=form.send_email.data,
-                        reminder_days=form.reminder_days.data if form.send_email.data else None
-                    )
-                    try:
-                        db.session.add(bill)
-                        db.session.commit()
-                        current_app.logger.info(f"Bill saved successfully for {bill_step1_data['email']}: {bill.bill_name}, category={bill.category}, frequency={bill.frequency}")
-                        flash(trans('bill_added_success', lang) or 'Bill added successfully', 'success')
-                    except Exception as e:
-                        db.session.rollback()
-                        current_app.logger.error(f"Failed to save bill: {str(e)}")
-                        flash(trans('bill_save_failed', lang) or 'Failed to save bill', 'danger')
-                        return render_template('bill_form_step2.html', form=form, trans=trans, lang=lang)
+                    bill_data['_id'] = ObjectId()
+                    bills_collection.insert_one(bill_data)
+                    current_app.logger.info(f"Bill saved successfully for {bill_step1_data['email']}: {bill_data['bill_name']}, category={bill_data['category']}, frequency={bill_data['frequency']}")
+                    flash(trans('bill_added_success', lang) or 'Bill added successfully', 'success')
 
                 if form.send_email.data and bill_step1_data['email']:
                     try:
@@ -267,7 +279,7 @@ def form_step2():
                                 'bills': [{
                                     'bill_name': bill_step1_data['bill_name'],
                                     'amount': bill_step1_data['amount'],
-                                    'due_date': bill_step1_data['due_date'],
+                                    'due_date': bill_step1_data['due_date'],  # Use session string format for email
                                     'category': trans(f'bill_category_{form.category.data}', lang=lang),
                                     'status': trans(f'bill_status_{status}', lang=lang)
                                 }],
@@ -296,8 +308,15 @@ def form_step2():
                 for field, errors in form.errors.items():
                     for err_msg in errors:
                         flash(f"{trans(f'bill_{field}', lang=lang)}: {err_msg}", 'danger')
-                return render_template('bill_form_step2.html', form=form, trans=trans, lang=lang)
-        return render_template('bill_form_step2.html', form=form, trans=trans, lang=lang)
+                return render_template('BILL/bill_form_step2.html', form=form, trans=trans, lang=lang)
+        log_tool_usage(
+            mongo,
+            tool_name='bill',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='form_step2_view'
+        )
+        return render_template('BILL/bill_form_step2.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Error in bill.form_step2: {str(e)}")
         flash(trans('bill_bill_form_load_error', lang) or 'Error loading bill form', 'danger')
@@ -310,6 +329,14 @@ def dashboard():
         session.permanent = True
     lang = session.get('lang', 'en')
 
+    log_tool_usage(
+        mongo,
+        tool_name='bill',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='dashboard_view'
+    )
+
     tips = [
         trans('bill_tip_pay_early', lang),
         trans('bill_tip_energy_efficient', lang),
@@ -320,8 +347,8 @@ def dashboard():
 
     try:
         filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
-        bills = Bill.query.filter_by(**filter_kwargs).all()
-        bills_data = [(bill.id, bill.to_dict()) for bill in bills]
+        bills = bills_collection.find(filter_kwargs)
+        bills_data = [(str(bill['_id']), bill) for bill in bills]
 
         paid_count = 0
         unpaid_count = 0
@@ -362,7 +389,7 @@ def dashboard():
                 pending_count += 1
 
             try:
-                bill_due_date = datetime.strptime(bill['due_date'], '%Y-%m-%d').date()
+                bill_due_date = datetime.strptime(bill['due_date'], '%Y-%m-%d').date()  # Parse string to datetime.date
                 if bill_due_date == today:
                     due_today.append((b_id, bill))
                 if today <= bill_due_date <= (today + timedelta(days=7)):
@@ -376,7 +403,7 @@ def dashboard():
                 continue
 
         return render_template(
-            'bill_dashboard.html',
+            'BILL/bill_dashboard.html',
             bills=bills_data,
             paid_count=paid_count,
             unpaid_count=unpaid_count,
@@ -399,7 +426,7 @@ def dashboard():
         current_app.logger.exception(f"Error in bill.dashboard: {str(e)}")
         flash(trans('bill_dashboard_load_error', lang) or 'Error loading bill dashboard', 'danger')
         return render_template(
-            'bill_dashboard.html',
+            'BILL/bill_dashboard.html',
             bills=[],
             paid_count=0,
             unpaid_count=0,
@@ -427,44 +454,69 @@ def view_edit():
     lang = session.get('lang', 'en')
     filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
 
+    log_tool_usage(
+        mongo,
+        tool_name='bill',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='view_edit_view'
+    )
+
     try:
-        bills = Bill.query.filter_by(**filter_kwargs).all()
+        bills = bills_collection.find(filter_kwargs)
         bills_data = []
         for bill in bills:
+            try:
+                due_date = bill['due_date']
+                if isinstance(due_date, str):
+                    due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+            except ValueError:
+                current_app.logger.warning(f"Invalid due_date format for bill {bill['_id']}: {due_date}")
+                due_date = None
             form = BillFormStep2(
                 data={
-                    'frequency': bill.frequency,
-                    'category': bill.category,
-                    'status': bill.status,
-                    'send_email': bill.send_email,
-                    'reminder_days': bill.reminder_days,
+                    'frequency': bill['frequency'],
+                    'category': bill['category'],
+                    'status': bill['status'],
+                    'send_email': bill['send_email'],
+                    'reminder_days': bill['reminder_days'],
                     'csrf_token': None
                 }
             )
-            bills_data.append((bill.id, bill.to_dict(), form))
+            bills_data.append((str(bill['_id']), bill, form))
 
         if request.method == 'POST':
             action = request.form.get('action')
             bill_id = request.form.get('bill_id')
-            bill = Bill.query.filter_by(id=bill_id, **filter_kwargs).first()
+            bill = bills_collection.find_one({'_id': ObjectId(bill_id), **filter_kwargs})
             if not bill:
                 flash(trans('bill_bill_not_found', lang) or 'Bill not found', 'danger')
                 return redirect(url_for('bill.view_edit'))
 
             if action == 'update':
+                log_tool_usage(
+                    mongo,
+                    tool_name='bill',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='update_bill'
+                )
                 form = BillFormStep2()
                 if form.validate_on_submit():
                     try:
-                        bill.frequency = form.frequency.data
-                        bill.category = form.category.data
-                        bill.status = form.status.data
-                        bill.send_email = form.send_email.data
-                        bill.reminder_days = form.reminder_days.data if form.send_email.data else None
-                        db.session.commit()
-                        current_app.logger.info(f"Bill updated successfully: {bill_id}, category={bill.category}, frequency={bill.frequency}")
+                        bills_collection.update_one(
+                            {'_id': ObjectId(bill_id), **filter_kwargs},
+                            {'$set': {
+                                'frequency': form.frequency.data,
+                                'category': form.category.data,
+                                'status': form.status.data,
+                                'send_email': form.send_email.data,
+                                'reminder_days': form.reminder_days.data if form.send_email.data else None
+                            }}
+                        )
+                        current_app.logger.info(f"Bill updated successfully: {bill_id}, category={form.category.data}, frequency={form.frequency.data}")
                         flash(trans('bill_updated_success', lang) or 'Bill updated successfully', 'success')
                     except Exception as e:
-                        db.session.rollback()
                         current_app.logger.error(f"Failed to update bill ID {bill_id}: {str(e)}")
                         flash(trans('bill_update_failed', lang) or 'Failed to update bill', 'danger')
                 else:
@@ -475,72 +527,107 @@ def view_edit():
                 return redirect(url_for('bill.view_edit'))
 
             elif action == 'edit':
+                log_tool_usage(
+                    mongo,
+                    tool_name='bill',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='edit_bill'
+                )
+                try:
+                    due_date = bill['due_date']
+                    if isinstance(due_date, str):
+                        due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+                except ValueError:
+                    current_app.logger.error(f"Invalid due_date format for bill {bill_id}: {bill['due_date']}")
+                    flash(trans('bill_due_date_format_invalid', lang) or 'Invalid due date format', 'danger')
+                    return redirect(url_for('bill.view_edit'))
                 session['bill_step1'] = {
-                    'first_name': bill.first_name,
-                    'email': bill.user_email,
-                    'bill_name': bill.bill_name,
-                    'amount': bill.amount,
-                    'due_date': bill.due_date.strftime('%Y-%m-%d')
+                    'first_name': bill['first_name'],
+                    'email': bill['user_email'],
+                    'bill_name': bill['bill_name'],
+                    'amount': bill['amount'],
+                    'due_date': due_date.strftime('%Y-%m-%d')
                 }
                 session['bill_step2'] = {
-                    'frequency': bill.frequency,
-                    'category': bill.category,
-                    'status': bill.status,
-                    'send_email': bill.send_email,
-                    'reminder_days': bill.reminder_days
+                    'frequency': bill['frequency'],
+                    'category': bill['category'],
+                    'status': bill['status'],
+                    'send_email': bill['send_email'],
+                    'reminder_days': bill['reminder_days']
                 }
-                session['bill_id'] = bill_id
-                current_app.logger.info(f"Redirecting to edit bill: {bill_id}, category={bill.category}, frequency={bill.frequency}")
+                session['bill_id'] = str(bill['_id'])
+                current_app.logger.info(f"Redirecting to edit bill: {bill_id}, category={bill['category']}, frequency={bill['frequency']}")
                 return redirect(url_for('bill.form_step1'))
 
             elif action == 'delete':
+                log_tool_usage(
+                    mongo,
+                    tool_name='bill',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='delete_bill'
+                )
                 try:
-                    db.session.delete(bill)
-                    db.session.commit()
+                    bills_collection.delete_one({'_id': ObjectId(bill_id), **filter_kwargs})
                     current_app.logger.info(f"Bill deleted successfully: {bill_id}")
                     flash(trans('bill_bill_deleted_success', lang) or 'Bill deleted successfully', 'success')
                 except Exception as e:
-                    db.session.rollback()
                     current_app.logger.error(f"Failed to delete bill ID {bill_id}: {str(e)}")
                     flash(trans('bill_bill_delete_failed', lang) or 'Failed to delete bill', 'danger')
                 return redirect(url_for('bill.dashboard'))
 
             elif action == 'toggle_status':
+                log_tool_usage(
+                    mongo,
+                    tool_name='bill',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='toggle_status'
+                )
                 try:
-                    current_status = bill.status
+                    current_status = bill['status']
                     new_status = 'paid' if current_status == 'unpaid' else 'unpaid'
-                    bill.status = new_status
-                    db.session.commit()
+                    bills_collection.update_one(
+                        {'_id': ObjectId(bill_id), **filter_kwargs},
+                        {'$set': {'status': new_status}}
+                    )
                     current_app.logger.info(f"Bill status toggled: {bill_id}, new_status={new_status}")
                     flash(trans('bill_bill_status_toggled_success', lang) or 'Bill status updated', 'success')
-                    if new_status == 'paid' and bill.frequency != 'one-time':
-                        new_due_date = calculate_next_due_date(bill.due_date, bill.frequency)
-                        new_bill = Bill(
-                            id=str(uuid.uuid4()),
-                            user_id=bill.user_id,
-                            session_id=bill.session_id,
-                            user_email=bill.user_email,
-                            first_name=bill.first_name,
-                            bill_name=bill.bill_name,
-                            amount=bill.amount,
-                            due_date=new_due_date,
-                            frequency=bill.frequency,
-                            category=bill.category,
-                            status='unpaid',
-                            send_email=bill.send_email,
-                            reminder_days=bill.reminder_days
-                        )
-                        db.session.add(new_bill)
-                        db.session.commit()
-                        current_app.logger.info(f"New recurring bill created: {new_bill.id}")
-                        flash(trans('bill_new_recurring_bill_success', lang).format(bill_name=bill.bill_name), 'success')
+                    if new_status == 'paid' and bill['frequency'] != 'one-time':
+                        try:
+                            due_date = bill['due_date']
+                            if isinstance(due_date, str):
+                                due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+                        except ValueError:
+                            current_app.logger.error(f"Invalid due_date format for bill {bill_id}: {bill['due_date']}")
+                            flash(trans('bill_due_date_format_invalid', lang) or 'Invalid due date format', 'danger')
+                            return redirect(url_for('bill.view_edit'))
+                        new_due_date = calculate_next_due_date(due_date, bill['frequency'])
+                        new_bill = {
+                            '_id': ObjectId(),
+                            'user_id': bill['user_id'],
+                            'session_id': bill['session_id'],
+                            'user_email': bill['user_email'],
+                            'first_name': bill['first_name'],
+                            'bill_name': bill['bill_name'],
+                            'amount': bill['amount'],
+                            'due_date': new_due_date.isoformat(),  # Convert to ISO string
+                            'frequency': bill['frequency'],
+                            'category': bill['category'],
+                            'status': 'unpaid',
+                            'send_email': bill['send_email'],
+                            'reminder_days': bill['reminder_days']
+                        }
+                        bills_collection.insert_one(new_bill)
+                        current_app.logger.info(f"New recurring bill created: {new_bill['_id']}")
+                        flash(trans('bill_new_recurring_bill_success', lang).format(bill_name=bill['bill_name']), 'success')
                 except Exception as e:
-                    db.session.rollback()
                     current_app.logger.error(f"Failed to toggle status for bill ID {bill_id}: {str(e)}")
                     flash(trans('bill_bill_status_toggle_failed', lang) or 'Failed to update bill status', 'danger')
                 return redirect(url_for('bill.dashboard'))
 
-        return render_template('view_edit_bills.html', bills_data=bills_data, trans=trans, lang=lang)
+        return render_template('BILL/view_edit_bills.html', bills_data=bills_data, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Error in bill.view_edit: {str(e)}")
         flash(trans('bill_view_edit_template_error', lang) or 'Error loading bill edit page', 'danger')
@@ -548,12 +635,19 @@ def view_edit():
 
 @bill_bp.route('/unsubscribe/<email>')
 def unsubscribe():
+    log_tool_usage(
+        mongo,
+        tool_name='bill',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='unsubscribe'
+    )
     try:
         lang = session.get('lang', 'en')
-        bills = Bill.query.filter_by(user_email=email).all()
-        for bill in bills:
-            bill.send_email = False
-        db.session.commit()
+        bills_collection.update_many(
+            {'user_email': email},
+            {'$set': {'send_email': False}}
+        )
         current_app.logger.info(f"Unsubscribed email: {email}")
         flash(trans('bill_unsubscribe_success', lang) or 'Unsubscribed successfully', 'success')
     except Exception as e:

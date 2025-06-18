@@ -526,7 +526,7 @@ FINANCIAL_HEALTH_TRANSLATIONS = {
         'financial_health_recalculate_score': 'Sake Ƙididdige Maki',
         'financial_health_start_financial_health': 'Fara Lafiyar Kuɗi',
         'financial_health_financial_health_score': 'Lafiyar Kuɗi',
-        'financial_health_get_health_score': 'Daga ina Za,a Dara? Fara da duba Lafiyar kudinku yanzu!',
+        'financial_health_get_health_score': 'Daga ina Za,a Fara? Fara da duba Lafiyar kudinku yanzu!',
         'financial_health_create_budget': 'Ƙirƙiri Kasafin Kuɗi',
         'financial_health_explore_savings_options': 'Bincika Zaɓuɓɓukan Ajiya',
         'financial_health_insight_high_debt_to_income': 'Rabar bashi zuwa kuɗin shiga mai yawa. Ka ji da rage aro daga abokai ko bankuna.',

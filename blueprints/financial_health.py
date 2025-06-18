@@ -6,12 +6,24 @@ from flask_login import current_user
 from datetime import datetime
 import uuid
 import json
-from extensions import db
 from mailersend_email import send_email, EMAIL_CONFIG
 from translations import trans
-from models import FinancialHealth
+from extensions import mongo
+from models import log_tool_usage
+from session_utils import create_anonymous_session
+from app import custom_login_required
 
-financial_health_bp = Blueprint('financial_health', __name__, url_prefix='/financial_health')
+# Blueprint setup
+financial_health_bp = Blueprint(
+    'financial_health',
+    __name__,
+    template_folder='templates/HEALTHSCORE',
+    url_prefix='/HEALTHSCORE'
+)
+
+# MongoDB client setup using Flask-PyMongo
+def get_mongo_collection():
+    return mongo.db['financial_health_scores']
 
 class Step1Form(FlaskForm):
     first_name = StringField()
@@ -112,6 +124,7 @@ class Step3Form(FlaskForm):
                 raise ValidationError(trans('financial_health_interest_rate_invalid', lang=session.get('lang', 'en')))
 
 @financial_health_bp.route('/step1', methods=['GET', 'POST'])
+@custom_login_required
 def step1():
     """Handle financial health step 1 form (personal info)."""
     if 'sid' not in session:
@@ -122,46 +135,77 @@ def step1():
     if current_user.is_authenticated:
         form_data['email'] = form_data.get('email', current_user.email)
         form_data['first_name'] = form_data.get('first_name', current_user.username)
+    else:
+        form_data['email'] = form_data.get('email', '')
+        form_data['first_name'] = form_data.get('first_name', '')
     form = Step1Form(data=form_data)
-    current_app.logger.info(f"Starting step1 for session {session['sid']}")
+    current_app.logger.info(f"Starting step1 for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+    log_tool_usage(
+        mongo,
+        tool_name='financial_health',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='step1_view'
+    )
     try:
         if request.method == 'POST':
-            current_app.logger.debug(f"Received POST data: {request.form}")
             if not form.validate_on_submit():
-                current_app.logger.warning(f"Form validation failed: {form.errors}")
+                current_app.logger.error(f"Form validation failed: {form.errors}")
                 flash(trans("financial_health_form_errors", lang=lang), "danger")
-                return render_template('health_score_step1.html', form=form, trans=trans, lang=lang)
-            
+                return render_template('HEALTHSCORE/health_score_step1.html', form=form, trans=trans, lang=lang)
+
             form_data = form.data.copy()
             if form_data.get('email') and not isinstance(form_data['email'], str):
                 current_app.logger.error(f"Invalid email type: {type(form_data['email'])}")
                 raise ValueError(trans("financial_health_email_must_be_string", lang=lang))
-            
-            # Save to database
-            financial_health = FinancialHealth(
-                id=str(uuid.uuid4()),
+
+            collection = get_mongo_collection()
+            filter_criteria = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+            record = collection.find_one({**filter_criteria, 'step': 1})
+            record_data = {
+                'user_id': current_user.id if current_user.is_authenticated else None,
+                'session_id': session['sid'],
+                'step': 1,
+                'first_name': form_data['first_name'],
+                'email': form_data['email'],
+                'user_type': form_data['user_type'],
+                'send_email': form_data['send_email'],
+                'created_at': datetime.utcnow()
+            }
+            document_id = None
+            if record:
+                record_data['_id'] = record['_id']
+                collection.update_one(
+                    {'_id': record['_id']},
+                    {'$set': {k: v for k, v in record_data.items() if k != '_id'}}
+                )
+                document_id = record['_id']
+            else:
+                record_data['_id'] = str(uuid.uuid4())
+                collection.insert_one(record_data)
+                document_id = record_data['_id']
+
+            current_app.logger.info(f"Step1 data updated/saved to MongoDB with ID {document_id} for session {session['sid']}")
+            log_tool_usage(
+                mongo,
+                tool_name='financial_health',
                 user_id=current_user.id if current_user.is_authenticated else None,
                 session_id=session['sid'],
-                step=1,
-                first_name=form_data['first_name'],
-                email=form_data['email'],
-                user_type=form_data['user_type'],
-                send_email=form_data['send_email'],
+                action='step1_submit'
             )
-            db.session.add(financial_health)
-            db.session.commit()
-            current_app.logger.info(f"Step1 data saved to database with ID {financial_health.id} for session {session['sid']}")
 
             session['health_step1'] = form_data
             session.modified = True
             return redirect(url_for('financial_health.step2'))
-        return render_template('health_score_step1.html', form=form, trans=trans, lang=lang)
+        
+        return render_template('HEALTHSCORE/health_score_step1.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Error in step1: {str(e)}")
-        flash(trans("financial_health_error_personal_info", lang=lang), "danger")
-        return render_template('health_score_step1.html', form=form, trans=trans, lang=lang), 500
+        flash(f"{trans('financial_health_error_personal_info', lang=lang)} - {str(e)}", "danger")
+        return render_template('HEALTHSCORE/health_score_step1.html', form=form, trans=trans, lang=lang), 500
 
 @financial_health_bp.route('/step2', methods=['GET', 'POST'])
+@custom_login_required
 def step2():
     """Handle financial health step 2 form (income and expenses)."""
     if 'sid' not in session:
@@ -172,26 +216,53 @@ def step2():
         flash(trans('financial_health_missing_step1', lang=lang, default='Please complete step 1 first.'), 'danger')
         return redirect(url_for('financial_health.step1'))
     form = Step2Form()
-    current_app.logger.info(f"Starting step2 for session {session['sid']}")
+    current_app.logger.info(f"Starting step2 for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+    log_tool_usage(
+        mongo,
+        tool_name='financial_health',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='step2_view'
+    )
     try:
         if request.method == 'POST':
             if not form.validate_on_submit():
-                current_app.logger.warning(f"Form validation failed: {form.errors}")
+                current_app.logger.error(f"Form validation failed: {form.errors}")
                 flash(trans("financial_health_form_errors", lang=lang), "danger")
-                return render_template('health_score_step2.html', form=form, trans=trans, lang=lang)
-            
-            # Save to database
-            financial_health = FinancialHealth(
-                id=str(uuid.uuid4()),
+                return render_template('HEALTHSCORE/health_score_step2.html', form=form, trans=trans, lang=lang)
+
+            collection = get_mongo_collection()
+            filter_criteria = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+            record = collection.find_one({**filter_criteria, 'step': 2})
+            record_data = {
+                'user_id': current_user.id if current_user.is_authenticated else None,
+                'session_id': session['sid'],
+                'step': 2,
+                'income': float(form.income.data),
+                'expenses': float(form.expenses.data),
+                'created_at': datetime.utcnow()
+            }
+            document_id = None
+            if record:
+                record_data['_id'] = record['_id']
+                collection.update_one(
+                    {'_id': record['_id']},
+                    {'$set': {k: v for k, v in record_data.items() if k != '_id'}}
+                )
+                document_id = record['_id']
+            else:
+                record_data['_id'] = str(uuid.uuid4())
+                collection.insert_one(record_data)
+                document_id = record_data['_id']
+
+            current_app.logger.info(f"Step2 data updated/saved to MongoDB with ID {document_id} for session {session['sid']}")
+            log_tool_usage(
+                mongo,
+                tool_name='financial_health',
                 user_id=current_user.id if current_user.is_authenticated else None,
                 session_id=session['sid'],
-                step=2,
-                income=float(form.income.data),
-                expenses=float(form.expenses.data),
+                action='step2_submit'
             )
-            db.session.add(financial_health)
-            db.session.commit()
-            current_app.logger.info(f"Step2 data saved to database with ID {financial_health.id} for session {session['sid']}")
 
             session['health_step2'] = {
                 'income': float(form.income.data),
@@ -199,13 +270,15 @@ def step2():
             }
             session.modified = True
             return redirect(url_for('financial_health.step3'))
-        return render_template('health_score_step2.html', form=form, trans=trans, lang=lang)
+        
+        return render_template('HEALTHSCORE/health_score_step2.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Error in step2: {str(e)}")
         flash(trans("financial_health_error_income_expenses", lang=lang), "danger")
-        return render_template('health_score_step2.html', form=form, trans=trans, lang=lang), 500
+        return render_template('HEALTHSCORE/health_score_step2.html', form=form, trans=trans, lang=lang), 500
 
 @financial_health_bp.route('/step3', methods=['GET', 'POST'])
+@custom_login_required
 def step3():
     """Handle financial health step 3 form (debt and interest) and calculate score."""
     if 'sid' not in session:
@@ -214,15 +287,22 @@ def step3():
     lang = session.get('lang', 'en')
     if 'health_step2' not in session:
         flash(trans('financial_health_missing_step2', lang=lang, default='Please complete step 2 first.'), 'danger')
-        return redirect(url_for('financial_health.step1'))
+        return redirect(url_for('financial_health.step2'))
     form = Step3Form()
-    current_app.logger.info(f"Starting step3 for session {session['sid']}")
+    current_app.logger.info(f"Starting step3 for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+    log_tool_usage(
+        mongo,
+        tool_name='financial_health',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='step3_view'
+    )
     try:
         if request.method == 'POST':
             if not form.validate_on_submit():
-                current_app.logger.warning(f"Form validation failed: {form.errors}")
+                current_app.logger.error(f"Form validation failed: {form.errors}")
                 flash(trans("financial_health_form_errors", lang=lang), "danger")
-                return render_template('health_score_step3.html', form=form, trans=trans, lang=lang)
+                return render_template('HEALTHSCORE/health_score_step3.html', form=form, trans=trans, lang=lang)
 
             step1_data = session.get('health_step1', {})
             step2_data = session.get('health_step2', {})
@@ -234,7 +314,7 @@ def step3():
             if income <= 0:
                 current_app.logger.error("Income is zero or negative, cannot calculate financial health metrics")
                 flash(trans("financial_health_income_zero_error", lang=lang), "danger")
-                return render_template('health_score_step3.html', form=form, trans=trans, lang=lang), 500
+                return render_template('HEALTHSCORE/health_score_step3.html', form=form, trans=trans, lang=lang), 500
 
             debt_to_income = (debt / income * 100) if income > 0 else 0
             savings_rate = ((income - expenses) / income * 100) if income > 0 else 0
@@ -242,7 +322,7 @@ def step3():
 
             score = 100
             if debt_to_income > 0:
-                score -= min(debt_to_income, 50)
+                score -= min(debt_to_income / 50, 50)
             if savings_rate < 0:
                 score -= min(abs(savings_rate), 30)
             elif savings_rate > 0:
@@ -270,33 +350,52 @@ def step3():
             if interest_burden == 0 and debt > 0:
                 badges.append(trans("financial_health_badge_interest_free", lang=lang))
 
-            # Save complete record to database
-            financial_health = FinancialHealth(
-                id=str(uuid.uuid4()),
+            collection = get_mongo_collection()
+            filter_criteria = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+            record = collection.find_one({**filter_criteria, 'step': 3})
+            record_data = {
+                'user_id': current_user.id if current_user.is_authenticated else None,
+                'session_id': session['sid'],
+                'step': 3,
+                'first_name': step1_data.get('first_name', ''),
+                'email': step1_data.get('email', ''),
+                'user_type': step1_data.get('user_type', 'individual'),
+                'income': income,
+                'expenses': expenses,
+                'debt': debt,
+                'interest_rate': interest_rate,
+                'debt_to_income': debt_to_income,
+                'savings_rate': savings_rate,
+                'interest_burden': interest_burden,
+                'score': score,
+                'status': status,
+                'status_key': status_key,
+                'badges': badges,
+                'send_email': step1_data.get('send_email', False),
+                'created_at': datetime.utcnow()
+            }
+            document_id = None
+            if record:
+                record_data['_id'] = record['_id']
+                collection.update_one(
+                    {'_id': record['_id']},
+                    {'$set': {k: v for k, v in record_data.items() if k != '_id'}}
+                )
+                document_id = record['_id']
+            else:
+                record_data['_id'] = str(uuid.uuid4())
+                collection.insert_one(record_data)
+                document_id = record_data['_id']
+
+            current_app.logger.info(f"Step3 data updated/saved to MongoDB with ID {document_id} for session {session['sid']}")
+            log_tool_usage(
+                mongo,
+                tool_name='financial_health',
                 user_id=current_user.id if current_user.is_authenticated else None,
                 session_id=session['sid'],
-                step=3,
-                first_name=step1_data.get('first_name', ''),
-                email=step1_data.get('email', ''),
-                user_type=step1_data.get('user_type', 'individual'),
-                income=income,
-                expenses=expenses,
-                debt=debt,
-                interest_rate=interest_rate,
-                debt_to_income=debt_to_income,
-                savings_rate=savings_rate,
-                interest_burden=interest_burden,
-                score=score,
-                status=status,
-                status_key=status_key,
-                badges=json.dumps(badges),
-                send_email=step1_data.get('send_email', False),
+                action='step3_submit'
             )
-            db.session.add(financial_health)
-            db.session.commit()
-            current_app.logger.info(f"Step3 data saved to database with ID {financial_health.id} for session {session['sid']}")
 
-            # Send email if opted in
             if step1_data.get('send_email', False) and step1_data.get('email'):
                 try:
                     config = EMAIL_CONFIG["financial_health"]
@@ -334,34 +433,42 @@ def step3():
             session.modified = True
             flash(trans("financial_health_health_completed_success", lang=lang), "success")
             return redirect(url_for('financial_health.dashboard'))
-        return render_template('health_score_step3.html', form=form, trans=trans, lang=lang)
+        
+        return render_template('HEALTHSCORE/health_score_step3.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Error in step3: {str(e)}")
         flash(trans("financial_health_unexpected_error", lang=lang), "danger")
-        return render_template('health_score_step3.html', form=form, trans=trans, lang=lang), 500
+        return render_template('HEALTHSCORE/health_score_step3.html', form=form, trans=trans, lang=lang), 500
 
 @financial_health_bp.route('/dashboard', methods=['GET', 'POST'])
+@custom_login_required
 def dashboard():
     """Display financial health dashboard with comparison to others."""
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
         session.permanent = True
     lang = session.get('lang', 'en')
-    current_app.logger.info(f"Starting dashboard for session {session['sid']}")
+    current_app.logger.info(f"Starting dashboard for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+    log_tool_usage(
+        mongo,
+        tool_name='financial_health',
+        user_id=current_user.id if current_user.is_authenticated else None,
+        session_id=session['sid'],
+        action='dashboard_view'
+    )
     try:
-        # Query records from database for current user or session
-        filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
-        stored_records = FinancialHealth.query.filter_by(step=3, **filter_kwargs).order_by(FinancialHealth.created_at.desc()).all()
+        collection = get_mongo_collection()
+        filter_criteria = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+        stored_records = list(collection.find({**filter_criteria, 'step': 3}).sort('created_at', -1))
         if not stored_records:
             latest_record = {}
             records = []
         else:
-            latest_record = stored_records[0].to_dict()
-            records = [(record.id, record.to_dict()) for record in stored_records]
+            latest_record = stored_records[0]
+            records = [(record['_id'], record) for record in stored_records]
 
-        # Query all records with step=3 for comparison
-        all_records = FinancialHealth.query.filter_by(step=3).all()
-        all_scores_for_comparison = [record.score for record in all_records if record.score is not None]
+        all_records = list(collection.find({'step': 3}))
+        all_scores_for_comparison = [record['score'] for record in all_records if record.get('score') is not None]
 
         total_users = len(all_scores_for_comparison)
         rank = 0
@@ -401,7 +508,7 @@ def dashboard():
             insights.append(trans("financial_health_insight_no_data", lang=lang))
 
         return render_template(
-            'health_score_dashboard.html',
+            'HEALTHSCORE/health_score_dashboard.html',
             records=records,
             latest_record=latest_record,
             insights=insights,
@@ -416,7 +523,7 @@ def dashboard():
         current_app.logger.exception(f"Critical error in dashboard: {str(e)}")
         flash(trans("financial_health_dashboard_load_error", lang=lang), "danger")
         return render_template(
-            'health_score_dashboard.html',
+            'HEALTHSCORE/health_score_dashboard.html',
             records=[],
             latest_record={},
             insights=[trans("financial_health_insight_no_data", lang=lang)],

@@ -7,4 +7,4 @@ User-agent: *
      Allow: /emergency_fund
      Allow: /quiz
      Allow: /budget
-     Sitemap: https://ficore-ai.onrender.com/sitemap.xml
+     Sitemap: https://budget-planner-6zpf.onrender.com/sitemap.xml

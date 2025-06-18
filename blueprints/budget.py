@@ -8,10 +8,18 @@ from datetime import datetime
 import uuid
 import re
 from translations import trans
-from extensions import db
-from models import Budget
+from extensions import mongo
+from bson import ObjectId
+from models import log_tool_usage
+from session_utils import create_anonymous_session
+from app import custom_login_required
 
-budget_bp = Blueprint('budget', __name__, url_prefix='/budget')
+budget_bp = Blueprint(
+    'budget',
+    __name__,
+    template_folder='templates/BUDGET',
+    url_prefix='/BUDGET'
+)
 
 def strip_commas(value):
     """Strip commas from string values."""
@@ -136,10 +144,11 @@ class Step4Form(FlaskForm):
             raise ValidationError(trans('budget_savings_goal_invalid', session.get('lang', 'en')) or 'Invalid savings goal format')
 
 @budget_bp.route('/step1', methods=['GET', 'POST'])
+@custom_login_required
 def step1():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        current_app.logger.info(f"New session ID generated: {session['sid']}")
+        current_app.logger.info(f"New session ID generated: {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
         session.pop('budget_step1', None)
         session.pop('budget_step2', None)
         session.pop('budget_step3', None)
@@ -150,29 +159,47 @@ def step1():
     if current_user.is_authenticated:
         form_data['email'] = form_data.get('email', current_user.email)
         form_data['first_name'] = form_data.get('first_name', current_user.username)
+    else:
+        form_data['email'] = form_data.get('email', '')
+        form_data['first_name'] = form_data.get('first_name', '')
     form = Step1Form(data=form_data)
     try:
         if request.method == 'POST':
-            current_app.logger.info(f"POST request received for step1, session {session['sid']}: Raw form data: {dict(request.form)}")
+            current_app.logger.info(f"POST request received for step1, session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}: Raw form data: {dict(request.form)}")
             if form.validate_on_submit():
+                log_tool_usage(
+                    mongo,
+                    tool_name='budget',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='step1_submit'
+                )
                 session['budget_step1'] = form.data
                 current_app.logger.info(f"Budget step1 form validated successfully for session {session['sid']}: {form.data}")
                 return redirect(url_for('budget.step2'))
             else:
                 current_app.logger.warning(f"Form validation failed for step1, session {session['sid']}: {form.errors}")
                 flash(trans("budget_form_validation_error") or "Please correct the errors in the form", "danger")
-        current_app.logger.info(f"Rendering step1 form for session {session['sid']}")
-        return render_template('budget_step1.html', form=form, trans=trans, lang=lang)
+        log_tool_usage(
+            mongo,
+            tool_name='budget',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step1_view'
+        )
+        current_app.logger.info(f"Rendering step1 form for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+        return render_template('BUDGET/budget_step1.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Unexpected error in budget.step1 for session {session['sid']}: {str(e)}")
         flash(trans("budget_error_personal_info") or "Error processing personal information", "danger")
-        return render_template('budget_step1.html', form=form, trans=trans, lang=lang)
+        return render_template('BUDGET/budget_step1.html', form=form, trans=trans, lang=lang)
 
 @budget_bp.route('/step2', methods=['GET', 'POST'])
+@custom_login_required
 def step2():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        current_app.logger.info(f"New session ID generated: {session['sid']}")
+        current_app.logger.info(f"New session ID generated: {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
     session.permanent = True
     lang = session.get('lang', 'en')
     form = Step2Form()
@@ -182,26 +209,41 @@ def step2():
             flash(trans("budget_missing_previous_steps") or "Please complete previous steps", "danger")
             return redirect(url_for('budget.step1'))
         if request.method == 'POST':
-            current_app.logger.info(f"POST request received for step2, session {session['sid']}: Raw form data: {dict(request.form)}")
+            current_app.logger.info(f"POST request received for step2, session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}: Raw form data: {dict(request.form)}")
             if form.validate_on_submit():
+                log_tool_usage(
+                    mongo,
+                    tool_name='budget',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='step2_submit'
+                )
                 session['budget_step2'] = form.data
                 current_app.logger.info(f"Budget step2 form validated successfully for session {session['sid']}: {form.data}")
                 return redirect(url_for('budget.step3'))
             else:
                 current_app.logger.warning(f"Form validation failed for step2, session {session['sid']}: {form.errors}")
                 flash(trans("budget_form_validation_error") or "Please correct the errors in the form", "danger")
-        current_app.logger.info(f"Rendering step2 form for session {session['sid']}")
-        return render_template('budget_step2.html', form=form, trans=trans, lang=lang)
+        log_tool_usage(
+            mongo,
+            tool_name='budget',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step2_view'
+        )
+        current_app.logger.info(f"Rendering step2 form for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+        return render_template('BUDGET/budget_step2.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Unexpected error in budget.step2 for session {session['sid']}: {str(e)}")
         flash(trans("budget_error_income_invalid") or "Error processing income", "danger")
-        return render_template('budget_step2.html', form=form, trans=trans, lang=lang)
+        return render_template('BUDGET/budget_step2.html', form=form, trans=trans, lang=lang)
 
 @budget_bp.route('/step3', methods=['GET', 'POST'])
+@custom_login_required
 def step3():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        current_app.logger.info(f"New session ID generated: {session['sid']}")
+        current_app.logger.info(f"New session ID generated: {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
     session.permanent = True
     lang = session.get('lang', 'en')
     form = Step3Form()
@@ -211,26 +253,41 @@ def step3():
             flash(trans("budget_missing_previous_steps") or "Please complete previous steps", "danger")
             return redirect(url_for('budget.step1'))
         if request.method == 'POST':
-            current_app.logger.info(f"POST request received for step3, session {session['sid']}: Raw form data: {dict(request.form)}")
+            current_app.logger.info(f"POST request received for step3, session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}: Raw form data: {dict(request.form)}")
             if form.validate_on_submit():
+                log_tool_usage(
+                    mongo,
+                    tool_name='budget',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='step3_submit'
+                )
                 session['budget_step3'] = form.data
                 current_app.logger.info(f"Budget step3 form validated successfully for session {session['sid']}: {form.data}")
                 return redirect(url_for('budget.step4'))
             else:
                 current_app.logger.warning(f"Form validation failed for step3, session {session['sid']}: {form.errors}")
                 flash(trans("budget_form_validation_error") or "Please correct the errors in the form", "danger")
-        current_app.logger.info(f"Rendering step3 form for session {session['sid']}")
-        return render_template('budget_step3.html', form=form, trans=trans, lang=lang)
+        log_tool_usage(
+            mongo,
+            tool_name='budget',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step3_view'
+        )
+        current_app.logger.info(f"Rendering step3 form for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+        return render_template('BUDGET/budget_step3.html', form=form, trans=trans, lang=lang)
     except Exception as e:
         current_app.logger.exception(f"Unexpected error in budget.step3 for session {session['sid']}: {str(e)}")
         flash(trans("budget_error_expenses_invalid") or "Error processing expenses", "danger")
-        return render_template('budget_step3.html', form=form, trans=trans, lang=lang)
+        return render_template('BUDGET/budget_step3.html', form=form, trans=trans, lang=lang)
 
 @budget_bp.route('/step4', methods=['GET', 'POST'])
+@custom_login_required
 def step4():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        current_app.logger.info(f"New session ID generated: {session['sid']}")
+        current_app.logger.info(f"New session ID generated: {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
     session.permanent = True
     lang = session.get('lang', 'en')
     form = Step4Form()
@@ -238,7 +295,7 @@ def step4():
     try:
         session_keys = ['budget_step1', 'budget_step2', 'budget_step3']
         missing_keys = [k for k in session_keys if k not in session]
-        current_app.logger.info(f"Session check for {session['sid']}: Missing keys: {missing_keys}")
+        current_app.logger.info(f"Session check for {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}: Missing keys: {missing_keys}")
 
         if missing_keys:
             current_app.logger.warning(f"Missing session data for session {session['sid']}: {missing_keys}")
@@ -246,8 +303,15 @@ def step4():
             return redirect(url_for('budget.step1'))
 
         if request.method == 'POST':
-            current_app.logger.info(f"POST request received for step4, session {session['sid']}: Raw form data: {dict(request.form)}")
+            current_app.logger.info(f"POST request received for step4, session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}: Raw form data: {dict(request.form)}")
             if form.validate_on_submit():
+                log_tool_usage(
+                    mongo,
+                    tool_name='budget',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='step4_submit'
+                )
                 session['budget_step4'] = form.data
                 current_app.logger.info(f"Budget step4 form validated successfully for session {session['sid']}: {form.data}")
 
@@ -268,32 +332,32 @@ def step4():
                 savings_goal = step4_data.get('savings_goal', 0)
                 surplus_deficit = income - expenses
 
-                budget = Budget(
-                    id=str(uuid.uuid4()),
-                    user_id=current_user.id if current_user.is_authenticated else None,
-                    session_id=session['sid'],
-                    user_email=step1_data.get('email'),
-                    income=income,
-                    fixed_expenses=expenses,
-                    variable_expenses=0,
-                    savings_goal=savings_goal,
-                    surplus_deficit=surplus_deficit,
-                    housing=step3_data.get('housing', 0),
-                    food=step3_data.get('food', 0),
-                    transport=step3_data.get('transport', 0),
-                    dependents=step3_data.get('dependents', 0),
-                    miscellaneous=step3_data.get('miscellaneous', 0),
-                    others=step3_data.get('others', 0)
-                )
+                budget_data = {
+                    '_id': str(uuid.uuid4()),
+                    'user_id': current_user.id if current_user.is_authenticated else None,
+                    'session_id': session['sid'],
+                    'user_email': step1_data.get('email'),
+                    'income': income,
+                    'fixed_expenses': expenses,
+                    'variable_expenses': 0,
+                    'savings_goal': savings_goal,
+                    'surplus_deficit': surplus_deficit,
+                    'housing': step3_data.get('housing', 0),
+                    'food': step3_data.get('food', 0),
+                    'transport': step3_data.get('transport', 0),
+                    'dependents': step3_data.get('dependents', 0),
+                    'miscellaneous': step3_data.get('miscellaneous', 0),
+                    'others': step3_data.get('others', 0),
+                    'created_at': datetime.utcnow()
+                }
+
                 try:
-                    db.session.add(budget)
-                    db.session.commit()
-                    current_app.logger.info(f"Budget saved successfully to database for session {session['sid']}")
+                    mongo.db.budgets.insert_one(budget_data)
+                    current_app.logger.info(f"Budget saved successfully to MongoDB for session {session['sid']}")
                 except Exception as e:
-                    db.session.rollback()
-                    current_app.logger.error(f"Failed to save budget to database for session {session['sid']}: {str(e)}")
+                    current_app.logger.error(f"Failed to save budget to MongoDB for session {session['sid']}: {str(e)}")
                     flash(trans("budget_storage_error") or "Failed to save budget data", "danger")
-                    return render_template('budget_step4.html', form=form, trans=trans, lang=lang)
+                    return render_template('BUDGET/budget_step4.html', form=form, trans=trans, lang=lang)
 
                 email = step1_data.get('email')
                 send_email_flag = step1_data.get('send_email', False)
@@ -342,36 +406,68 @@ def step4():
             else:
                 current_app.logger.warning(f"Form validation failed for step4, session {session['sid']}: {form.errors}")
                 flash(trans("budget_form_validation_error") or "Please correct the errors in the form", "danger")
-                return render_template('budget_step4.html', form=form, trans=trans, lang=lang)
+                return render_template('BUDGET/budget_step4.html', form=form, trans=trans, lang=lang)
 
-        current_app.logger.info(f"Rendering step4 form for session {session['sid']}")
-        return render_template('budget_step4.html', form=form, trans=trans, lang=lang)
+        log_tool_usage(
+            mongo,
+            tool_name='budget',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='step4_view'
+        )
+        current_app.logger.info(f"Rendering step4 form for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
+        return render_template('BUDGET/budget_step4.html', form=form, trans=trans, lang=lang)
 
     except Exception as e:
         current_app.logger.exception(f"Unexpected error in budget.step4 for session {session['sid']}: {str(e)}")
         flash(trans("budget_budget_process_error") or "An unexpected error occurred", "danger")
-        return render_template('budget_step4.html', form=form, trans=trans, lang=lang)
+        return render_template('BUDGET/budget_step4.html', form=form, trans=trans, lang=lang)
 
 @budget_bp.route('/dashboard', methods=['GET', 'POST'])
+@custom_login_required
 def dashboard():
     if 'sid' not in session:
         session['sid'] = str(uuid.uuid4())
-        current_app.logger.info(f"New session ID generated: {session['sid']}")
+        current_app.logger.info(f"New session ID generated: {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}")
     session.permanent = True
     lang = session.get('lang', 'en')
     try:
-        current_app.logger.info(f"Request started for path: /budget/dashboard [session: {session['sid']}]")
+        current_app.logger.info(f"Request started for path: /budget/dashboard [session: {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}]")
+        log_tool_usage(
+            mongo,
+            tool_name='budget',
+            user_id=current_user.id if current_user.is_authenticated else None,
+            session_id=session['sid'],
+            action='dashboard_view'
+        )
 
-        filter_kwargs = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
-        budgets = Budget.query.filter_by(**filter_kwargs).order_by(Budget.created_at.desc()).all()
-        current_app.logger.info(f"Read {len(budgets)} records from budget storage [session: {session['sid']}]")
+        filter_criteria = {'user_id': current_user.id} if current_user.is_authenticated else {'session_id': session['sid']}
+        budgets = list(mongo.db.budgets.find(filter_criteria).sort('created_at', -1))
+        current_app.logger.info(f"Read {len(budgets)} records from MongoDB budgets collection [session: {session['sid']}]")
 
         budgets_dict = {}
         latest_budget = None
         for budget in budgets:
-            budget_data = budget.to_dict()
-            budgets_dict[budget.id] = budget_data
-            if not latest_budget or budget.created_at > datetime.strptime(latest_budget['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ'):
+            budget_data = {
+                'id': str(budget['_id']),
+                'user_id': budget.get('user_id'),
+                'session_id': budget.get('session_id'),
+                'user_email': budget.get('user_email'),
+                'income': budget.get('income', 0.0),
+                'fixed_expenses': budget.get('fixed_expenses', 0.0),
+                'variable_expenses': budget.get('variable_expenses', 0.0),
+                'savings_goal': budget.get('savings_goal', 0.0),
+                'surplus_deficit': budget.get('surplus_deficit', 0.0),
+                'housing': budget.get('housing', 0.0),
+                'food': budget.get('food', 0.0),
+                'transport': budget.get('transport', 0.0),
+                'dependents': budget.get('dependents', 0.0),
+                'miscellaneous': budget.get('miscellaneous', 0.0),
+                'others': budget.get('others', 0.0),
+                'created_at': budget.get('created_at').strftime('%Y-%m-%dT%H:%M:%S.%fZ') if budget.get('created_at') else ''
+            }
+            budgets_dict[budget_data['id']] = budget_data
+            if not latest_budget or budget.get('created_at') > datetime.strptime(latest_budget['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ'):
                 latest_budget = budget_data
 
         if not latest_budget:
@@ -393,17 +489,21 @@ def dashboard():
             action = request.form.get('action')
             budget_id = request.form.get('budget_id')
             if action == 'delete':
+                log_tool_usage(
+                    mongo,
+                    tool_name='budget',
+                    user_id=current_user.id if current_user.is_authenticated else None,
+                    session_id=session['sid'],
+                    action='delete_budget'
+                )
                 try:
-                    budget = Budget.query.filter_by(id=budget_id, **filter_kwargs).first()
-                    if budget:
-                        db.session.delete(budget)
-                        db.session.commit()
+                    result = mongo.db.budgets.delete_one({'_id': budget_id, **filter_criteria})
+                    if result.deleted_count > 0:
                         flash(trans("budget_budget_deleted_success") or "Budget deleted successfully", "success")
                         current_app.logger.info(f"Deleted budget ID {budget_id} for session {session['sid']}")
                     else:
                         flash(trans("budget_budget_not_found") or "Budget not found", "danger")
                 except Exception as e:
-                    db.session.rollback()
                     current_app.logger.error(f"Failed to delete budget ID {budget_id} for session {session['sid']}: {str(e)}")
                     flash(trans("budget_budget_delete_failed") or "Failed to delete budget", "danger")
                 return redirect(url_for('budget.dashboard'))
@@ -432,9 +532,9 @@ def dashboard():
             if latest_budget.get('savings_goal', 0) == 0:
                 insights.append(trans("budget_insight_set_savings_goal") or "Consider setting a savings goal.")
 
-        current_app.logger.info(f"Rendering dashboard for session {session['sid']}: {len(budgets_dict)} budgets found")
+        current_app.logger.info(f"Rendering dashboard for session {session['sid']} {'(anonymous)' if session.get('is_anonymous') else ''}: {len(budgets_dict)} budgets found")
         return render_template(
-            'budget_dashboard.html',
+            'BUDGET/budget_dashboard.html',
             budgets=budgets_dict,
             latest_budget=latest_budget,
             categories=categories,
@@ -447,7 +547,7 @@ def dashboard():
         current_app.logger.exception(f"Unexpected error in budget.dashboard for session {session['sid']}: {str(e)}")
         flash(trans("budget_dashboard_load_error") or "Error loading dashboard", "danger")
         return render_template(
-            'budget_dashboard.html',
+            'BUDGET/budget_dashboard.html',
             budgets={},
             latest_budget={
                 'income': 0.0,

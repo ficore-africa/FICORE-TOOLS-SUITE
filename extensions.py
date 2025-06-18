@@ -1,12 +1,13 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_session import Session
+from flask_pymongo import PyMongo
 from flask_login import LoginManager
+from flask_session import Session
 from flask_wtf.csrf import CSRFProtect
-from datetime import datetime  # Ensure datetime is imported
+import certifi
 
-db = SQLAlchemy()
+# MongoDB setup
+mongo = PyMongo()
+
+# Other extensions
 login_manager = LoginManager()
-session = Session()
+flask_session = Session()
 csrf = CSRFProtect()
-
-
