@@ -1,5 +1,9 @@
 
-✅ Deployment Fixes to Remember
+✅ Deployment Fixes to Remember'
+
+Keep the Jinja2 filters (format_currency, format_date, etc.) in app.py as they are.
+Add the corresponding Python functions (format_currency, format_date) to utils.py to resolve the ImportError in users/routes.py.
+Use a raw string (r) for the regex pattern in app.py to eliminate the SyntaxWarning for the email pattern in the setup_database function.
 
 1. MongoDB Connection Fix
 - Use this format for MongoDB Atlas URI (avoid conflicting SSL params):
