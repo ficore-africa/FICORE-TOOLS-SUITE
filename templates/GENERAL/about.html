@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{ trans('core_about_ficore_africa') | default('About Ficore Africa') }}{% endblock %}
+{% block content %}
+<main class="about-page">
+    <div class="container about-container mt-5">
+        <header class="about-header">
+            <h1 class="about-title">{{ trans('core_about_ficore_africa') | default('About Ficore Africa') }}</h1>
+            <p class="about-subtitle">{{ trans('core_empowering_financial_growth') | default('Empowering financial growth across Africa since 2025') }}</p>
+        </header>
+
+        <section class="about-content mt-5">
+            <div class="info-box">
+                <i class="fas fa-exclamation-triangle"></i> {{ trans('core_disclaimer') | default('Ficore is not a bank. We do not hold or move funds — we only provide financial planning tools.') }}
+            </div>
+            <p class="about-learn-more">{{ trans('core_learn_more_content') | default('Ficore Africa provides tools to help you track your income, net worth, budgets, and bills, enabling you to grow your money with confidence.') }}</p>
+        </section>
+
+        <section class="mission-statement mt-5">
+            <h3><i class="fas fa-globe-africa"></i> {{ trans('core_our_mission') | default('Our Mission') }}</h3>
+            <p>{{ trans('core_mission_statement_content') | default('To empower individuals and businesses across Africa with accessible and intuitive financial tools and knowledge, fostering financial literacy and driving economic growth.') }}</p>
+        </section>
+
+        <section class="team-why mt-5">
+            <h3><i class="fas fa-handshake"></i> {{ trans('core_why_ficore_africa') | default('The Vision Behind Ficore Africa') }}</h3>
+            <p>{{ trans('core_team_why_content') | default('Ficore Africa was born from a shared passion to bridge the financial literacy gap in Africa and provide practical, user-friendly solutions that address the unique financial challenges faced by individuals and businesses in the region. We believe that by equipping Africans with the right tools and understanding, we can unlock their economic potential and build a more prosperous future for the continent.') }}</p>
+        </section>
+
+        <section class="cta-section text-center mt-5">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-explore">{{ trans('core_explore_tools') | default('Explore Our Tools') }}</a>
+        </section>
+    </div>
+</main>
+{% endblock %}
