@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}
+{{ trans(lesson['title_key']) }}
+{% endblock %}
+{% block extra_head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<div class="container mx-auto p-4">
+    <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 rounded-t-lg">
+        <h1 class="text-2xl font-bold">{{ trans(lesson['title_key']) }}</h1>
+        <p class="mt-2">{{ trans(course['title_key']) }}</p>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="bg-{{ 'green' if category == 'success' else 'red' }}-100 text-{{ 'green' if category == 'success' else 'red' }}-800 p-4 rounded mt-4">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="bg-white shadow-md rounded-lg p-4 mt-4">
+        {% if lesson['content_type'] == 'video' %}
+            <video controls class="w-full rounded">
+                <source src="{{ url_for('learning_hub.serve_uploaded_file', filename=lesson['content_path']) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        {% elif lesson['content_type'] == 'slides' %}
+            <embed src="{{ url_for('learning_hub.serve_uploaded_file', filename=lesson['content_path']) }}" type="application/pdf" class="w-full h-96">
+        {% else %}
+            <p>{{ trans(lesson['content_key']) }}</p>
+        {% endif %}
+        <form method="POST" class="mt-4" onsubmit="this.querySelector('button').disabled=true;">
+            {{ form.csrf_token }}
+            <input type="hidden" name="lesson_id" value="{{ lesson['id'] }}">
+            <button type="submit" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                <i class="fas fa-check"></i> {{ trans('learning_hub_mark_complete') }}
+            </button>
+        </form>
+        {% if next_lesson_id %}
+            <a href="{{ url_for('learning_hub.lesson', course_id=course['id'], lesson_id=next_lesson_id) }}" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-2">
+                <i class="fas fa-forward"></i> {{ trans('learning_hub_next_lesson') }}
+            </a>
+        {% endif %}
+        <a href="{{ url_for('learning_hub.course_overview', course_id=course['id']) }}" class="inline-block bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mt-2">
+            <i class="fas fa-home"></i> {{ trans('learning_hub_back_to_course') }}
+        </a>
+    </div>
+</div>
+{% endblock %}

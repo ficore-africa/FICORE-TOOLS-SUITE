@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ trans('bill_dashboard', lang=lang) | default('Bill Dashboard') }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% set tool_name = trans('bill_bill_dashboard', lang=lang) | default('Bill Dashboard') %}
+    {% set tool_icon = 'fa-tachometer-alt' %}
+    {% set subtitle = trans('bill_dashboard_subtitle', lang=lang) | default('Manage and track all your bills') %}
+    {% include 'tool_header.html' %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="toast align-items-center text-white bg-{{ category }} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            {{ trans(message, lang=lang) | default(message) | safe }}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="{{ trans('core_close', lang=lang) | default('Close') }}"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if bills %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ trans('bill_summary', lang=lang) | default('Bill Summary') }}</h5>
+                <p>{{ trans('bill_paid_count', lang=lang) | default('Paid Bills') }}: {{ paid_count }}</p>
+                <p>{{ trans('bill_unpaid_count', lang=lang) | default('Unpaid Bills') }}: {{ unpaid_count }}</p>
+                <p>{{ trans('bill_overdue_count', lang=lang) | default('Overdue Bills') }}: {{ overdue_count }}</p>
+                <p>{{ trans('bill_pending_count', lang=lang) | default('Pending Bills') }}: {{ pending_count }}</p>
+                <p>{{ trans('bill_total_paid', lang=lang) | default('Total Paid') }}: {{ total_paid | format_currency }}</p>
+                <p>{{ trans('bill_total_unpaid', lang=lang) | default('Total Unpaid') }}: {{ total_unpaid | format_currency }}</p>
+                <p>{{ trans('bill_total_overdue', lang=lang) | default('Total Overdue') }}: {{ total_overdue | format_currency }}</p>
+                <p>{{ trans('bill_total_bills', lang=lang) | default('Total Bills') }}: {{ total_bills | format_currency }}</p>
+            </div>
+        </div>
+
+        {% if due_today %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>{{ trans('bill_due_today', lang=lang) | default('Due Today') }}</h5>
+                    <ul>
+                        {% for bill_id, bill in due_today %}
+                            <li>{{ bill.bill_name }} ({{ bill.amount | format_currency }})</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if upcoming_bills %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>{{ trans('bill_upcoming_bills', lang=lang) | default('Upcoming Bills') }}</h5>
+                    <ul>
+                        {% for bill_id, bill in upcoming_bills %}
+                            <li>{{ bill.bill_name }} ({{ bill.amount | format_currency }}) - Due: {{ bill.due_date }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{{ trans('bill_bill_name', lang=lang) | default('Bill Name') }}</th>
+                        <th>{{ trans('bill_amount', lang=lang) | default('Amount') }}</th>
+                        <th>{{ trans('bill_due_date', lang=lang) | default('Due Date') }}</th>
+                        <th>{{ trans('bill_category', lang=lang) | default('Category') }}</th>
+                        <th>{{ trans('bill_frequency', lang=lang) | default('Frequency') }}</th>
+                        <th>{{ trans('bill_status', lang=lang) | default('Status') }}</th>
+                        <th>{{ trans('bill_actions', lang=lang) | default('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bill_id, bill in bills %}
+                        {% if bill.bill_name and bill.amount is not none and bill.due_date and bill.frequency and bill.category and bill.status %}
+                            <tr>
+                                <td>{{ bill.bill_name }}</td>
+                                <td>{{ bill.amount | format_currency }}</td>
+                                <td>{{ bill.due_date }}</td>
+                                <td>{{ trans('bill_category_' + bill.category, lang=lang) | default(bill.category) }}</td>
+                                <td>{{ trans('bill_frequency_' + bill.frequency, lang=lang) | default(bill.frequency) }}</td>
+                                <td>{{ trans('bill_status_' + bill.status, lang=lang) | default(bill.status) }}</td>
+                                <td>
+                                    <form action="{{ url_for('bill.view_edit') }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="bill_id" value="{{ bill_id }}">
+                                        <input type="hidden" name="action" value="edit">
+                                        <button type="submit" class="btn btn-sm btn-primary">{{ trans('bill_edit', lang=lang) | default('Edit') }}</button>
+                                    </form>
+                                    <form action="{{ url_for('bill.view_edit') }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ trans('bill_confirm_delete', lang=lang) | default('Are you sure you want to delete this bill?') }}');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="bill_id" value="{{ bill_id }}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="btn btn-sm btn-danger">{{ trans('bill_delete', lang=lang) | default('Delete') }}</button>
+                                    </form>
+                                    <form action="{{ url_for('bill.view_edit') }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="bill_id" value="{{ bill_id }}">
+                                        <input type="hidden" name="action" value="toggle_status">
+                                        <button type="submit" class="btn btn-sm btn-secondary">{{ trans('bill_toggle_status', lang=lang) | default('Toggle Status') }}</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Share Ficore Africa Section -->
+        {% if current_user.is_authenticated %}
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>{{ trans('share_ficore', lang=lang) | default('Share Ficore Africa with Friends') }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{{ trans('core_share_ficore_invite', lang=lang) | default('Invite your friends to join Ficore Africa and manage their finances better!') }}</p>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="referralLink" value="{{ url_for('auth.signup', ref=current_user.referral_code, _external=True) }}" readonly>
+                            <button class="btn btn-primary" type="button" onclick="copyReferralLink()">{{ trans('core_profile_copy_link', lang=lang) | default('Copy') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('bill.form_step1') }}" class="btn btn-primary">{{ trans('bill_add_bill', lang=lang) | default('Add Bill') }}</a>
+        <a href="{{ url_for('bill.view_edit') }}" class="btn btn-primary">{{ trans('bill_view_edit_bills', lang=lang) | default('View and Edit Bills') }}</a>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">{{ trans('bill_back_to_index', lang=lang) | default('Back to Index') }}</a>
+    {% else %}
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-file-invoice fa-3x mb-3 text-muted"></i>
+                <p>{{ trans('bill_no_bills_empty_state', lang=lang) | default('No bills added yet. Start by adding one!') }}</p>
+                <a href="{{ url_for('bill.form_step1') }}" class="btn btn-primary">{{ trans('bill_add_bill', lang=lang) | default('Add Bill') }}</a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">{{ trans('bill_back_to_index', lang=lang) | default('Back to Index') }}</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    toastElList.forEach(function(toastEl) {
+        var toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    });
+
+    function copyReferralLink() {
+        const referralLink = document.getElementById('referralLink');
+        referralLink.select();
+        document.execCommand('copy');
+        alert('{{ trans('profile_link_copied', lang=lang) | default('Referral link copied to clipboard!') }}');
+    }
+});
+</script>
+{% endblock %}

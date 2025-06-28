@@ -1,0 +1,195 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trans('bill_bill_payment_reminder', default='Bill Payment Reminder', lang=lang) }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2E7D32, #0288D1);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding: 10px;
+            border-top: 1px solid #ddd;
+        }
+        a {
+            color: #0288D1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2E7D32, #0288D1);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #1B5E20, #01579B);
+        }
+        .bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .bill-table th, .bill-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .bill-table th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+        .status-overdue {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .status-pending {
+            color: #FBC02D;
+        }
+        h2 {
+            color: #2E7D32;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+        .unsubscribe {
+            font-size: 12px;
+            color: #777;
+            margin-top: 20px;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 10px;
+            }
+            .btn {
+                display: block;
+                text-align: center;
+            }
+            .bill-table th, .bill-table td {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ trans('bill_bill_payment_reminder', default='Bill Payment Reminder', lang=lang) }}</h1>
+        </div>
+        <div class="content">
+            <p>{{ trans('core_dear', default='Dear', lang=lang) }} {{ data.first_name | default(trans('core_user', default='User', lang=lang)) }},</p>
+            <p>{{ trans('bill_bill_reminder_intro', default='This is a reminder about your upcoming or overdue bills in your FiCore Africa Bill Planner.', lang=lang) }}</p>
+            
+            <h2>{{ trans('bill_bill_details', default='Bill Details', lang=lang) }}</h2>
+            {% if data.bills %}
+                <table class="bill-table">
+                    <tr>
+                        <th>{{ trans('bill_bill_name', default='Bill Name', lang=lang) }}</th>
+                        <th>{{ trans('bill_amount', default='Amount', lang=lang) }}</th>
+                        <th>{{ trans('bill_due_date', default='Due Date', lang=lang) }}</th>
+                        <th>{{ trans('bill_status', default='Status', lang=lang) }}</th>
+                    </tr>
+                    {% for bill in data.bills %}
+                        <tr>
+                            <td>{{ bill.bill_name }}</td>
+                            <td>₦{{ bill.amount | format_number }}</td>
+                            <td>{{ bill.due_date }}</td>
+                            <td class="status-{{ bill.status.lower() }}">{{ bill.status }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p>{{ trans('bill_no_bills_due', default='No bills are currently due or overdue.', lang=lang) }}</p>
+            {% endif %}
+
+            <p>{{ trans('bill_pay_on_time', default='Pay on time to avoid late fees and stay on top of your finances.', lang=lang) }}</p>
+
+            <p style="text-align: center;">
+                <a href="{{ data.cta_url }}" class="btn">{{ trans('bill_go_to_bill_planner', default='Go to Bill Planner', lang=lang) }}</a>
+            </p>
+
+            <p>{{ trans('core_thank_you', default='Thank you for using FiCore Africa!', lang=lang) }}</p>
+
+            <p class="unsubscribe">
+                {{ trans('bill_unsubscribe_prompt', default='To stop receiving these emails, ', lang=lang) }}
+                <a href="{{ data.unsubscribe_url }}">{{ trans('bill_unsubscribe', default='unsubscribe here', lang=lang) }}</a>.
+            </p>
+        </div>
+        <div class="footer">
+            <p>{{ trans('core_powered_by', default='Powered by FiCore Africa', lang=lang) }}</p>
+        </div>
+    </div>
+</body>
+</html>

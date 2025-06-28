@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="{{ session.lang | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ trans('core_ficore_africa') | default('Ficore Africa') }} | {% block title %}{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6.5.1 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Canvas Confetti 1.9.3 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles-base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles-modules.css') }}">
+    <!-- Favicon and Apple Touch Icon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='img/favicon-16x16.png') }}">
+    <!-- CSRF Token for POST Requests -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Header Message (Directly under body) -->
+    <div class="header-message">
+        {{ trans('core_welcome_to_ficore') | default('Welcome to Ficore Africa Tools Suite: Use Ficore to Track your income, net worth, budgets, and bills, to grow your money with confidence.') }}
+    </div>
+
+    <!-- Navigation Bar (Directly under body, no container-fluid) -->
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='img/ficore_logo.png') }}" alt="{{ trans('core_ficore_africa_logo') | default('Ficore Africa Logo') }}" class="logo-centered" style="border-radius: 50%; object-fit: contain; width: 80px; height: 80px;">
+        </a>
+        <a href="{{ url_for('set_language', lang='ha' if session.lang == 'en' else 'en') }}"
+           class="btn btn-primary navbar-btn btn-outline-light language-btn ms-1 me-1"
+           title="{{ trans('core_change_language') | default('Change Language') }}"
+           aria-label="{{ trans('core_switch_to') | default('Switch to') }} {{ 'Hausa' if session.lang == 'en' else 'English' }}"
+           role="button">
+            <i class="fas fa-globe me-1" aria-hidden="true"></i>
+            {{ 'Hausa' if session.lang == 'en' else 'English' }}
+        </a>
+        <!-- Mode Toggle Button -->
+        <button id="modeToggle" class="ms-1 me-1" aria-label="{{ trans('core_toggle_dark_mode') | default('Toggle Dark Mode') }}">
+            <i class="fas fa-moon" aria-hidden="true"></i>
+        </button>
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="{{ trans('core_toggle_navigation') | default('Toggle navigation') }}">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <!-- Group 1: Home, Feedback, General Dashboard, Admin Panel -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="mainMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem;">
+                        {{ trans('core_main_menu') | default('Main Menu') }}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="mainMenuDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('index') }}" style="font-size: 0.85rem;">{{ trans('core_home') | default('Home') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('feedback') }}" style="font-size: 0.85rem;">{{ trans('core_feedback') | default('Feedback') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('general_dashboard') }}" style="font-size: 0.85rem;">{{ trans('core_general_dashboard') | default('General Dashboard') }}</a></li>
+                        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                        <li><a class="dropdown-item" href="{{ url_for('admin.overview') }}" style="font-size: 0.85rem;">{{ trans('core_admin_panel') | default('Admin Panel') }}</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                <!-- Group 2: Tools, Profile, Login, Sign Up/Logout -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="toolsAuthDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.85rem;">
+                        {{ trans('core_tools_auth') | default('Tools & Account') }}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="toolsAuthDropdown">
+                        <li><a class="dropdown-item" href="#tools-section" style="font-size: 0.85rem;">{{ trans('core_tools') | default('Tools') }}</a></li>
+                        {% if current_user.is_authenticated %}
+                        <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}" style="font-size: 0.85rem;">{{ trans('core_profile') | default('Profile') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}" style="font-size: 0.85rem;">{{ trans('core_logout') | default('Logout') }}</a></li>
+                        {% else %}
+                        <li><a class="dropdown-item" href="{{ url_for('auth.signin') }}" style="font-size: 0.85rem;">{{ trans('core_login') | default('Login') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('auth.signup') }}" style="font-size: 0.85rem;">{{ trans('core_signup') | default('Sign Up') }}</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Consent Banner -->
+    {% if not session.get('consent_acknowledged') %}
+    <div class="consent-banner alert alert-info alert-dismissible fade show" id="consentBanner" role="alert">
+        <i class="fas fa-shield-alt me-1" aria-hidden="true"></i> {{ trans('core_consent_banner') | default('By using Ficore, you understand that we provide tools for planning only, not banking.') }}
+        <button type="button" class="btn btn-primary btn-sm ms-2" id="acknowledgeConsentBtn">{{ trans('core_accept') | default('Accept') }}</button>
+    </div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ trans(message) | default(message) }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{{ trans('core_close') | default('Close') }}"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer mt-5" style="background: linear-gradient(90deg, #003087, #004D40); color: white;">
+        <div class="container text-center py-4" role="contentinfo">
+            <p>{{ trans('core_about_ficore_africa') | default('About Ficore Africa') }}: {{ trans('core_empowering_financial_growth') | default('Empowering financial growth across Africa since 2025') }}</p>
+            <p class="footer-disclaimer"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i> {{ trans('core_disclaimer') | default('Ficore is not a bank and does not hold or move funds.') }} <a href="{{ url_for('about') }}" class="text-white text-decoration-underline">{{ trans('core_learn_more') | default('Learn more') }}</a></p>
+            <div class="social-icons d-flex justify-content-center gap-3">
+                <a href="{{ LINKEDIN_URL }}" target="_blank" aria-label="{{ trans('core_connect_on_linkedin') | default('Connect on LinkedIn') }}" class="d-flex align-items-center text-white">
+                    <i class="fab fa-linkedin me-1"></i> LinkedIn
+                </a>
+                <a href="{{ TWITTER_URL }}" target="_blank" aria-label="{{ trans('core_follow_on_twitter') | default('Follow on Twitter') }}" class="d-flex align-items-center text-white">
+                    <i class="fab fa-x-twitter me-1"></i> Twitter
+                </a>
+                <a href="{{ FACEBOOK_URL }}" target="_blank" aria-label="{{ trans('core_follow_on_facebook') | default('Follow on Facebook') }}" class="d-flex align-items-center text-white">
+                    <i class="fab fa-facebook me-1"></i> Facebook
+                </a>
+            </div>
+            <div class="footer-buttons mt-3">
+                <a href="mailto:support@ficoreafrica.com" class="text-white"><i class="fas fa-envelope"></i> {{ trans('core_contact_us') | default('Contact Us') }}</a>
+                <a href="{{ url_for('feedback') }}" class="text-white"><i class="fas fa-comment"></i> {{ trans('core_provide_feedback') | default('Provide Feedback') }}</a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.logout') }}" class="text-white"><i class="fas fa-sign-out-alt"></i> {{ trans('core_logout') | default('Logout') }}</a>
+                {% else %}
+                <a href="{{ url_for('auth.signin') }}" class="text-white"><i class="fas fa-sign-in-alt"></i> {{ trans('core_login') | default('Login') }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/interactivity.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+    {% block base_scripts %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation
+            document.querySelectorAll('form.validate-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    let valid = true;
+                    form.querySelectorAll('.form-control').forEach(input => {
+                        input.classList.add('was-validated');
+                        if (!input.value.trim()) {
+                            input.classList.add('is-invalid');
+                            valid = false;
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    });
+                    form.querySelectorAll('.form-select').forEach(select => {
+                        select.classList.add('was-validated');
+                        if (!select.value) {
+                            select.classList.add('is-invalid');
+                            valid = false;
+                        } else {
+                            select.classList.remove('is-invalid');
+                        }
+                    });
+                    console.log('Form validation result:', valid ? 'Valid' : 'Invalid', 'Form ID:', form.id);
+                    if (!valid) {
+                        e.preventDefault();
+                        alert('{{ trans('core_please_complete_all_fields') | default('Please complete all required fields') }}');
+                    }
+                });
+            });
+
+            // Consent banner handling
+            const consentBtn = document.getElementById('acknowledgeConsentBtn');
+            if (consentBtn) {
+                consentBtn.addEventListener('click', function() {
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    fetch('{{ url_for("acknowledge_consent") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': csrfToken
+                        },
+                        body: '{}'
+                    })
+                    .then(response => {
+                        if (response.status === 204) {
+                            const banner = document.getElementById('consentBanner');
+                            if (banner) {
+                                banner.classList.remove('show');
+                                setTimeout(() => banner.remove(), 300);
+                            }
+                        } else if (response.status === 400) {
+                            alert('{{ trans("core_invalid_request") | default("Invalid request. Please try again.") }}');
+                        } else {
+                            alert('{{ trans("core_error_acknowledging_consent") | default("Error acknowledging consent. Please try again.") }}');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('{{ trans("core_network_error") | default("Network error. Please try again.") }}');
+                    });
+                });
+            }
+
+            // Tooltip initialization
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            [...tooltipTriggerList].forEach(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        });
+    </script>
+    {% endblock %}
+    {% block extra_scripts %}{% endblock %}
+
+    <!-- Dark Mode Toggle Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('modeToggle');
+            const body = document.body;
+
+            // Check localStorage for theme preference on load
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-theme');
+                themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+            }
+
+            // Toggle dark mode
+            themeToggle.addEventListener('click', function() {
+                if (body.classList.contains('dark-theme')) {
+                    body.classList.remove('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.querySelector('i').classList.replace('fa-sun', 'fa-moon');
+                } else {
+                    body.classList.add('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ trans('budget_budget_planner') | default('Budget Planner') }}{% endblock %}
+{% block content %}
+<div class="container step-container">
+    {% set tool_name = trans('budget_budget_planner') | default('Budget Planner') %}
+    {% set tool_icon = 'fa-calculator' %}
+    {% set subtitle = trans('budget_personal_info') | default('Let’s start with a few details') %}
+    {% set step = 1 %}
+    {% set total_steps = 4 %}
+    {% set step_labels = [trans('budget_personal_info') | default('Personal Info'), trans('budget_income') | default('Income'), trans('budget_expenses') | default('Expenses'), trans('budget_savings') | default('Savings')] %}
+    {% include 'tool_header.html' %}
+    <div class="card">
+        <div class="card-body">
+            <form id="budget-form" method="POST" action="{{ url_for('budget.step1') }}" class="validate-form">
+                {{ form.csrf_token }}
+                <div class="mb-3">
+                    <label class="form-label" for="first_name">{{ trans('budget_first_name') | default('First Name') }}</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" value="{{ form.first_name.data or '' }}" required>
+                    {% if form.first_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.first_name.errors %}
+                                <span>{{ error }}</span><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="email">{{ trans('budget_email') | default('Email') }}</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ form.email.data or '' }}" placeholder="{{ trans('budget_email_placeholder') | default('e.g., user@example.com') }}">
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div id="email_help" class="form-text">{{ trans('budget_email_help') | default('Optional: Enter your email to receive a budget summary') }}</div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="send_email" name="send_email" {% if form.send_email.data %}checked{% endif %}>
+                    <label class="form-check-label" for="send_email">{{ trans('budget_send_email') | default('Send me a budget summary') }}</label>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" id="submit-button" class="btn btn-primary">{{ trans('budget_next') | default('Next') }}</button>
+                </div>
+                <div id="loading-spinner" style="display: none;" class="text-center mt-3">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    {{ trans('budget_processing') | default('Processing...') }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('budget-form');
+    const emailInput = document.getElementById('email');
+    const submitButton = document.getElementById('submit-button');
+
+    emailInput.addEventListener('blur', function() {
+        const value = emailInput.value;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (value && !emailPattern.test(value)) {
+            emailInput.classList.add('is-invalid');
+            document.getElementById('email_help').innerText = "{{ trans('budget_email_invalid') | default('Please enter a valid email') }}";
+        } else {
+            emailInput.classList.remove('is-invalid');
+            document.getElementById('email_help').innerText = "{{ trans('budget_email_help') | default('Optional: Enter your email to receive a budget summary') }}";
+        }
+        console.log(`Validated email: ${value}`);
+    });
+
+    form.addEventListener('submit', function(e) {
+        console.log(`Submitting step1 form: first_name=${document.getElementById('first_name').value}, email=${emailInput.value}`);
+        document.getElementById('loading-spinner').style.display = 'block';
+        submitButton.disabled = true;
+    });
+});
+</script>
+{% endblock %}
